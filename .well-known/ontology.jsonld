@@ -14,15 +14,15 @@
 
   "@id": "https://nervosys.com/ontology/aimv",
   "@type": "owl:Ontology",
-  "name": "AI Model Vault Agent Ontology",
-  "description": "Comprehensive machine-readable ontology for AI Model Vault — designed for autonomous agent observability. Describes entities, states, transitions, events, affordances, constraints, metrics, and causal models so that agents can reason about the system without reading source code.",
+  "name": "IronVault Agent Ontology",
+  "description": "Comprehensive machine-readable ontology for IronVault — designed for autonomous agent observability. Describes entities, states, transitions, events, affordances, constraints, metrics, and causal models so that agents can reason about the system without reading source code.",
   "dcterms:creator": "NERVOSYS AI Team",
   "dcterms:license": "AGPL-3.0-or-later",
   "dcterms:created": "2026-02-13",
   "dcterms:modified": "2026-02-22",
   "version": "2.0.0",
   "owl:versionInfo": "2.0.0 — agent-observable redesign",
-  "url": "https://github.com/nervosys/AIModelVault",
+  "url": "https://github.com/nervosys/IronVault",
 
   "aimv:ontologyDesign": {
     "purpose": "Enable autonomous agents to discover, understand, and interact with AIMV without reading source code",
@@ -58,7 +58,7 @@
 
   "aimv:projectIdentity": {
     "@type": "SoftwareApplication",
-    "name": "AI Model Vault",
+    "name": "IronVault",
     "alternateName": ["AIMV", "aimv"],
     "applicationCategory": "DeveloperApplication",
     "applicationSubCategory": "MLOps",
@@ -66,9 +66,9 @@
     "programmingLanguage": "Rust",
     "runtimePlatform": "Native Binary",
     "softwareVersion": "1.3.0",
-    "executableName": "aim",
+    "executableName": "iv",
     "license": "AGPL-3.0-or-later",
-    "codeRepository": "https://github.com/nervosys/AIModelVault",
+    "codeRepository": "https://github.com/nervosys/IronVault",
     "author": {
       "@type": "Organization",
       "name": "NERVOSYS",
@@ -348,7 +348,7 @@
         "aimv:operations": ["pull", "store_after_pull"],
         "aimv:integrity": "SHA-256 checksum verification with optional --sha256 pin",
         "aimv:auth": "Bearer token (for HuggingFace private repos)",
-        "aimv:cli": "aim pull <SOURCE> [-o DIR] [--sha256 HASH] [--token TOKEN] [--store] [--name NAME]"
+        "aimv:cli": "iv pull <SOURCE> [-o DIR] [--sha256 HASH] [--token TOKEN] [--store] [--name NAME]"
       },
       {
         "@id": "aimv:ModelSigning",
@@ -359,7 +359,7 @@
         "aimv:algorithm": "HMAC-SHA256",
         "aimv:operations": ["sign", "verify"],
         "aimv:signatureFile": ".sig",
-        "aimv:cli": ["aim sign <NAME> [--version V] [--key KEY] [--identity ID]", "aim verify <NAME> --signature <SIG>"]
+        "aimv:cli": ["iv sign <NAME> [--version V] [--key KEY] [--identity ID]", "iv verify <NAME> --signature <SIG>"]
       },
       {
         "@id": "aimv:PickleScanner",
@@ -370,7 +370,7 @@
         "aimv:detectsOpcodes": ["REDUCE", "GLOBAL", "INST", "OBJ", "NEWOBJ", "BUILD", "STACK_GLOBAL"],
         "aimv:detectsPatterns": ["os.system", "subprocess", "eval", "exec", "__import__", "pickle.loads"],
         "aimv:operations": ["scan_file", "scan_version"],
-        "aimv:cli": "aim scan [<NAME>] [--file PATH] [--version V] [--format text|json]"
+        "aimv:cli": "iv scan [<NAME>] [--file PATH] [--version V] [--format text|json]"
       },
       {
         "@id": "aimv:ModelDiffer",
@@ -380,7 +380,7 @@
         "skos:broader": "aimv:CoreConcept",
         "aimv:strategies": ["SafeTensors tensor-by-tensor", "GGUF metadata + tensor", "Generic byte-level"],
         "aimv:operations": ["diff"],
-        "aimv:cli": "aim diff <LEFT> <RIGHT> [--format text|json]"
+        "aimv:cli": "iv diff <LEFT> <RIGHT> [--format text|json]"
       },
       {
         "@id": "aimv:EngineInterop",
@@ -390,7 +390,7 @@
         "skos:broader": "aimv:CoreConcept",
         "aimv:engines": ["ollama", "lm-studio"],
         "aimv:operations": ["register", "create_modelfile"],
-        "aimv:cli": "aim register <NAME> --engine <ollama|lm-studio> [--alias NAME] [--system-prompt TEXT]"
+        "aimv:cli": "iv register <NAME> --engine <ollama|lm-studio> [--alias NAME] [--system-prompt TEXT]"
       },
       {
         "@id": "aimv:Benchmarks",
@@ -399,7 +399,7 @@
         "rdfs:comment": "Persist and query benchmark scores per model version.",
         "skos:broader": "aimv:CoreConcept",
         "aimv:operations": ["add", "show"],
-        "aimv:cli": ["aim benchmark add", "aim benchmark show"]
+        "aimv:cli": ["iv benchmark add", "iv benchmark show"]
       },
       {
         "@id": "aimv:LicenseScanner",
@@ -410,7 +410,7 @@
         "aimv:sources": ["model card", "config.json", "GGUF metadata", "LICENSE file", "README"],
         "aimv:normalization": "SPDX",
         "aimv:operations": ["scan_path"],
-        "aimv:cli": "aim license-scan <PATH> [--format text|json]"
+        "aimv:cli": "iv license-scan <PATH> [--format text|json]"
       },
       {
         "@id": "aimv:ModelTags",
@@ -419,7 +419,7 @@
         "rdfs:comment": "Tag models with labels and key-value annotations; search the vault by name, tag, or annotation.",
         "skos:broader": "aimv:CoreConcept",
         "aimv:operations": ["add", "remove", "list", "annotate", "search"],
-        "aimv:cli": ["aim tag add", "aim tag remove", "aim tag list", "aim tag annotate", "aim search <QUERY> [--tag TAG]"]
+        "aimv:cli": ["iv tag add", "iv tag remove", "iv tag list", "iv tag annotate", "iv search <QUERY> [--tag TAG]"]
       },
       {
         "@id": "aimv:VaultBundle",
@@ -429,7 +429,7 @@
         "skos:broader": "aimv:CoreConcept",
         "aimv:format": "tar.gz",
         "aimv:operations": ["export", "import", "selective_export"],
-        "aimv:cli": ["aim vault-export <OUTPUT>", "aim vault-import <ARCHIVE> [TARGET]"]
+        "aimv:cli": ["iv vault-export <OUTPUT>", "iv vault-import <ARCHIVE> [TARGET]"]
       },
       {
         "@id": "aimv:GarbageCollector",
@@ -438,7 +438,7 @@
         "rdfs:comment": "Reclaim space by removing orphaned blobs and temp files; supports dry-run.",
         "skos:broader": "aimv:CoreConcept",
         "aimv:operations": ["scan_orphans", "clean_temp", "reclaim"],
-        "aimv:cli": "aim gc [--dry-run]"
+        "aimv:cli": "iv gc [--dry-run]"
       },
       {
         "@id": "aimv:TUIDashboard",
@@ -446,7 +446,7 @@
         "rdfs:label": "TUIDashboard",
         "rdfs:comment": "Interactive terminal UI for browsing vault contents.",
         "skos:broader": "aimv:CoreConcept",
-        "aimv:cli": "aim browse",
+        "aimv:cli": "iv browse",
         "aimv:framework": "ratatui"
       },
       {
@@ -457,7 +457,7 @@
         "skos:broader": "aimv:CoreConcept",
         "aimv:operations": ["add", "remove", "list", "test"],
         "aimv:hmac_signing": true,
-        "aimv:cli": ["aim webhook add --url <URL> [--secret SECRET]", "aim webhook test <ID>"]
+        "aimv:cli": ["iv webhook add --url <URL> [--secret SECRET]", "iv webhook test <ID>"]
       },
       {
         "@id": "aimv:AccessControl",
@@ -467,7 +467,7 @@
         "skos:broader": "aimv:CoreConcept",
         "aimv:roles": ["reader", "writer", "admin"],
         "aimv:operations": ["grant", "revoke", "list", "check"],
-        "aimv:cli": ["aim acl grant <PRINCIPAL> --role <ROLE>", "aim acl revoke", "aim acl list", "aim acl check"]
+        "aimv:cli": ["iv acl grant <PRINCIPAL> --role <ROLE>", "iv acl revoke", "iv acl list", "iv acl check"]
       },
       {
         "@id": "aimv:KMSIntegration",
@@ -485,7 +485,7 @@
         "rdfs:comment": "Integrity validation of model versions via SHA-256 checksum probes.",
         "skos:broader": "aimv:CoreConcept",
         "aimv:operations": ["validate", "validate_all"],
-        "aimv:cli": "aim validate <NAME> [--version V]"
+        "aimv:cli": "iv validate <NAME> [--version V]"
       },
       {
         "@id": "aimv:RetentionPolicy",
@@ -496,7 +496,7 @@
         "aimv:parameters": ["max_versions", "max_age_days", "keep_minimum"],
         "aimv:operations": ["set", "remove", "list", "apply", "apply_all"],
         "aimv:dryRun": true,
-        "aimv:cli": ["aim policy set", "aim policy apply [--dry-run]", "aim policy apply-all"]
+        "aimv:cli": ["iv policy set", "iv policy apply [--dry-run]", "iv policy apply-all"]
       },
       {
         "@id": "aimv:LineageGraph",
@@ -506,7 +506,7 @@
         "skos:broader": "aimv:CoreConcept",
         "aimv:edgeKinds": ["fine-tune", "distill", "quantize", "convert", "merge", "lora"],
         "aimv:operations": ["add_edge", "show", "ancestors", "descendants"],
-        "aimv:cli": ["aim lineage-graph add --child <C> --parents <P>... --kind <KIND>", "aim lineage-graph ancestors <MODEL>"]
+        "aimv:cli": ["iv lineage-graph add --child <C> --parents <P>... --kind <KIND>", "iv lineage-graph ancestors <MODEL>"]
       },
       {
         "@id": "aimv:PluginSystem",
@@ -516,7 +516,7 @@
         "skos:broader": "aimv:CoreConcept",
         "aimv:manifestFormat": "JSON",
         "aimv:operations": ["discover", "install", "uninstall", "list", "info"],
-        "aimv:cli": ["aim plugin discover", "aim plugin install <PATH>", "aim plugin info <ID>"]
+        "aimv:cli": ["iv plugin discover", "iv plugin install <PATH>", "iv plugin info <ID>"]
       },
       {
         "@id": "aimv:ConfigProfiles",
@@ -525,7 +525,7 @@
         "rdfs:comment": "Named configuration profiles with overrides and an activate/deactivate switch.",
         "skos:broader": "aimv:CoreConcept",
         "aimv:operations": ["create", "remove", "list", "activate", "deactivate", "show"],
-        "aimv:cli": ["aim profile create <NAME>", "aim profile activate <NAME>"]
+        "aimv:cli": ["iv profile create <NAME>", "iv profile activate <NAME>"]
       },
       {
         "@id": "aimv:QuantizationPipeline",
@@ -535,7 +535,7 @@
         "skos:broader": "aimv:CoreConcept",
         "aimv:methods": ["f32", "f16", "q8_0", "q5_k_m", "q4_k_m", "q4_0"],
         "aimv:operations": ["set_profile", "list_profiles", "estimate_size"],
-        "aimv:cli": ["aim quantize set <MODEL> --method <METHOD>", "aim quantize estimate <MODEL> --method <METHOD>"]
+        "aimv:cli": ["iv quantize set <MODEL> --method <METHOD>", "iv quantize estimate <MODEL> --method <METHOD>"]
       },
       {
         "@id": "aimv:EvaluationHarness",
@@ -545,7 +545,7 @@
         "skos:broader": "aimv:CoreConcept",
         "aimv:operations": ["record", "list", "compare", "suites"],
         "aimv:knownSuites": ["mmlu", "hellaswag", "arc", "winogrande", "truthfulqa", "gsm8k", "humaneval"],
-        "aimv:cli": ["aim eval record", "aim eval compare --versions <V1,V2>"]
+        "aimv:cli": ["iv eval record", "iv eval compare --versions <V1,V2>"]
       },
       {
         "@id": "aimv:BackupScheduler",
@@ -555,7 +555,7 @@
         "skos:broader": "aimv:CoreConcept",
         "aimv:frequencies": ["daily", "weekly", "monthly", "custom"],
         "aimv:operations": ["schedule", "list", "run", "history"],
-        "aimv:cli": ["aim backup schedule", "aim backup run [VAULT]"]
+        "aimv:cli": ["iv backup schedule", "iv backup run [VAULT]"]
       },
       {
         "@id": "aimv:VaultRegistry",
@@ -564,7 +564,7 @@
         "rdfs:comment": "Registry of multiple vaults with an active-vault concept for session-wide switching.",
         "skos:broader": "aimv:CoreConcept",
         "aimv:operations": ["register", "unregister", "list", "activate", "active"],
-        "aimv:cli": ["aim vaults register <NAME> <PATH>", "aim vaults activate <NAME>"]
+        "aimv:cli": ["iv vaults register <NAME> <PATH>", "iv vaults activate <NAME>"]
       },
       {
         "@id": "aimv:Telemetry",
@@ -866,7 +866,7 @@
           {
             "action": "init",
             "description": "Create a new encrypted vault",
-            "cli": "aim init [--name NAME]",
+            "cli": "iv init [--name NAME]",
             "mcp_tool": "vault_init",
             "api": "POST /api/v1/vaults",
             "required_input": ["passphrase"],
@@ -881,7 +881,7 @@
           {
             "action": "unlock",
             "description": "Unlock the vault with passphrase",
-            "cli": "aim unlock",
+            "cli": "iv unlock",
             "required_input": ["passphrase"],
             "produces": "VaultUnlocked event",
             "transitions_to": "Unlocked"
@@ -893,7 +893,7 @@
           {
             "action": "unlock",
             "description": "Unlock the vault with passphrase",
-            "cli": "aim unlock",
+            "cli": "iv unlock",
             "required_input": ["passphrase"],
             "produces": "VaultUnlocked event",
             "transitions_to": "Unlocked"
@@ -901,7 +901,7 @@
           {
             "action": "list",
             "description": "List models (metadata only, no decryption needed)",
-            "cli": "aim list",
+            "cli": "iv list",
             "mcp_tool": "vault_list",
             "api": "GET /api/v1/models",
             "required_input": [],
@@ -915,7 +915,7 @@
           {
             "action": "store",
             "description": "Encrypt and store a model",
-            "cli": "aim store <NAME> <PATH> [-f FORMAT] [-d DESCRIPTION]",
+            "cli": "iv store <NAME> <PATH> [-f FORMAT] [-d DESCRIPTION]",
             "mcp_tool": "vault_store",
             "api": "POST /api/v1/models",
             "required_input": ["name", "file_path"],
@@ -926,7 +926,7 @@
           {
             "action": "get",
             "description": "Decrypt and retrieve a model",
-            "cli": "aim get <NAME> <OUTPUT> [-v VERSION]",
+            "cli": "iv get <NAME> <OUTPUT> [-v VERSION]",
             "mcp_tool": "vault_get",
             "api": "GET /api/v1/models/{name}/data?version={v}",
             "required_input": ["name", "output_path"],
@@ -937,7 +937,7 @@
           {
             "action": "delete",
             "description": "Delete a specific model version",
-            "cli": "aim delete <NAME> <VERSION>",
+            "cli": "iv delete <NAME> <VERSION>",
             "api": "DELETE /api/v1/models/{name}/versions/{version}",
             "required_input": ["name", "version"],
             "produces": "ModelDeleted event",
@@ -947,7 +947,7 @@
           {
             "action": "convert",
             "description": "Convert model to another format",
-            "cli": "aim convert <NAME> --to-format <FMT> [--quantization <Q>] [--validate]",
+            "cli": "iv convert <NAME> --to-format <FMT> [--quantization <Q>] [--validate]",
             "mcp_tool": "model_convert",
             "required_input": ["name", "target_format"],
             "optional_input": ["quantization", "validate"],
@@ -957,7 +957,7 @@
           {
             "action": "list",
             "description": "List all models with metadata",
-            "cli": "aim list",
+            "cli": "iv list",
             "mcp_tool": "vault_list",
             "api": "GET /api/v1/models",
             "required_input": [],
@@ -966,7 +966,7 @@
           {
             "action": "versions",
             "description": "List all versions of a model",
-            "cli": "aim versions <NAME>",
+            "cli": "iv versions <NAME>",
             "mcp_tool": "vault_versions",
             "api": "GET /api/v1/models/{name}/versions",
             "required_input": ["name"],
@@ -975,7 +975,7 @@
           {
             "action": "lineage",
             "description": "Show version ancestry graph",
-            "cli": "aim lineage <NAME> <VERSION>",
+            "cli": "iv lineage <NAME> <VERSION>",
             "mcp_tool": "vault_lineage",
             "api": "GET /api/v1/models/{name}/versions/{v}/lineage",
             "required_input": ["name", "version"],
@@ -984,7 +984,7 @@
           {
             "action": "stats",
             "description": "Show vault storage statistics",
-            "cli": "aim stats",
+            "cli": "iv stats",
             "mcp_tool": "vault_stats",
             "api": "GET /api/v1/stats",
             "required_input": [],
@@ -993,7 +993,7 @@
           {
             "action": "compliance",
             "description": "Run compliance checks (FIPS/CMMC/MITRE)",
-            "cli": "aim compliance [--verbose]",
+            "cli": "iv compliance [--verbose]",
             "mcp_tool": "compliance_check",
             "api": "GET /api/v1/compliance",
             "required_input": [],
@@ -1004,7 +1004,7 @@
           {
             "action": "cloud_push",
             "description": "Push model to cloud storage",
-            "cli": "aim cloud push <NAME> --provider <P> --bucket <B>",
+            "cli": "iv cloud push <NAME> --provider <P> --bucket <B>",
             "mcp_tool": "cloud_push",
             "required_input": ["name", "provider", "bucket"],
             "optional_input": ["prefix", "region"],
@@ -1014,7 +1014,7 @@
           {
             "action": "cloud_pull",
             "description": "Pull model from cloud storage",
-            "cli": "aim cloud pull <NAME> --provider <P> --bucket <B> --remote-path <R>",
+            "cli": "iv cloud pull <NAME> --provider <P> --bucket <B> --remote-path <R>",
             "mcp_tool": "cloud_pull",
             "required_input": ["name", "provider", "bucket", "remote_path"],
             "produces": "CloudSynced event (direction: pull)",
@@ -1023,7 +1023,7 @@
           {
             "action": "change_passphrase",
             "description": "Change vault encryption passphrase (re-encrypts all models)",
-            "cli": "aim change-passphrase",
+            "cli": "iv change-passphrase",
             "required_input": ["old_passphrase", "new_passphrase"],
             "produces": "PassphraseChanged event",
             "transitions_to": "Unlocked",
@@ -1032,7 +1032,7 @@
           {
             "action": "lock",
             "description": "Lock the vault (zeroes encryption key from memory)",
-            "cli": "aim lock",
+            "cli": "iv lock",
             "required_input": [],
             "produces": "VaultLocked event",
             "transitions_to": "Locked"
@@ -1040,7 +1040,7 @@
           {
             "action": "analyze",
             "description": "Analyze a stored model (format, size, metadata)",
-            "cli": "aim analyze <NAME>",
+            "cli": "iv analyze <NAME>",
             "mcp_tool": "model_analyze",
             "required_input": ["name"],
             "transitions_to": "Unlocked"
@@ -1048,7 +1048,7 @@
           {
             "action": "deduplicate",
             "description": "Find and remove duplicate model data",
-            "cli": "aim deduplicate",
+            "cli": "iv deduplicate",
             "mcp_tool": "model_deduplicate",
             "required_input": [],
             "transitions_to": "Unlocked"
@@ -1072,13 +1072,13 @@
         "@id": "aimv:IntegrityInvariant",
         "rdfs:label": "Integrity",
         "description": "Every model retrieval verifies SHA-256 checksum. Mismatch triggers IntegrityFailed event.",
-        "verification": "aim get <model> <output> — exits non-zero if checksum mismatch"
+        "verification": "iv get <model> <output> — exits non-zero if checksum mismatch"
       },
       {
         "@id": "aimv:AuditabilityInvariant",
         "rdfs:label": "Auditability",
         "description": "Every state-changing operation is recorded in the audit log. Log is append-only.",
-        "verification": "aim compliance --verbose — checks audit log completeness"
+        "verification": "iv compliance --verbose — checks audit log completeness"
       },
       {
         "@id": "aimv:ImmutabilityInvariant",
@@ -1139,7 +1139,7 @@
   },
 
   "aimv:metrics": {
-    "@comment": "Layer 6: Observable metrics — what an agent can measure and monitor. Available via CLI (aim stats), REST API (GET /api/v1/metrics), or MCP (vault_stats tool).",
+    "@comment": "Layer 6: Observable metrics — what an agent can measure and monitor. Available via CLI (iv stats), REST API (GET /api/v1/metrics), or MCP (vault_stats tool).",
 
     "counters": [
       {"name": "models_stored_total", "description": "Total models stored since vault creation", "unit": "count"},
@@ -1218,7 +1218,7 @@
         "description": "Model format detection or conversion failure",
         "severity": "medium",
         "causes": ["unsupported format", "corrupted model file", "no conversion path", "quantization not supported for target"],
-        "recovery": ["specify format explicitly with -f", "check supported formats (aim list-conversions)", "use intermediate format"],
+        "recovery": ["specify format explicitly with -f", "check supported formats (iv list-conversions)", "use intermediate format"],
         "exit_code": 6
       },
       {
@@ -1227,7 +1227,7 @@
         "description": "Compliance check failure",
         "severity": "high",
         "causes": ["weak encryption config", "missing audit log", "permission too broad", "key derivation below minimum"],
-        "recovery": ["run aim compliance --verbose for details", "reconfigure vault", "fix file permissions"],
+        "recovery": ["run iv compliance --verbose for details", "reconfigure vault", "fix file permissions"],
         "exit_code": 8
       },
       {
@@ -1263,7 +1263,7 @@
         "description": "A named resource does not exist — model, version, profile, registered vault, backup schedule, or document",
         "severity": "low",
         "causes": ["misspelled name", "wrong vault active", "resource already deleted", "version never stored"],
-        "recovery": ["aim list to enumerate models", "aim versions <name> to enumerate versions", "aim vaults list to check the active vault"],
+        "recovery": ["iv list to enumerate models", "iv versions <name> to enumerate versions", "iv vaults list to check the active vault"],
         "exit_code": 3
       },
       {
@@ -1272,7 +1272,7 @@
         "description": "Access refused by the operating system or by a vault security policy",
         "severity": "high",
         "causes": ["file mode too restrictive for the current user", "directory owned by another account", "ACL denies the operation", "security policy violation"],
-        "recovery": ["fix file permissions (700 for directories, 600 for files)", "run as the owning user", "aim acl to review access control"],
+        "recovery": ["fix file permissions (700 for directories, 600 for files)", "run as the owning user", "iv acl to review access control"],
         "exit_code": 4
       },
       {
@@ -1281,7 +1281,7 @@
         "description": "An argument value this command cannot act on, including a mistyped subcommand or flag",
         "severity": "low",
         "causes": ["unknown --format value", "unrecognized subcommand", "unsupported model format", "out-of-range numeric argument"],
-        "recovery": ["aim introspect --format json for the full command schema", "aim <command> --help", "aim list-conversions for supported formats"],
+        "recovery": ["iv introspect --format json for the full command schema", "iv <command> --help", "iv list-conversions for supported formats"],
         "exit_code": 6
       }
     ],
@@ -1314,7 +1314,7 @@
           "disk_writes": ["models/{name}/v{version}.vault", "versions.json updated"],
           "duration_estimate": "~1s per GB (limited by encryption throughput)",
           "reversible": true,
-          "reversal": "aim delete <name> <version>"
+          "reversal": "iv delete <name> <version>"
         }
       },
       {
@@ -1353,7 +1353,7 @@
           "disk_writes": ["models/{name}/v{new_version}.vault"],
           "duration_estimate": "Varies by format — typically 2-30s per GB",
           "reversible": true,
-          "reversal": "aim delete <name> <new_version>"
+          "reversal": "iv delete <name> <new_version>"
         }
       },
       {
@@ -1428,23 +1428,23 @@
       },
       {
         "name": "CLI",
-        "description": "Command-line interface via the `aim` binary",
-        "binary": "aim",
+        "description": "Command-line interface via the `iv` binary",
+        "binary": "iv",
         "strengths": ["Shell scripting", "Automation", "No server required"],
         "preferred_for": ["Shell scripts", "CI/CD", "Manual operations", "Offline use"]
       },
       {
         "name": "Rust Library",
-        "description": "Native Rust API via the ai_model_vault crate",
-        "crate": "ai-model-vault",
-        "docs": "https://docs.rs/ai-model-vault",
+        "description": "Native Rust API via the ironvault crate",
+        "crate": "ironvault",
+        "docs": "https://docs.rs/ironvault",
         "strengths": ["Full API access", "Type safety", "Best performance"],
         "preferred_for": ["Rust applications", "Custom tooling", "Embedded use"]
       },
       {
         "name": "Python Library",
         "description": "Python bindings via PyO3/maturin",
-        "package": "aimodelvault",
+        "package": "ironvault",
         "feature_flag": "python",
         "strengths": ["Python ecosystem integration", "Notebook workflows"],
         "preferred_for": ["ML pipelines", "Jupyter notebooks", "Python toolchains"]
@@ -1454,9 +1454,9 @@
 
   "aimv:cliSchema": {
     "@comment": "Layer 9: Complete CLI command schema — machine-readable specification of every command, argument, type, default, constraint, and example. Agents use this to construct exact CLI invocations.",
-    "binary": "aim",
+    "binary": "iv",
     "version": "1.3.0",
-    "install": "cargo install ai-model-vault",
+    "install": "cargo install ironvault",
     "globalFlags": [
       {"name": "--vault", "short": "-v", "type": "string", "required": false, "description": "Vault name (uses default if not specified)"},
       {"name": "--config", "short": "-c", "type": "path", "required": false, "description": "Config file path"},
@@ -1471,7 +1471,7 @@
         "args": [
           {"name": "--name", "short": "-n", "type": "string", "required": false, "default": "default", "description": "Vault name"}
         ],
-        "examples": ["aim init", "aim init --name production"],
+        "examples": ["iv init", "iv init --name production"],
         "exitCodes": {"0": "Vault created successfully", "1": "Vault already exists or I/O error"},
         "requiresPassphrase": true,
         "requiresUnlock": false,
@@ -1490,8 +1490,8 @@
           {"name": "--task", "type": "string", "required": false, "examples": ["text-generation", "image-classification", "embeddings"], "description": "ML task"}
         ],
         "examples": [
-          "aim store my-llm ./model.safetensors",
-          "aim store my-llm ./model.pt -f pytorch -d 'Fine-tuned LLaMA 3' --framework pytorch --task text-generation"
+          "iv store my-llm ./model.safetensors",
+          "iv store my-llm ./model.pt -f pytorch -d 'Fine-tuned LLaMA 3' --framework pytorch --task text-generation"
         ],
         "exitCodes": {"0": "Model stored successfully", "1": "File not found or encryption error"},
         "requiresPassphrase": true,
@@ -1508,7 +1508,7 @@
           {"name": "output", "type": "path", "required": true, "positional": true, "description": "Output file path"},
           {"name": "--version", "short": "-v", "type": "u32", "required": false, "description": "Version number (latest if not specified)"}
         ],
-        "examples": ["aim get my-llm ./output.safetensors", "aim get my-llm ./output.safetensors -v 3"],
+        "examples": ["iv get my-llm ./output.safetensors", "iv get my-llm ./output.safetensors -v 3"],
         "exitCodes": {"0": "Model retrieved and checksum verified", "3": "Model or version not found", "6": "Integrity check failed"},
         "requiresPassphrase": true,
         "requiresUnlock": true,
@@ -1519,7 +1519,7 @@
         "description": "List all models in the vault with metadata",
         "category": "vault",
         "args": [],
-        "examples": ["aim list"],
+        "examples": ["iv list"],
         "exitCodes": {"0": "Success"},
         "requiresPassphrase": true,
         "requiresUnlock": false,
@@ -1532,7 +1532,7 @@
         "args": [
           {"name": "name", "type": "string", "required": true, "positional": true, "description": "Model name"}
         ],
-        "examples": ["aim versions my-llm"],
+        "examples": ["iv versions my-llm"],
         "exitCodes": {"0": "Success", "3": "Model not found"},
         "requiresPassphrase": true,
         "requiresUnlock": false,
@@ -1546,7 +1546,7 @@
           {"name": "name", "type": "string", "required": true, "positional": true, "description": "Model name"},
           {"name": "version", "type": "u32", "required": true, "positional": true, "description": "Version number"}
         ],
-        "examples": ["aim lineage my-llm 5"],
+        "examples": ["iv lineage my-llm 5"],
         "exitCodes": {"0": "Success", "3": "Model or version not found"},
         "requiresPassphrase": true,
         "requiresUnlock": false,
@@ -1561,7 +1561,7 @@
           {"name": "version", "type": "u32", "required": true, "positional": true, "description": "Version number"},
           {"name": "--force", "short": "-f", "type": "bool", "required": false, "description": "Skip confirmation prompt"}
         ],
-        "examples": ["aim delete my-llm 2", "aim delete my-llm 2 --force"],
+        "examples": ["iv delete my-llm 2", "iv delete my-llm 2 --force"],
         "exitCodes": {"0": "Version deleted", "3": "Not found"},
         "requiresPassphrase": true,
         "requiresUnlock": true,
@@ -1573,7 +1573,7 @@
         "description": "Show vault storage statistics",
         "category": "vault",
         "args": [],
-        "examples": ["aim stats"],
+        "examples": ["iv stats"],
         "exitCodes": {"0": "Success"},
         "requiresPassphrase": true,
         "requiresUnlock": false,
@@ -1584,7 +1584,7 @@
         "description": "Run FIPS 140-3, CMMC 2.0, and MITRE ATT&CK compliance checks",
         "category": "security",
         "args": [],
-        "examples": ["aim compliance"],
+        "examples": ["iv compliance"],
         "exitCodes": {"0": "All checks passed", "5": "One or more checks failed"},
         "requiresPassphrase": false,
         "requiresUnlock": false,
@@ -1596,7 +1596,7 @@
         "description": "Change vault encryption passphrase (re-encrypts all models)",
         "category": "security",
         "args": [],
-        "examples": ["aim change-passphrase"],
+        "examples": ["iv change-passphrase"],
         "exitCodes": {"0": "Passphrase changed", "8": "Authentication failed"},
         "requiresPassphrase": true,
         "requiresUnlock": true,
@@ -1615,8 +1615,8 @@
           {"name": "--versions", "short": "-v", "type": "u32[]", "required": false, "description": "Version numbers (latest for each if not specified)"}
         ],
         "examples": [
-          "aim archive my-llm my-cnn ./models.tar",
-          "aim archive my-llm ./backup.zip -f zip -v 1 -v 3"
+          "iv archive my-llm my-cnn ./models.tar",
+          "iv archive my-llm ./backup.zip -f zip -v 1 -v 3"
         ],
         "exitCodes": {"0": "Archive created", "3": "Model not found"},
         "requiresPassphrase": true,
@@ -1630,7 +1630,7 @@
           {"name": "archive", "type": "path", "required": true, "positional": true, "description": "Archive file path"},
           {"name": "--output", "short": "-o", "type": "path", "required": false, "default": ".", "description": "Output directory"}
         ],
-        "examples": ["aim extract ./models.tar", "aim extract ./backup.zip -o ./restored"],
+        "examples": ["iv extract ./models.tar", "iv extract ./backup.zip -o ./restored"],
         "exitCodes": {"0": "Extracted successfully", "1": "Invalid archive"}
       },
       {
@@ -1641,7 +1641,7 @@
           {"name": "name", "type": "string", "required": true, "positional": true, "description": "Model name"},
           {"name": "--version", "short": "-v", "type": "u32", "required": false, "description": "Version number (latest if not specified)"}
         ],
-        "examples": ["aim analyze my-llm", "aim analyze my-llm -v 2"],
+        "examples": ["iv analyze my-llm", "iv analyze my-llm -v 2"],
         "exitCodes": {"0": "Success", "3": "Not found"},
         "requiresPassphrase": true,
         "requiresUnlock": false,
@@ -1654,7 +1654,7 @@
         "args": [
           {"name": "--detailed", "short": "-d", "type": "bool", "required": false, "description": "Show detailed similarity scores"}
         ],
-        "examples": ["aim deduplicate", "aim deduplicate --detailed"],
+        "examples": ["iv deduplicate", "iv deduplicate --detailed"],
         "exitCodes": {"0": "Success"},
         "requiresPassphrase": true,
         "requiresUnlock": false,
@@ -1669,7 +1669,7 @@
           {"name": "output", "type": "path", "required": true, "positional": true, "description": "Output directory"},
           {"name": "--version", "short": "-v", "type": "u32", "required": false, "description": "Version number (latest if not specified)"}
         ],
-        "examples": ["aim export my-llm ./exported/"],
+        "examples": ["iv export my-llm ./exported/"],
         "exitCodes": {"0": "Exported successfully", "3": "Not found"},
         "requiresPassphrase": true,
         "requiresUnlock": true
@@ -1679,7 +1679,7 @@
         "description": "Show cache statistics (if caching is enabled)",
         "category": "utility",
         "args": [],
-        "examples": ["aim cache"],
+        "examples": ["iv cache"],
         "exitCodes": {"0": "Success"},
         "requiresPassphrase": false,
         "requiresUnlock": false,
@@ -1700,9 +1700,9 @@
           {"name": "--plan-only", "type": "bool", "required": false, "description": "Show conversion plan without executing"}
         ],
         "examples": [
-          "aim convert my-llm --to-format gguf --quantization q4_k_m --validate",
-          "aim convert my-llm -t onnx --opset 17",
-          "aim convert my-llm -t safetensors --plan-only"
+          "iv convert my-llm --to-format gguf --quantization q4_k_m --validate",
+          "iv convert my-llm -t onnx --opset 17",
+          "iv convert my-llm -t safetensors --plan-only"
         ],
         "exitCodes": {"0": "Conversion successful", "4": "No conversion path or format error"},
         "requiresPassphrase": true,
@@ -1715,7 +1715,7 @@
         "description": "List all supported format conversion paths",
         "category": "conversion",
         "args": [],
-        "examples": ["aim list-conversions"],
+        "examples": ["iv list-conversions"],
         "exitCodes": {"0": "Success"},
         "requiresPassphrase": false,
         "requiresUnlock": false,
@@ -1736,9 +1736,9 @@
           {"name": "--revocation-store", "type": "path", "required": false, "env": "AIM_REVOCATION_STORE", "description": "File to persist the JWT revocation list to. Without it, revoked tokens are re-admitted when the server restarts."}
         ],
         "examples": [
-          "aim serve --jwt-secret mysecret",
-          "aim serve --port 9090 --jwt-secret $AIM_JWT_SECRET --cors-permissive",
-          "aim serve --jwt-secret $AIM_JWT_SECRET --revocation-store /var/lib/aim/revocations.json"
+          "iv serve --jwt-secret mysecret",
+          "iv serve --port 9090 --jwt-secret $AIM_JWT_SECRET --cors-permissive",
+          "iv serve --jwt-secret $AIM_JWT_SECRET --revocation-store /var/lib/iv/revocations.json"
         ],
         "exitCodes": {"0": "Server stopped gracefully", "1": "Bind error"},
         "longRunning": true,
@@ -1758,7 +1758,7 @@
               {"name": "--provider", "short": "-p", "type": "string", "required": true, "enum": ["s3", "azure", "gcs"], "description": "Cloud provider"},
               {"name": "--bucket", "short": "-b", "type": "string", "required": true, "description": "Bucket/container name"}
             ],
-            "examples": ["aim cloud push my-llm --provider s3 --bucket my-models"],
+            "examples": ["iv cloud push my-llm --provider s3 --bucket my-models"],
             "exitCodes": {"0": "Pushed successfully", "1": "Cloud error or auth failure"},
             "requiresPassphrase": true,
             "requiresUnlock": true,
@@ -1773,7 +1773,7 @@
               {"name": "--bucket", "short": "-b", "type": "string", "required": true, "description": "Bucket/container name"},
               {"name": "--remote-path", "short": "-k", "type": "string", "required": true, "description": "Remote path/key"}
             ],
-            "examples": ["aim cloud pull my-llm --provider s3 --bucket my-models --remote-path models/my-llm.vault"],
+            "examples": ["iv cloud pull my-llm --provider s3 --bucket my-models --remote-path models/my-llm.vault"],
             "exitCodes": {"0": "Pulled successfully", "1": "Cloud error"},
             "requiresPassphrase": true,
             "requiresUnlock": true,
@@ -1787,7 +1787,7 @@
               {"name": "--bucket", "short": "-b", "type": "string", "required": true, "description": "Bucket/container name"},
               {"name": "--prefix", "short": "-x", "type": "string", "required": false, "description": "Path prefix filter"}
             ],
-            "examples": ["aim cloud list --provider s3 --bucket my-models"],
+            "examples": ["iv cloud list --provider s3 --bucket my-models"],
             "exitCodes": {"0": "Success", "1": "Auth or network error"}
           },
           {
@@ -1797,7 +1797,7 @@
               {"name": "--provider", "short": "-p", "type": "string", "required": true, "enum": ["s3", "azure", "gcs"], "description": "Cloud provider"},
               {"name": "--show", "short": "-s", "type": "bool", "required": false, "description": "Show current configuration"}
             ],
-            "examples": ["aim cloud config --provider s3 --show"]
+            "examples": ["iv cloud config --provider s3 --show"]
           }
         ]
       },
@@ -1818,7 +1818,7 @@
               {"name": "--output", "short": "-o", "type": "path", "required": true, "description": "Output file (JSON, YAML, or Markdown by extension)"},
               {"name": "--interactive", "short": "-i", "type": "bool", "required": false, "description": "Open interactive wizard"}
             ],
-            "examples": ["aim card create my-llm -v 1.0 -d 'Fine-tuned model' -t 'LLM' -a 'Transformer' -o card.json"]
+            "examples": ["iv card create my-llm -v 1.0 -d 'Fine-tuned model' -t 'LLM' -a 'Transformer' -o card.json"]
           },
           {
             "name": "show",
@@ -1827,7 +1827,7 @@
               {"name": "path", "type": "path", "required": true, "positional": true, "description": "Path to model card file"},
               {"name": "--format", "short": "-f", "type": "string", "required": false, "default": "markdown", "enum": ["json", "yaml", "markdown"], "description": "Output format"}
             ],
-            "examples": ["aim card show card.json", "aim card show card.yaml --format markdown"]
+            "examples": ["iv card show card.json", "iv card show card.yaml --format markdown"]
           },
           {
             "name": "validate",
@@ -1836,7 +1836,7 @@
               {"name": "path", "type": "path", "required": true, "positional": true, "description": "Path to model card file"},
               {"name": "--strict", "short": "-s", "type": "bool", "required": false, "description": "Check for all required fields"}
             ],
-            "examples": ["aim card validate card.json --strict"]
+            "examples": ["iv card validate card.json --strict"]
           },
           {
             "name": "convert",
@@ -1845,7 +1845,7 @@
               {"name": "input", "type": "path", "required": true, "positional": true, "description": "Input model card file"},
               {"name": "output", "type": "path", "required": true, "positional": true, "description": "Output file (format by extension)"}
             ],
-            "examples": ["aim card convert card.json card.md"]
+            "examples": ["iv card convert card.json card.md"]
           },
           {
             "name": "template",
@@ -1854,7 +1854,7 @@
               {"name": "--template-type", "short": "-t", "type": "string", "required": false, "default": "basic", "enum": ["basic", "llm", "classifier", "medical", "hiring"], "description": "Template type"},
               {"name": "--output", "short": "-o", "type": "path", "required": true, "description": "Output file"}
             ],
-            "examples": ["aim card template -t llm -o llm-card.json"]
+            "examples": ["iv card template -t llm -o llm-card.json"]
           },
           {
             "name": "attach",
@@ -1864,7 +1864,7 @@
               {"name": "--version", "short": "-v", "type": "u32", "required": false, "description": "Version number (latest if not specified)"},
               {"name": "card", "type": "path", "required": true, "positional": true, "description": "Path to model card file"}
             ],
-            "examples": ["aim card attach my-llm card.json", "aim card attach my-llm -v 2 card.yaml"]
+            "examples": ["iv card attach my-llm card.json", "iv card attach my-llm -v 2 card.yaml"]
           },
           {
             "name": "extract",
@@ -1874,7 +1874,7 @@
               {"name": "--version", "short": "-v", "type": "u32", "required": false, "description": "Version number (latest if not specified)"},
               {"name": "--output", "short": "-o", "type": "path", "required": true, "description": "Output file"}
             ],
-            "examples": ["aim card extract my-llm -o card.json"]
+            "examples": ["iv card extract my-llm -o card.json"]
           },
           {
             "name": "generate",
@@ -1886,7 +1886,7 @@
               {"name": "--include-training", "type": "bool", "required": false, "description": "Include training data section"},
               {"name": "--include-evaluation", "type": "bool", "required": false, "description": "Include evaluation section"}
             ],
-            "examples": ["aim card generate my-llm -o card.md --include-training --include-evaluation"]
+            "examples": ["iv card generate my-llm -o card.md --include-training --include-evaluation"]
           }
         ]
       },
@@ -1902,7 +1902,7 @@
               {"name": "--path", "short": "-p", "type": "path", "required": true, "description": "Database path"},
               {"name": "--db-type", "short": "-t", "type": "string", "required": false, "default": "sqlite", "enum": ["sqlite", "sled"], "description": "Database backend type"}
             ],
-            "examples": ["aim database init --path ./kb --db-type sqlite"]
+            "examples": ["iv database init --path ./kb --db-type sqlite"]
           },
           {
             "name": "store",
@@ -1913,7 +1913,7 @@
               {"name": "--id", "short": "-I", "type": "string", "required": false, "description": "Document ID (generated if not provided)"},
               {"name": "--metadata", "short": "-m", "type": "string[]", "required": false, "description": "Metadata key=value pairs"}
             ],
-            "examples": ["aim database store --path ./kb --input paper.pdf", "aim database store --path ./kb --input notes.md --id my-notes --metadata source=manual"]
+            "examples": ["iv database store --path ./kb --input paper.pdf", "iv database store --path ./kb --input notes.md --id my-notes --metadata source=manual"]
           },
           {
             "name": "get",
@@ -1922,7 +1922,7 @@
               {"name": "--path", "short": "-p", "type": "path", "required": true, "description": "Database path"},
               {"name": "id", "type": "string", "required": true, "positional": true, "description": "Document ID"}
             ],
-            "examples": ["aim database get --path ./kb my-doc-id"]
+            "examples": ["iv database get --path ./kb my-doc-id"]
           },
           {
             "name": "search",
@@ -1932,7 +1932,7 @@
               {"name": "query", "type": "string", "required": true, "positional": true, "description": "Search query"},
               {"name": "--limit", "short": "-n", "type": "usize", "required": false, "default": 10, "description": "Maximum results"}
             ],
-            "examples": ["aim database search --path ./kb 'transformer attention mechanism'"]
+            "examples": ["iv database search --path ./kb 'transformer attention mechanism'"]
           },
           {
             "name": "list",
@@ -1940,7 +1940,7 @@
             "args": [
               {"name": "--path", "short": "-p", "type": "path", "required": true, "description": "Database path"}
             ],
-            "examples": ["aim database list --path ./kb"]
+            "examples": ["iv database list --path ./kb"]
           },
           {
             "name": "delete",
@@ -1949,7 +1949,7 @@
               {"name": "--path", "short": "-p", "type": "path", "required": true, "description": "Database path"},
               {"name": "id", "type": "string", "required": true, "positional": true, "description": "Document ID"}
             ],
-            "examples": ["aim database delete --path ./kb my-doc-id"],
+            "examples": ["iv database delete --path ./kb my-doc-id"],
             "destructive": true
           },
           {
@@ -1959,7 +1959,7 @@
               {"name": "--path", "short": "-p", "type": "path", "required": true, "description": "Database path"},
               {"name": "--output", "short": "-o", "type": "path", "required": true, "description": "Output JSON file"}
             ],
-            "examples": ["aim database export --path ./kb -o backup.json"]
+            "examples": ["iv database export --path ./kb -o backup.json"]
           },
           {
             "name": "import",
@@ -1968,7 +1968,7 @@
               {"name": "--path", "short": "-p", "type": "path", "required": true, "description": "Database path"},
               {"name": "--input", "short": "-i", "type": "path", "required": true, "description": "Input JSON file"}
             ],
-            "examples": ["aim database import --path ./kb -i backup.json"]
+            "examples": ["iv database import --path ./kb -i backup.json"]
           },
           {
             "name": "stats",
@@ -1976,7 +1976,7 @@
             "args": [
               {"name": "--path", "short": "-p", "type": "path", "required": true, "description": "Database path"}
             ],
-            "examples": ["aim database stats --path ./kb"]
+            "examples": ["iv database stats --path ./kb"]
           },
           {
             "name": "build-index",
@@ -1985,7 +1985,7 @@
               {"name": "--path", "short": "-p", "type": "path", "required": true, "description": "Database path"},
               {"name": "--output", "short": "-o", "type": "path", "required": true, "description": "Output index path"}
             ],
-            "examples": ["aim database build-index --path ./kb -o ./kb-index"]
+            "examples": ["iv database build-index --path ./kb -o ./kb-index"]
           },
           {
             "name": "vector-search",
@@ -1995,7 +1995,7 @@
               {"name": "--query", "short": "-q", "type": "path", "required": true, "description": "Query text or embedding file"},
               {"name": "--limit", "short": "-n", "type": "usize", "required": false, "default": 5, "description": "Number of results"}
             ],
-            "examples": ["aim database vector-search --index ./kb-index --query ./query.txt"]
+            "examples": ["iv database vector-search --index ./kb-index --query ./query.txt"]
           }
         ]
       },
@@ -2008,25 +2008,25 @@
             "name": "status",
             "description": "Show current telemetry status",
             "args": [],
-            "examples": ["aim telemetry status"]
+            "examples": ["iv telemetry status"]
           },
           {
             "name": "enable",
             "description": "Enable anonymous telemetry",
             "args": [],
-            "examples": ["aim telemetry enable"]
+            "examples": ["iv telemetry enable"]
           },
           {
             "name": "disable",
             "description": "Disable telemetry (opt out)",
             "args": [],
-            "examples": ["aim telemetry disable"]
+            "examples": ["iv telemetry disable"]
           },
           {
             "name": "reset",
             "description": "Reset device ID (generates new anonymous ID)",
             "args": [],
-            "examples": ["aim telemetry reset"]
+            "examples": ["iv telemetry reset"]
           }
         ]
       },
@@ -2038,7 +2038,7 @@
           {"name": "--format", "short": "-f", "type": "string", "required": false, "default": "json", "enum": ["json", "yaml", "jsonld"], "description": "Output format"},
           {"name": "--compact", "type": "bool", "required": false, "description": "Minimize output (no descriptions or examples)"}
         ],
-        "examples": ["aim introspect", "aim introspect --format yaml", "aim introspect --compact"],
+        "examples": ["iv introspect", "iv introspect --format yaml", "iv introspect --compact"],
         "exitCodes": {"0": "Success"},
         "requiresPassphrase": false,
         "requiresUnlock": false,
@@ -2053,53 +2053,53 @@
           "name": "store-and-convert",
           "description": "Store a model then convert it for edge deployment",
           "steps": [
-            "aim init",
-            "aim store my-llm ./model.safetensors -d 'Base model'",
-            "aim convert my-llm --to-format gguf --quantization q4_k_m --validate"
+            "iv init",
+            "iv store my-llm ./model.safetensors -d 'Base model'",
+            "iv convert my-llm --to-format gguf --quantization q4_k_m --validate"
           ]
         },
         {
           "name": "store-and-push",
           "description": "Store a model locally then push to cloud",
           "steps": [
-            "aim store my-llm ./model.safetensors",
-            "aim cloud push my-llm --provider s3 --bucket my-models"
+            "iv store my-llm ./model.safetensors",
+            "iv cloud push my-llm --provider s3 --bucket my-models"
           ]
         },
         {
           "name": "pull-and-convert",
           "description": "Pull a model from cloud and convert for local inference",
           "steps": [
-            "aim cloud pull my-llm --provider s3 --bucket my-models --remote-path models/llm.vault",
-            "aim convert my-llm --to-format gguf --quantization q4_k_m"
+            "iv cloud pull my-llm --provider s3 --bucket my-models --remote-path models/llm.vault",
+            "iv convert my-llm --to-format gguf --quantization q4_k_m"
           ]
         },
         {
           "name": "full-audit",
           "description": "Run a complete vault audit",
           "steps": [
-            "aim compliance",
-            "aim stats",
-            "aim deduplicate --detailed"
+            "iv compliance",
+            "iv stats",
+            "iv deduplicate --detailed"
           ]
         },
         {
           "name": "rag-pipeline",
           "description": "Set up a RAG knowledge base and search it",
           "steps": [
-            "aim database init --path ./kb --db-type sqlite",
-            "aim database store --path ./kb --input paper.pdf",
-            "aim database build-index --path ./kb -o ./kb-index",
-            "aim database search --path ./kb 'attention mechanism'"
+            "iv database init --path ./kb --db-type sqlite",
+            "iv database store --path ./kb --input paper.pdf",
+            "iv database build-index --path ./kb -o ./kb-index",
+            "iv database search --path ./kb 'attention mechanism'"
           ]
         },
         {
           "name": "model-documentation",
           "description": "Create and attach model documentation",
           "steps": [
-            "aim card generate my-llm -o card.json --include-training --include-evaluation",
-            "aim card validate card.json --strict",
-            "aim card attach my-llm card.json"
+            "iv card generate my-llm -o card.json --include-training --include-evaluation",
+            "iv card validate card.json --strict",
+            "iv card attach my-llm card.json"
           ]
         }
       ]
@@ -2111,11 +2111,11 @@
         "Exit code 0 always means success",
         "Non-zero exit codes map to error categories (see aimv:errors)",
         "Structured output is available via --format json where supported",
-        "aim introspect outputs machine-readable schema in JSON/YAML/JSON-LD",
+        "iv introspect outputs machine-readable schema in JSON/YAML/JSON-LD",
         "Error messages are written to stderr, data to stdout",
         "Progress indicators are written to stderr"
       ],
-      "jsonOutput": "Most commands support --format json for structured output parsing. Use aim introspect for the complete machine-readable CLI schema."
+      "jsonOutput": "Most commands support --format json for structured output parsing. Use iv introspect for the complete machine-readable CLI schema."
     }
   },
 

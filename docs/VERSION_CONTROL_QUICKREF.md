@@ -424,4 +424,4 @@ aimv verify llama-2-7b-chat --version 3
 
 ---
 
-**AI Model Vault (AIMV)** - Git-like version control for AI models.
+**IronVault (AIMV)** - Git-like version control for AI models.

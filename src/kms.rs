@@ -11,11 +11,11 @@
 //! accepted — see [`KmsUri`] for the scheme table.
 //!
 //! ```no_run
-//! use ai_model_vault::kms::{self, KmsUri};
+//! use ironvault::kms::{self, KmsUri};
 //!
-//! let uri: KmsUri = "vault://secret/aim/passphrase".parse()?;
+//! let uri: KmsUri = "vault://secret/iv/passphrase".parse()?;
 //! let secret = kms::fetch(&uri)?;
-//! # Ok::<(), ai_model_vault::VaultError>(())
+//! # Ok::<(), ironvault::VaultError>(())
 //! ```
 //!
 //! Every backend returns a [`Zeroizing<String>`] so the plaintext is wiped from
@@ -200,8 +200,8 @@ fn normalize_file_path(rest: &str) -> String {
 
 /// True when `s` looks like a KMS URI with a scheme this crate understands.
 ///
-/// Used to distinguish `aimodelvault_PASSPHRASE=hunter2` (a literal secret)
-/// from `aimodelvault_PASSPHRASE=vault://secret/aim/pass` (a reference).
+/// Used to distinguish `IRONVAULT_PASSPHRASE=hunter2` (a literal secret)
+/// from `IRONVAULT_PASSPHRASE=vault://secret/iv/pass` (a reference).
 #[must_use]
 pub fn is_kms_uri(s: &str) -> bool {
     s.split_once("://")
@@ -588,8 +588,8 @@ mod tests {
 
     #[test]
     fn test_uri_parse_file_posix_and_windows() {
-        let posix: KmsUri = "file:///etc/aim/pass".parse().unwrap();
-        assert_eq!(posix.secret_id, "/etc/aim/pass");
+        let posix: KmsUri = "file:///etc/ironvault/pass".parse().unwrap();
+        assert_eq!(posix.secret_id, "/etc/ironvault/pass");
 
         let windows: KmsUri = "file:///c:/secrets/pass.txt".parse().unwrap();
         assert_eq!(windows.secret_id, "c:/secrets/pass.txt");
@@ -611,18 +611,18 @@ mod tests {
 
     #[test]
     fn test_uri_parse_hashicorp() {
-        let uri: KmsUri = "vault://secret/aim/passphrase".parse().unwrap();
+        let uri: KmsUri = "vault://secret/iv/passphrase".parse().unwrap();
         assert_eq!(uri.backend, KmsBackend::HashicorpVault);
-        assert_eq!(uri.secret_id, "secret/aim/passphrase");
+        assert_eq!(uri.secret_id, "secret/iv/passphrase");
 
         assert!("vault://nofield".parse::<KmsUri>().is_err());
     }
 
     #[test]
     fn test_uri_parse_aws() {
-        let uri: KmsUri = "aws-sm://prod/aim-passphrase".parse().unwrap();
+        let uri: KmsUri = "aws-sm://prod/iv-passphrase".parse().unwrap();
         assert_eq!(uri.backend, KmsBackend::AwsSecretsManager);
-        assert_eq!(uri.secret_id, "prod/aim-passphrase");
+        assert_eq!(uri.secret_id, "prod/iv-passphrase");
     }
 
     #[test]
@@ -643,15 +643,15 @@ mod tests {
 
     #[test]
     fn test_fetch_from_env() {
-        std::env::set_var("AIM_TEST_SECRET_KMS", "super-secret-passphrase");
-        let uri: KmsUri = "env://AIM_TEST_SECRET_KMS".parse().unwrap();
+        std::env::set_var("IRONVAULT_TEST_SECRET_KMS", "super-secret-passphrase");
+        let uri: KmsUri = "env://IRONVAULT_TEST_SECRET_KMS".parse().unwrap();
         assert_eq!(&*fetch(&uri).unwrap(), "super-secret-passphrase");
-        std::env::remove_var("AIM_TEST_SECRET_KMS");
+        std::env::remove_var("IRONVAULT_TEST_SECRET_KMS");
     }
 
     #[test]
     fn test_env_missing() {
-        let uri: KmsUri = "env://AIM_DEFINITELY_NOT_SET_42".parse().unwrap();
+        let uri: KmsUri = "env://IRONVAULT_DEFINITELY_NOT_SET_42".parse().unwrap();
         assert!(fetch(&uri).is_err());
     }
 
@@ -695,7 +695,7 @@ mod tests {
 
     #[test]
     fn test_file_missing() {
-        let uri: KmsUri = "file:///definitely/not/here/aim-secret".parse().unwrap();
+        let uri: KmsUri = "file:///definitely/not/here/iv-secret".parse().unwrap();
         assert!(fetch(&uri).is_err());
     }
 
@@ -706,9 +706,9 @@ mod tests {
 
     #[test]
     fn test_resolve_follows_uri() {
-        std::env::set_var("AIM_TEST_RESOLVE", "from-env");
-        assert_eq!(&*resolve("env://AIM_TEST_RESOLVE").unwrap(), "from-env");
-        std::env::remove_var("AIM_TEST_RESOLVE");
+        std::env::set_var("IRONVAULT_TEST_RESOLVE", "from-env");
+        assert_eq!(&*resolve("env://IRONVAULT_TEST_RESOLVE").unwrap(), "from-env");
+        std::env::remove_var("IRONVAULT_TEST_RESOLVE");
     }
 
     #[test]
@@ -716,7 +716,7 @@ mod tests {
         // No VAULT_ADDR / VAULT_TOKEN in the test environment.
         std::env::remove_var("VAULT_ADDR");
         std::env::remove_var("VAULT_TOKEN");
-        let uri: KmsUri = "vault://secret/aim/pass".parse().unwrap();
+        let uri: KmsUri = "vault://secret/iv/pass".parse().unwrap();
         assert!(fetch(&uri).is_err());
     }
 
@@ -738,14 +738,14 @@ mod tests {
 
     #[test]
     fn test_legacy_request_api() {
-        std::env::set_var("AIM_TEST_LEGACY", "legacy-value");
+        std::env::set_var("IRONVAULT_TEST_LEGACY", "legacy-value");
         let req = KmsRequest {
             backend: KmsBackend::Env,
-            secret_id: "AIM_TEST_LEGACY".into(),
+            secret_id: "IRONVAULT_TEST_LEGACY".into(),
             endpoint: None,
         };
         assert_eq!(&*fetch_secret(&req).unwrap(), "legacy-value");
-        std::env::remove_var("AIM_TEST_LEGACY");
+        std::env::remove_var("IRONVAULT_TEST_LEGACY");
     }
 
     #[test]

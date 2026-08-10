@@ -67,7 +67,7 @@ function run_demo() {
 # Main script
 echo ""
 echo -e "${COLOR_BLUE}═══════════════════════════════════════════════════════${COLOR_RESET}"
-echo -e "${COLOR_BLUE}  AI Model Vault - PyTorch Demo Setup (uv)${COLOR_RESET}"
+echo -e "${COLOR_BLUE}  IronVault - PyTorch Demo Setup (uv)${COLOR_RESET}"
 echo -e "${COLOR_BLUE}═══════════════════════════════════════════════════════${COLOR_RESET}"
 echo ""
 

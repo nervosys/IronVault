@@ -11,10 +11,10 @@ Role-based ACLs per principal. Three built-in roles:
 ## CLI
 
 ```bash
-aim acl grant alice --role writer
-aim acl check alice --role writer
-aim acl list
-aim acl revoke alice
+iv acl grant alice --role writer
+iv acl check alice --role writer
+iv acl list
+iv acl revoke alice
 ```
 
 ## MCP tools
@@ -25,4 +25,4 @@ aim acl revoke alice
 
 `/api/v1/acl` (list/grant/revoke).
 
-JWT subject claims map directly to principal names — see the [OpenAPI specification](https://github.com/nervosys/AIModelVault/blob/master/.well-known/openapi.yaml) and [src/access_control.rs](https://github.com/nervosys/AIModelVault/blob/master/src/access_control.rs).
+JWT subject claims map directly to principal names — see the [OpenAPI specification](https://github.com/nervosys/IronVault/blob/master/.well-known/openapi.yaml) and [src/access_control.rs](https://github.com/nervosys/IronVault/blob/master/src/access_control.rs).

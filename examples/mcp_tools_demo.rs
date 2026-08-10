@@ -7,10 +7,10 @@
 //! - Build custom tool executors
 //! - Integrate tools with knowledge bases
 
-use ai_model_vault::rag::*;
+use ironvault::rag::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("=== AI Model Vault MCP Tools Demo ===\n");
+    println!("=== IronVault MCP Tools Demo ===\n");
 
     // PART 1: Basic Tool Creation
     println!("📦 PART 1: Creating Custom Tools");

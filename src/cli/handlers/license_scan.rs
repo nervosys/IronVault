@@ -1,8 +1,8 @@
-//! CLI handler for license scanning (aim license-scan).
+//! CLI handler for license scanning (iv license-scan).
 
 use std::path::PathBuf;
 
-use ai_model_vault::{LicenseScanner, Result, VaultError};
+use ironvault::{LicenseScanner, Result, VaultError};
 
 pub fn handle_license_scan(path: PathBuf, format: String) -> Result<()> {
     let report = if path.is_dir() {

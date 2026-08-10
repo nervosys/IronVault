@@ -1,6 +1,6 @@
-# aimodelvault CLI Reference
+# ironvault CLI Reference
 
-Complete command-line interface documentation for aimodelvault.
+Complete command-line interface documentation for ironvault.
 
 ## Global Options
 
@@ -18,7 +18,7 @@ Complete command-line interface documentation for aimodelvault.
 Initialize a new secure vault for storing AI models.
 
 ```bash
-aim init [OPTIONS]
+iv init [OPTIONS]
 ```
 
 **Options:**
@@ -26,7 +26,7 @@ aim init [OPTIONS]
 
 **Example:**
 ```bash
-aim init --name production-models
+iv init --name production-models
 ```
 
 ---
@@ -36,7 +36,7 @@ aim init --name production-models
 Store a model file in the vault with encryption and compression.
 
 ```bash
-aim store <NAME> <PATH> [OPTIONS]
+iv store <NAME> <PATH> [OPTIONS]
 ```
 
 **Arguments:**
@@ -52,19 +52,19 @@ aim store <NAME> <PATH> [OPTIONS]
 **Examples:**
 ```bash
 # Store a PyTorch model
-aim store gpt2-finetuned ./model.pt \
+iv store gpt2-finetuned ./model.pt \
   --format pytorch \
   --description "GPT-2 fine-tuned on custom dataset" \
   --framework "PyTorch 2.1" \
   --task "text-generation"
 
 # Store a Safetensors model
-aim store llama-7b ./model.safetensors \
+iv store llama-7b ./model.safetensors \
   --format safetensors \
   --description "Llama 7B base model"
 
 # Store ONNX model
-aim store resnet50 ./model.onnx \
+iv store resnet50 ./model.onnx \
   --format onnx \
   --task "image-classification"
 ```
@@ -76,7 +76,7 @@ aim store resnet50 ./model.onnx \
 Retrieve and decrypt a model from the vault.
 
 ```bash
-aim get <NAME> <OUTPUT> [OPTIONS]
+iv get <NAME> <OUTPUT> [OPTIONS]
 ```
 
 **Arguments:**
@@ -89,10 +89,10 @@ aim get <NAME> <OUTPUT> [OPTIONS]
 **Examples:**
 ```bash
 # Get latest version
-aim get gpt2-finetuned ./retrieved_model.pt
+iv get gpt2-finetuned ./retrieved_model.pt
 
 # Get specific version
-aim get gpt2-finetuned ./model_v3.pt --version 3
+iv get gpt2-finetuned ./model_v3.pt --version 3
 ```
 
 ---
@@ -102,7 +102,7 @@ aim get gpt2-finetuned ./model_v3.pt --version 3
 Display all models stored in the vault.
 
 ```bash
-aim list
+iv list
 ```
 
 **Example Output:**
@@ -120,7 +120,7 @@ Models in vault:
 Show all versions of a specific model.
 
 ```bash
-aim versions <NAME>
+iv versions <NAME>
 ```
 
 **Arguments:**
@@ -128,7 +128,7 @@ aim versions <NAME>
 
 **Example:**
 ```bash
-aim versions gpt2-finetuned
+iv versions gpt2-finetuned
 ```
 
 **Example Output:**
@@ -146,7 +146,7 @@ Versions of 'gpt2-finetuned':
 Display the complete lineage/generation history of a model version.
 
 ```bash
-aim lineage <NAME> <VERSION>
+iv lineage <NAME> <VERSION>
 ```
 
 **Arguments:**
@@ -155,7 +155,7 @@ aim lineage <NAME> <VERSION>
 
 **Example:**
 ```bash
-aim lineage gpt2-finetuned 5
+iv lineage gpt2-finetuned 5
 ```
 
 **Example Output:**
@@ -174,7 +174,7 @@ Lineage for 'gpt2-finetuned' v5:
 Delete a specific version of a model.
 
 ```bash
-aim delete <NAME> <VERSION> [OPTIONS]
+iv delete <NAME> <VERSION> [OPTIONS]
 ```
 
 **Arguments:**
@@ -187,10 +187,10 @@ aim delete <NAME> <VERSION> [OPTIONS]
 **Examples:**
 ```bash
 # Delete with confirmation
-aim delete gpt2-finetuned 1
+iv delete gpt2-finetuned 1
 
 # Force delete without confirmation
-aim delete gpt2-finetuned 1 --force
+iv delete gpt2-finetuned 1 --force
 ```
 
 **Warning:** Deleted versions cannot be recovered unless you have backups.
@@ -202,7 +202,7 @@ aim delete gpt2-finetuned 1 --force
 Display statistics about the vault.
 
 ```bash
-aim stats
+iv stats
 ```
 
 **Example Output:**
@@ -221,7 +221,7 @@ Vault Statistics:
 Run security and compliance verification checks.
 
 ```bash
-aim compliance
+iv compliance
 ```
 
 **Example Output:**
@@ -260,7 +260,7 @@ failure — a CVE scan that actually ran and found something.
 Change the passphrase for the vault (requires re-encryption).
 
 ```bash
-aim change-passphrase
+iv change-passphrase
 ```
 
 **Note:** This feature re-encrypts all stored models with the new passphrase.
@@ -274,7 +274,7 @@ aim change-passphrase
 Archive multiple models into a single TAR or ZIP file for backup or transfer.
 
 ```bash
-aim archive <MODELS>... <OUTPUT> [OPTIONS]
+iv archive <MODELS>... <OUTPUT> [OPTIONS]
 ```
 
 **Arguments:**
@@ -288,13 +288,13 @@ aim archive <MODELS>... <OUTPUT> [OPTIONS]
 **Examples:**
 ```bash
 # Archive models to TAR
-aim archive gpt2-finetuned bert-base resnet50 backup.tar
+iv archive gpt2-finetuned bert-base resnet50 backup.tar
 
 # Archive to ZIP with specific versions
-aim archive model1 model2 backup.zip --format zip --versions 3 2
+iv archive model1 model2 backup.zip --format zip --versions 3 2
 
 # Quick backup of all critical models
-aim archive prod-model-v1 prod-model-v2 prod-backup.tar
+iv archive prod-model-v1 prod-model-v2 prod-backup.tar
 ```
 
 ---
@@ -304,7 +304,7 @@ aim archive prod-model-v1 prod-model-v2 prod-backup.tar
 Extract models from a TAR or ZIP archive.
 
 ```bash
-aim extract <ARCHIVE> [OPTIONS]
+iv extract <ARCHIVE> [OPTIONS]
 ```
 
 **Arguments:**
@@ -316,10 +316,10 @@ aim extract <ARCHIVE> [OPTIONS]
 **Examples:**
 ```bash
 # Extract to current directory
-aim extract backup.tar
+iv extract backup.tar
 
 # Extract to specific directory
-aim extract backup.zip --output ./restored_models
+iv extract backup.zip --output ./restored_models
 ```
 
 ---
@@ -329,7 +329,7 @@ aim extract backup.zip --output ./restored_models
 Analyze compression efficiency and model characteristics.
 
 ```bash
-aim analyze <NAME> [OPTIONS]
+iv analyze <NAME> [OPTIONS]
 ```
 
 **Arguments:**
@@ -340,7 +340,7 @@ aim analyze <NAME> [OPTIONS]
 
 **Example:**
 ```bash
-aim analyze gpt2-finetuned
+iv analyze gpt2-finetuned
 ```
 
 **Example Output:**
@@ -374,7 +374,7 @@ Model Analysis:
 Find duplicate models in the vault using content hashing.
 
 ```bash
-aim deduplicate [OPTIONS]
+iv deduplicate [OPTIONS]
 ```
 
 **Options:**
@@ -383,10 +383,10 @@ aim deduplicate [OPTIONS]
 **Examples:**
 ```bash
 # Find duplicates
-aim deduplicate
+iv deduplicate
 
 # Show detailed similarity analysis
-aim deduplicate --detailed
+iv deduplicate --detailed
 ```
 
 **Example Output:**
@@ -415,7 +415,7 @@ You can save space by removing duplicates.
 Export a model along with its metadata as a JSON file.
 
 ```bash
-aim export <NAME> <OUTPUT> [OPTIONS]
+iv export <NAME> <OUTPUT> [OPTIONS]
 ```
 
 **Arguments:**
@@ -428,10 +428,10 @@ aim export <NAME> <OUTPUT> [OPTIONS]
 **Examples:**
 ```bash
 # Export latest version
-aim export gpt2-finetuned ./exports
+iv export gpt2-finetuned ./exports
 
 # Export specific version
-aim export bert-base ./models --version 5
+iv export bert-base ./models --version 5
 ```
 
 **Creates:**
@@ -457,7 +457,7 @@ aim export bert-base ./models --version 5
 Show caching statistics (for programmatic usage information).
 
 ```bash
-aim cache
+iv cache
 ```
 
 **Note:** The CLI displays usage information. To use caching in your code, see the API documentation and examples.
@@ -469,7 +469,7 @@ aim cache
 Convert models between different formats (PyTorch, ONNX, Safetensors, GGUF, etc.).
 
 ```bash
-aim convert <MODEL> --to-format <FORMAT> [OPTIONS]
+iv convert <MODEL> --to-format <FORMAT> [OPTIONS]
 ```
 
 **Arguments:**
@@ -498,19 +498,19 @@ aim convert <MODEL> --to-format <FORMAT> [OPTIONS]
 **Examples:**
 ```bash
 # Convert PyTorch to Safetensors
-aim convert llama-2-7b --to-format safetensors
+iv convert llama-2-7b --to-format safetensors
 
 # Convert to GGUF with quantization
-aim convert gpt2-model --to-format gguf --quantization q4_k_m
+iv convert gpt2-model --to-format gguf --quantization q4_k_m
 
 # Convert specific version to ONNX
-aim convert bert-base --to-format onnx --version 2 --output bert-v2.onnx
+iv convert bert-base --to-format onnx --version 2 --output bert-v2.onnx
 
 # Convert to TensorFlow Lite for mobile
-aim convert mobilenet --to-format tflite --output model.tflite
+iv convert mobilenet --to-format tflite --output model.tflite
 
 # Convert to Core ML for Apple devices
-aim convert resnet50 --to-format coreml --output resnet50.mlmodel
+iv convert resnet50 --to-format coreml --output resnet50.mlmodel
 ```
 
 **How it Works:**
@@ -531,16 +531,16 @@ The convert command provides guidance on converting between formats:
 
 ```bash
 # Training → Production (LLM)
-aim convert my-llm --to-format safetensors        # PyTorch → Safetensors
-aim convert my-llm --to-format gguf -q q4_k_m     # Safetensors → GGUF
+iv convert my-llm --to-format safetensors        # PyTorch → Safetensors
+iv convert my-llm --to-format gguf -q q4_k_m     # Safetensors → GGUF
 
 # Research → Mobile
-aim convert my-model --to-format onnx             # PyTorch → ONNX
-aim convert my-model --to-format tflite           # ONNX → TFLite
+iv convert my-model --to-format onnx             # PyTorch → ONNX
+iv convert my-model --to-format tflite           # ONNX → TFLite
 
 # Edge Deployment
-aim convert vision-model --to-format openvino     # ONNX → OpenVINO
-aim convert vision-model --to-format ncnn         # ONNX → NCNN
+iv convert vision-model --to-format openvino     # ONNX → OpenVINO
+iv convert vision-model --to-format ncnn         # ONNX → NCNN
 ```
 
 **Note:** Format conversion requires external tools (PyTorch, ONNX Runtime, llama.cpp, etc.). The command provides detailed instructions for each conversion path.
@@ -552,7 +552,7 @@ aim convert vision-model --to-format ncnn         # ONNX → NCNN
 Upload, download, and manage models in cloud storage (S3, Azure, GCS).
 
 ```bash
-aim cloud <SUBCOMMAND>
+iv cloud <SUBCOMMAND>
 ```
 
 **Subcommands:**
@@ -560,7 +560,7 @@ aim cloud <SUBCOMMAND>
 #### `push` - Push Model to Cloud
 
 ```bash
-aim cloud push <MODEL> --provider <PROVIDER> --bucket <BUCKET> [OPTIONS]
+iv cloud push <MODEL> --provider <PROVIDER> --bucket <BUCKET> [OPTIONS]
 ```
 
 **Arguments:**
@@ -574,16 +574,16 @@ aim cloud push <MODEL> --provider <PROVIDER> --bucket <BUCKET> [OPTIONS]
 **Examples:**
 ```bash
 # Push to AWS S3
-aim cloud push gpt2-finetuned --provider s3 --bucket my-models
+iv cloud push gpt2-finetuned --provider s3 --bucket my-models
 
 # Push specific version to Azure
-aim cloud push bert-classifier --provider azure --bucket ml-models --version 3
+iv cloud push bert-classifier --provider azure --bucket ml-models --version 3
 ```
 
 #### `pull` - Pull Model from Cloud
 
 ```bash
-aim cloud pull <MODEL> --provider <PROVIDER> --bucket <BUCKET> --remote-path <PATH>
+iv cloud pull <MODEL> --provider <PROVIDER> --bucket <BUCKET> --remote-path <PATH>
 ```
 
 **Arguments:**
@@ -597,16 +597,16 @@ aim cloud pull <MODEL> --provider <PROVIDER> --bucket <BUCKET> --remote-path <PA
 **Examples:**
 ```bash
 # Pull from S3
-aim cloud pull gpt2-finetuned --provider s3 --bucket my-models --remote-path gpt2-finetuned/safetensors/v2.vault
+iv cloud pull gpt2-finetuned --provider s3 --bucket my-models --remote-path gpt2-finetuned/safetensors/v2.vault
 
 # Pull from Azure
-aim cloud pull bert-classifier --provider azure --bucket ml-models --remote-path models/bert/v1.vault
+iv cloud pull bert-classifier --provider azure --bucket ml-models --remote-path models/bert/v1.vault
 ```
 
 #### `list` - List Cloud Models
 
 ```bash
-aim cloud list --provider <PROVIDER> --bucket <BUCKET> [OPTIONS]
+iv cloud list --provider <PROVIDER> --bucket <BUCKET> [OPTIONS]
 ```
 
 **Options:**
@@ -617,16 +617,16 @@ aim cloud list --provider <PROVIDER> --bucket <BUCKET> [OPTIONS]
 **Examples:**
 ```bash
 # List all models in S3 bucket
-aim cloud list --provider s3 --bucket my-models
+iv cloud list --provider s3 --bucket my-models
 
 # List models with prefix
-aim cloud list --provider azure --bucket ml-models --prefix production/
+iv cloud list --provider azure --bucket ml-models --prefix production/
 ```
 
 #### `config` - Configure Cloud Credentials
 
 ```bash
-aim cloud config --provider <PROVIDER> [--show]
+iv cloud config --provider <PROVIDER> [--show]
 ```
 
 **Options:**
@@ -636,10 +636,10 @@ aim cloud config --provider <PROVIDER> [--show]
 **Examples:**
 ```bash
 # Show S3 configuration
-aim cloud config --provider s3 --show
+iv cloud config --provider s3 --show
 
 # Show Azure configuration
-aim cloud config --provider azure --show
+iv cloud config --provider azure --show
 ```
 
 **Cloud Provider Setup:**
@@ -669,10 +669,10 @@ Use S3 or Azure instead
 
 ## Environment Variables
 
-- `aimodelvault_CONFIG` - Config directory override (`config.yaml`, profiles, plugins)
-- `aimodelvault_HOME` - Relocates all config/data/cache directories under one root
-- `aimodelvault_VAULT` - Default vault name
-- `aimodelvault_PASSPHRASE` - Passphrase for unattended use: a literal value or a KMS URI (`env://`, `file://`, `aws-sm://`, `azure-kv://`, `vault://`). Prefer a KMS URI or `file://` over a literal on shared hosts — see [KMS.md](KMS.md)
+- `IRONVAULT_CONFIG` - Config directory override (`config.yaml`, profiles, plugins)
+- `IRONVAULT_HOME` - Relocates all config/data/cache directories under one root
+- `IRONVAULT_VAULT` - Default vault name
+- `IRONVAULT_PASSPHRASE` - Passphrase for unattended use: a literal value or a KMS URI (`env://`, `file://`, `aws-sm://`, `azure-kv://`, `vault://`). Prefer a KMS URI or `file://` over a literal on shared hosts — see [KMS.md](KMS.md)
 - `AWS_ACCESS_KEY_ID` - AWS access key for S3
 - `AWS_SECRET_ACCESS_KEY` - AWS secret key for S3
 - `AWS_REGION` - AWS region (default: us-east-1)
@@ -690,14 +690,14 @@ Use S3 or Azure instead
 | `2` | Authentication failed | Wrong passphrase, or ciphertext that failed its authentication tag |
 | `3` | Not found | No such model, version, profile, registered vault, schedule, or document |
 | `4` | Permission denied | The OS refused access, or a security policy did |
-| `5` | Integrity check failed | `aim verify` / `aim validate` failed, or a checksum did not match |
+| `5` | Integrity check failed | `iv verify` / `iv validate` failed, or a checksum did not match |
 | `6` | Invalid input | Unusable argument value — including a mistyped subcommand or flag |
 | `7` | Configuration error | `--config` file missing, malformed, or invalid |
-| `8` | Compliance violation | `aim compliance` policy check failed |
+| `8` | Compliance violation | `iv compliance` policy check failed |
 
 This is a stability contract: the mapping from category to code will not change,
 and new categories only ever get previously unused codes. It is implemented by
-`VaultError::exit_code` in [src/error.rs](https://github.com/nervosys/AIModelVault/blob/master/src/error.rs)
+`VaultError::exit_code` in [src/error.rs](https://github.com/nervosys/IronVault/blob/master/src/error.rs)
 and pinned by tests in that file plus `tests/cli_tests.rs`.
 
 Note that `6` covers usage errors. clap's own default for a bad command line is
@@ -708,7 +708,7 @@ overrides it.
 
 ## Configuration File
 
-Location: `~/.config/aimodelvault/config.yaml`
+Location: `~/.config/ironvault/config.yaml`
 
 See [QUICKSTART.md](QUICKSTART.md#configuration) for configuration details.
 
@@ -717,7 +717,7 @@ See [QUICKSTART.md](QUICKSTART.md#configuration) for configuration details.
 ## Security Considerations
 
 1. **Passphrase Entry**: Always enter passphrases interactively (prompts hide input)
-2. **Audit Logs**: Review `~/.local/share/aimodelvault/logs/audit.log` regularly
+2. **Audit Logs**: Review `~/.local/share/ironvault/logs/audit.log` regularly
 3. **Permissions**: Ensure proper file permissions (700 for directories, 600 for files)
 4. **Backups**: Backup your vault data regularly to a secure location
 
@@ -729,31 +729,31 @@ See [QUICKSTART.md](QUICKSTART.md#configuration) for configuration details.
 
 ```bash
 # 1. Initialize vault
-aim init --name ml-models
+iv init --name ml-models
 
 # 2. Store a model
-aim store my-transformer ./model.pt \
+iv store my-transformer ./model.pt \
   --format pytorch \
   --description "Custom transformer model" \
   --task "text-classification"
 
 # 3. List models
-aim list
+iv list
 
 # 4. View versions
-aim versions my-transformer
+iv versions my-transformer
 
 # 5. Retrieve model
-aim get my-transformer ./output.pt
+iv get my-transformer ./output.pt
 
 # 6. Analyze compression and characteristics
-aim analyze my-transformer
+iv analyze my-transformer
 
 # 7. Check compliance
-aim compliance
+iv compliance
 
 # 8. View statistics
-aim stats
+iv stats
 ```
 
 ### Batch Operations
@@ -762,35 +762,35 @@ aim stats
 # Store multiple models
 for model in models/*.pt; do
   name=$(basename "$model" .pt)
-  aim store "$name" "$model" --format pytorch
+  iv store "$name" "$model" --format pytorch
 done
 
 # Export all latest versions
-for model in $(aim list | grep -oE '^\s+\S+'); do
-  aim get "$model" "./exports/${model}.pt"
+for model in $(iv list | grep -oE '^\s+\S+'); do
+  iv get "$model" "./exports/${model}.pt"
 done
 
 # Create backup archive
-aim archive model1 model2 model3 backup.tar
+iv archive model1 model2 model3 backup.tar
 
 # Find and remove duplicates
-aim deduplicate --detailed
+iv deduplicate --detailed
 ```
 
 ### Utility Workflows
 
 ```bash
 # Backup workflow
-aim archive prod-model test-model backup-$(date +%Y%m%d).tar
-aim extract backup-20241028.tar --output ./restored
+iv archive prod-model test-model backup-$(date +%Y%m%d).tar
+iv extract backup-20241028.tar --output ./restored
 
 # Analysis workflow
-aim analyze my-model
-aim deduplicate
-aim stats
+iv analyze my-model
+iv deduplicate
+iv stats
 
 # Export workflow
-aim export my-model ./exports
+iv export my-model ./exports
 # Creates: ./exports/my-model and ./exports/my-model_metadata.json
 ```
 
@@ -801,7 +801,7 @@ aim export my-model ./exports
 ### Command Not Found
 
 ```bash
-# Ensure aimodelvault is in PATH
+# Ensure ironvault is in PATH
 cargo install --path .
 # or
 export PATH="$HOME/.cargo/bin:$PATH"
@@ -811,8 +811,8 @@ export PATH="$HOME/.cargo/bin:$PATH"
 
 ```bash
 # Fix permissions
-chmod 700 ~/.local/share/aimodelvault
-chmod 600 ~/.config/aimodelvault/config.yaml
+chmod 700 ~/.local/share/ironvault
+chmod 600 ~/.config/ironvault/config.yaml
 ```
 
 ### Authentication Failures
@@ -826,5 +826,5 @@ chmod 600 ~/.config/aimodelvault/config.yaml
 ## See Also
 
 - [Quick Start Guide](QUICKSTART.md)
-- [Security Policy](https://github.com/nervosys/AIModelVault/blob/master/SECURITY.md)
-- [API Documentation](https://docs.rs/aimodelvault)
+- [Security Policy](https://github.com/nervosys/IronVault/blob/master/SECURITY.md)
+- [API Documentation](https://docs.rs/ironvault)

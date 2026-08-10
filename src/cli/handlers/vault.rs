@@ -1,8 +1,8 @@
 //! Vault core command handlers (init, store, get, list, versions, lineage, delete, stats, compliance, change-passphrase, cache).
 
-use ai_model_vault::compliance::ComplianceChecker;
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-use ai_model_vault::{Result, VaultConfig, VaultError};
+use ironvault::compliance::ComplianceChecker;
+use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::{Result, VaultConfig, VaultError};
 use std::io::{self, Write};
 
 use crate::cli::helpers::{build_vault, prompt_passphrase};
@@ -95,7 +95,7 @@ pub fn handle_store(
     let size = data.len() as u64;
     let started = std::time::Instant::now();
     let stored = vault.store_model(&name, data, metadata, None);
-    ai_model_vault::telemetry::track_model_op(
+    ironvault::telemetry::track_model_op(
         "store",
         format_label,
         size,
@@ -140,7 +140,7 @@ pub fn handle_get(
 
     let started = std::time::Instant::now();
     let fetched = vault.get_model(&name, version);
-    ai_model_vault::telemetry::track_model_op(
+    ironvault::telemetry::track_model_op(
         "get",
         format_label,
         fetched.as_ref().map_or(0, |d| d.len() as u64),
@@ -263,7 +263,7 @@ pub fn handle_delete(
 
     let started = std::time::Instant::now();
     let deleted = vault.delete_version(&name, version);
-    ai_model_vault::telemetry::track_model_op(
+    ironvault::telemetry::track_model_op(
         "delete",
         format_label,
         0,
@@ -367,7 +367,7 @@ pub fn handle_change_passphrase(config: VaultConfig, use_sqlite: bool) -> Result
 }
 
 pub fn handle_cache() -> Result<()> {
-    use ai_model_vault::utils::RetrievalOptimizer;
+    use ironvault::utils::RetrievalOptimizer;
     let cache = RetrievalOptimizer::new(1024 * 1024 * 1024); // 1 GB
     let stats = cache.cache_stats();
     println!("Cache Statistics:");

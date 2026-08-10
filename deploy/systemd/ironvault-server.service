@@ -1,10 +1,10 @@
-; systemd unit for the AI Model Vault API server.
+; systemd unit for the IronVault API server.
 ;
 ; Install:
-;   sudo cp deploy/systemd/aim-server.service /etc/systemd/system/
-;   sudo cp deploy/systemd/aim-server.env.example /etc/aim/server.env
-;   sudo chmod 0600 /etc/aim/server.env && sudo chown root:root /etc/aim/server.env
-;   sudo systemctl daemon-reload && sudo systemctl enable --now aim-server
+;   sudo cp deploy/systemd/ironvault-server.service /etc/systemd/system/
+;   sudo cp deploy/systemd/ironvault-server.env.example /etc/ironvault/server.env
+;   sudo chmod 0600 /etc/ironvault/server.env && sudo chown root:root /etc/ironvault/server.env
+;   sudo systemctl daemon-reload && sudo systemctl enable --now ironvault-server
 ;
 ; Configuration is service-scoped by design. Everything below applies to this
 ; unit only -- nothing is written to /etc/environment, /etc/profile.d, or any
@@ -12,27 +12,27 @@
 ; collector endpoint and, more importantly, none inherits the bearer token.
 
 [Unit]
-Description=AI Model Vault API server
-Documentation=https://github.com/nervosys/AIModelVault
+Description=IronVault API server
+Documentation=https://github.com/nervosys/IronVault
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=aim
-Group=aim
+User=ironvault
+Group=ironvault
 
 ; Secrets and configuration live here, readable only by root, loaded into this
 ; process and no other. Use EnvironmentFile rather than Environment= lines:
 ; Environment= values are visible in `systemctl show` and `systemd-analyze
 ; dump` to any local user, which for a bearer token means every account on the
 ; box can read it.
-EnvironmentFile=/etc/aim/server.env
+EnvironmentFile=/etc/ironvault/server.env
 
-ExecStart=/usr/local/bin/aim serve \
+ExecStart=/usr/local/bin/iv serve \
     --host 127.0.0.1 \
     --port 8080 \
-    --revocation-store /var/lib/aim/revocations.json
+    --revocation-store /var/lib/ironvault/revocations.json
 
 Restart=on-failure
 RestartSec=5s
@@ -56,8 +56,8 @@ CapabilityBoundingSet=
 AmbientCapabilities=
 
 ; The only writable paths.
-StateDirectory=aim
-ReadWritePaths=/var/lib/aim
+StateDirectory=ironvault
+ReadWritePaths=/var/lib/ironvault
 
 [Install]
 WantedBy=multi-user.target

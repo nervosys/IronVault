@@ -1,6 +1,6 @@
 //! Database command handlers for RAG knowledge base operations.
 
-use ai_model_vault::{Result, VaultError};
+use ironvault::{Result, VaultError};
 use std::path::PathBuf;
 
 use crate::cli::args::DatabaseCommands;
@@ -17,7 +17,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
 
     #[cfg(any(feature = "sqlite", feature = "kv-store"))]
     {
-        use ai_model_vault::rag::Document;
+        use ironvault::rag::Document;
         use std::collections::HashMap;
 
         match command {
@@ -88,7 +88,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             match db_type.to_lowercase().as_str() {
                 #[cfg(feature = "sqlite")]
                 "sqlite" => {
-                    use ai_model_vault::rag::SQLiteDatabase;
+                    use ironvault::rag::SQLiteDatabase;
                     let _db = SQLiteDatabase::new(&path)?;
                     let conn = rusqlite::Connection::open(&path).map_err(|e| {
                         VaultError::StorageError(format!("Failed to open database: {}", e))
@@ -114,7 +114,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
                 }
                 #[cfg(feature = "kv-store")]
                 "sled" => {
-                    use ai_model_vault::rag::SledDatabase;
+                    use ironvault::rag::SledDatabase;
                     let _db = SledDatabase::new(&path)?;
                     println!("✅ Sled database initialized successfully!");
                 }
@@ -161,7 +161,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             {
                 #[cfg(feature = "sqlite")]
                 {
-                    use ai_model_vault::rag::SQLiteDatabase;
+                    use ironvault::rag::SQLiteDatabase;
                     let db = SQLiteDatabase::new(&path)?;
                     db.store_document(&doc)?;
                 }
@@ -174,7 +174,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             } else {
                 #[cfg(feature = "kv-store")]
                 {
-                    use ai_model_vault::rag::SledDatabase;
+                    use ironvault::rag::SledDatabase;
                     let db = SledDatabase::new(&path)?;
                     db.store_document(&doc)?;
                 }
@@ -199,7 +199,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             if path.extension().and_then(|s| s.to_str()) == Some("db") {
                 #[cfg(feature = "sqlite")]
                 {
-                    use ai_model_vault::rag::SQLiteDatabase;
+                    use ironvault::rag::SQLiteDatabase;
                     let db = SQLiteDatabase::new(&path)?;
                     if let Some(doc) = db.get_document(&id)? {
                         println!("\n📄 Document Found:");
@@ -225,7 +225,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             } else {
                 #[cfg(feature = "kv-store")]
                 {
-                    use ai_model_vault::rag::SledDatabase;
+                    use ironvault::rag::SledDatabase;
                     let db = SledDatabase::new(&path)?;
                     if let Some(doc) = db.get_document(&id)? {
                         println!("\n📄 Document Found:");
@@ -253,7 +253,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             if path.extension().and_then(|s| s.to_str()) == Some("db") {
                 #[cfg(feature = "sqlite")]
                 {
-                    use ai_model_vault::rag::SQLiteDatabase;
+                    use ironvault::rag::SQLiteDatabase;
                     let db = SQLiteDatabase::new(&path)?;
                     let results = db.search_documents(&query, limit)?;
 
@@ -286,7 +286,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             if path.extension().and_then(|s| s.to_str()) == Some("db") {
                 #[cfg(feature = "sqlite")]
                 {
-                    use ai_model_vault::rag::SQLiteDatabase;
+                    use ironvault::rag::SQLiteDatabase;
                     let db = SQLiteDatabase::new(&path)?;
                     let results = db.search_documents("", 1000)?;
 
@@ -304,7 +304,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             } else {
                 #[cfg(feature = "kv-store")]
                 {
-                    use ai_model_vault::rag::SledDatabase;
+                    use ironvault::rag::SledDatabase;
                     let db = SledDatabase::new(&path)?;
                     let ids = db.list_documents()?;
 
@@ -331,7 +331,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             if path.extension().and_then(|s| s.to_str()) == Some("db") {
                 #[cfg(feature = "sqlite")]
                 {
-                    use ai_model_vault::rag::{Database, SQLiteDatabase};
+                    use ironvault::rag::{Database, SQLiteDatabase};
                     let mut db = SQLiteDatabase::new(&path)?;
                     db.delete("documents", &id)?;
                     println!("✅ Document deleted successfully!");
@@ -345,7 +345,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             } else {
                 #[cfg(feature = "kv-store")]
                 {
-                    use ai_model_vault::rag::{Database, SledDatabase};
+                    use ironvault::rag::{Database, SledDatabase};
                     let mut db = SledDatabase::new(&path)?;
                     db.delete("", &id)?;
                     println!("✅ Document deleted successfully!");
@@ -370,7 +370,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             if path.extension().and_then(|s| s.to_str()) == Some("db") {
                 #[cfg(feature = "sqlite")]
                 {
-                    use ai_model_vault::rag::SQLiteDatabase;
+                    use ironvault::rag::SQLiteDatabase;
                     let db = SQLiteDatabase::new(&path)?;
                     documents = db.search_documents("", 100000)?;
                 }
@@ -400,7 +400,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             if path.extension().and_then(|s| s.to_str()) == Some("db") {
                 #[cfg(feature = "sqlite")]
                 {
-                    use ai_model_vault::rag::SQLiteDatabase;
+                    use ironvault::rag::SQLiteDatabase;
                     let db = SQLiteDatabase::new(&path)?;
                     for doc in &documents {
                         db.store_document(doc)?;
@@ -415,7 +415,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             } else {
                 #[cfg(feature = "kv-store")]
                 {
-                    use ai_model_vault::rag::SledDatabase;
+                    use ironvault::rag::SledDatabase;
                     let db = SledDatabase::new(&path)?;
                     for doc in &documents {
                         db.store_document(doc)?;
@@ -440,7 +440,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             if path.extension().and_then(|s| s.to_str()) == Some("db") {
                 #[cfg(feature = "sqlite")]
                 {
-                    use ai_model_vault::rag::SQLiteDatabase;
+                    use ironvault::rag::SQLiteDatabase;
                     let db = SQLiteDatabase::new(&path)?;
                     let all_docs = db.search_documents("", 100000)?;
 
@@ -465,7 +465,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             } else {
                 #[cfg(feature = "kv-store")]
                 {
-                    use ai_model_vault::rag::SledDatabase;
+                    use ironvault::rag::SledDatabase;
                     let db = SledDatabase::new(&path)?;
                     let ids = db.list_documents()?;
                     println!("\n   Documents: {}", ids.len());
@@ -485,12 +485,12 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             println!("   Database: {}", path.display());
             println!("   Output: {}", output.display());
 
-            use ai_model_vault::rag::{SimpleVectorStore, VectorStore};
+            use ironvault::rag::{SimpleVectorStore, VectorStore};
 
             let all_docs = if path.extension().and_then(|s| s.to_str()) == Some("db") {
                 #[cfg(feature = "sqlite")]
                 {
-                    use ai_model_vault::rag::SQLiteDatabase;
+                    use ironvault::rag::SQLiteDatabase;
                     let db = SQLiteDatabase::new(&path)?;
                     db.search_documents("", 100000)?
                 }
@@ -503,7 +503,7 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             } else {
                 #[cfg(feature = "kv-store")]
                 {
-                    use ai_model_vault::rag::SledDatabase;
+                    use ironvault::rag::SledDatabase;
                     let db = SledDatabase::new(&path)?;
                     let ids = db.list_documents()?;
                     let mut docs = Vec::new();
@@ -557,10 +557,10 @@ pub fn handle_database(command: DatabaseCommands) -> Result<()> {
             println!("   Index: {}", index.display());
             println!("   Query: {}", query.display());
 
-            use ai_model_vault::rag::{SimpleVectorStore, VectorStore};
+            use ironvault::rag::{SimpleVectorStore, VectorStore};
 
             let index_data = std::fs::read_to_string(&index)?;
-            let documents: Vec<ai_model_vault::rag::Document> = serde_json::from_str(&index_data)?;
+            let documents: Vec<ironvault::rag::Document> = serde_json::from_str(&index_data)?;
 
             let mut store = SimpleVectorStore::new();
             for doc in &documents {

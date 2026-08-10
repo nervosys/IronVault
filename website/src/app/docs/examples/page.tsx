@@ -7,7 +7,7 @@ export default function ExamplesPage() {
       <h1 className="text-4xl font-bold mb-4">Examples</h1>
       <p className="text-lg text-[var(--color-text-secondary)] mb-8">
         Runnable examples ship in the <code className="text-xs px-1 bg-[var(--color-bg-secondary)] rounded">examples/</code> directory.
-        Each demonstrates a focused slice of AI Model Vault functionality and
+        Each demonstrates a focused slice of IronVault functionality and
         can be executed directly with Cargo.
       </p>
 

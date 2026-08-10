@@ -1,6 +1,6 @@
 # XDG Base Directory Specification Compliance
 
-AI Model Vault is **fully compliant** with the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html), ensuring proper organization of configuration files, application data, and cache across all platforms.
+IronVault is **fully compliant** with the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html), ensuring proper organization of configuration files, application data, and cache across all platforms.
 
 ## Table of Contents
 
@@ -31,15 +31,15 @@ The **XDG Base Directory Specification** defines standard locations for storing:
 
 ## XDG Directory Structure
 
-AI Model Vault uses the following XDG-compliant directories:
+IronVault uses the following XDG-compliant directories:
 
 ### Linux
 
 ```
-~/.config/aimodelvault/           # XDG_CONFIG_HOME
+~/.config/ironvault/           # XDG_CONFIG_HOME
   └── config.yaml                 # Vault configuration
 
-~/.local/share/aimodelvault/      # XDG_DATA_HOME
+~/.local/share/ironvault/      # XDG_DATA_HOME
   ├── vaults/
   │   └── default/
   │       ├── models/             # Encrypted model files
@@ -47,7 +47,7 @@ AI Model Vault uses the following XDG-compliant directories:
   └── logs/
       └── audit.log               # Security audit log
 
-~/.cache/aimodelvault/            # XDG_CACHE_HOME
+~/.cache/ironvault/            # XDG_CACHE_HOME
   ├── decompressed/               # LRU cache for models
   └── temp/                       # Temporary files
 ```
@@ -55,32 +55,32 @@ AI Model Vault uses the following XDG-compliant directories:
 ### macOS
 
 ```
-~/Library/Application Support/ai.nervosys.aimodelvault/
+~/Library/Application Support/ai.nervosys.ironvault/
   ├── config.yaml
   ├── vaults/
   └── logs/
 
-~/Library/Caches/ai.nervosys.aimodelvault/
+~/Library/Caches/ai.nervosys.ironvault/
   └── decompressed/
 ```
 
 ### Windows
 
 ```
-%APPDATA%\nervosys\aimodelvault\config\
+%APPDATA%\nervosys\ironvault\config\
   └── config.yaml
 
-%APPDATA%\nervosys\aimodelvault\data\
+%APPDATA%\nervosys\ironvault\data\
   ├── vaults\
   └── logs\
 
-%LOCALAPPDATA%\nervosys\aimodelvault\cache\
+%LOCALAPPDATA%\nervosys\ironvault\cache\
   └── decompressed\
 ```
 
 ## Platform Support
 
-AI Model Vault provides **native XDG-style directory organization** on all platforms:
+IronVault provides **native XDG-style directory organization** on all platforms:
 
 | Platform    | Config Location                  | Data Location                    | Cache Location              |
 | ----------- | -------------------------------- | -------------------------------- | --------------------------- |
@@ -94,7 +94,7 @@ While Windows doesn't natively support XDG, we maintain the same **separation of
 
 ## Environment Variables
 
-AI Model Vault respects XDG environment variables:
+IronVault respects XDG environment variables:
 
 ### XDG_CONFIG_HOME
 
@@ -104,7 +104,7 @@ AI Model Vault respects XDG environment variables:
 
 ```bash
 export XDG_CONFIG_HOME=/custom/config
-# AI Model Vault will use: /custom/config/aimodelvault/
+# IronVault will use: /custom/config/ironvault/
 ```
 
 ### XDG_DATA_HOME
@@ -115,7 +115,7 @@ export XDG_CONFIG_HOME=/custom/config
 
 ```bash
 export XDG_DATA_HOME=/custom/data
-# AI Model Vault will use: /custom/data/aimodelvault/
+# IronVault will use: /custom/data/ironvault/
 ```
 
 ### XDG_CACHE_HOME
@@ -126,7 +126,7 @@ export XDG_DATA_HOME=/custom/data
 
 ```bash
 export XDG_CACHE_HOME=/custom/cache
-# AI Model Vault will use: /custom/cache/aimodelvault/
+# IronVault will use: /custom/cache/ironvault/
 ```
 
 ### XDG_STATE_HOME
@@ -145,7 +145,7 @@ export XDG_STATE_HOME=/custom/state
 ### Configuration Directory (`XDG_CONFIG_HOME`)
 
 ```
-~/.config/aimodelvault/
+~/.config/ironvault/
 ├── config.yaml              # Main configuration file
 └── preferences.yaml         # User preferences (future)
 ```
@@ -159,7 +159,7 @@ export XDG_STATE_HOME=/custom/state
 ### Data Directory (`XDG_DATA_HOME`)
 
 ```
-~/.local/share/aimodelvault/
+~/.local/share/ironvault/
 ├── vaults/
 │   ├── default/             # Default vault
 │   │   ├── models/
@@ -186,7 +186,7 @@ export XDG_STATE_HOME=/custom/state
 ### Cache Directory (`XDG_CACHE_HOME`)
 
 ```
-~/.cache/aimodelvault/
+~/.cache/ironvault/
 ├── decompressed/            # LRU cache of decompressed models
 │   ├── model_id_v1.bin
 │   └── model_id_v2.bin
@@ -203,16 +203,16 @@ export XDG_STATE_HOME=/custom/state
 
 ## Security & Permissions
 
-AI Model Vault enforces **secure permissions** on all directories:
+IronVault enforces **secure permissions** on all directories:
 
 ### Unix/Linux/macOS
 
 All directories created with `0700` permissions (owner-only access):
 
 ```bash
-drwx------ user user ~/.config/aimodelvault/
-drwx------ user user ~/.local/share/aimodelvault/
-drwx------ user user ~/.cache/aimodelvault/
+drwx------ user user ~/.config/ironvault/
+drwx------ user user ~/.local/share/ironvault/
+drwx------ user user ~/.cache/ironvault/
 ```
 
 This ensures:
@@ -229,11 +229,11 @@ Uses platform-appropriate ACLs:
 
 ## Compliance Checklist
 
-AI Model Vault is **100% XDG compliant**:
+IronVault is **100% XDG compliant**:
 
-- ✅ **Configuration in XDG_CONFIG_HOME** - All config in `~/.config/aimodelvault/`
-- ✅ **Data in XDG_DATA_HOME** - All models in `~/.local/share/aimodelvault/`
-- ✅ **Cache in XDG_CACHE_HOME** - All cache in `~/.cache/aimodelvault/`
+- ✅ **Configuration in XDG_CONFIG_HOME** - All config in `~/.config/ironvault/`
+- ✅ **Data in XDG_DATA_HOME** - All models in `~/.local/share/ironvault/`
+- ✅ **Cache in XDG_CACHE_HOME** - All cache in `~/.cache/ironvault/`
 - ✅ **Respects environment variables** - Honors XDG_* overrides
 - ✅ **Falls back to defaults** - Works without XDG_* set
 - ✅ **No hardcoded paths** - All paths computed at runtime
@@ -247,7 +247,7 @@ AI Model Vault is **100% XDG compliant**:
 ### Basic Usage (Default XDG Paths)
 
 ```rust
-use ai_model_vault::{VaultConfig, ModelVault};
+use ironvault::{VaultConfig, ModelVault};
 
 // Uses XDG directories automatically
 let config = VaultConfig::new()?;
@@ -266,7 +266,7 @@ export XDG_CONFIG_HOME=/mnt/config
 export XDG_DATA_HOME=/mnt/data
 export XDG_CACHE_HOME=/tmp/cache
 
-# AI Model Vault will automatically use custom paths
+# IronVault will automatically use custom paths
 cargo run --example xdg_demo
 ```
 
@@ -274,7 +274,7 @@ cargo run --example xdg_demo
 
 ```rust
 use std::path::PathBuf;
-use ai_model_vault::{VaultConfig, DirectoryPaths};
+use ironvault::{VaultConfig, DirectoryPaths};
 
 // Create test directories
 let temp_dir = std::env::temp_dir().join("test_vault");
@@ -294,13 +294,13 @@ let config = VaultConfig::with_dirs(dirs)?;
 
 ```bash
 # Development
-export XDG_DATA_HOME=$HOME/dev/aimodelvault_dev
+export XDG_DATA_HOME=$HOME/dev/IRONVAULT_DEV
 
 # Staging
-export XDG_DATA_HOME=$HOME/staging/aimodelvault_staging
+export XDG_DATA_HOME=$HOME/staging/IRONVAULT_STAGING
 
 # Production
-export XDG_DATA_HOME=/mnt/production/aimodelvault
+export XDG_DATA_HOME=/mnt/production/ironvault
 
 # Each environment has isolated vault data
 ```
@@ -311,13 +311,13 @@ XDG separation makes backups easy:
 
 ```bash
 # Backup configuration only (small, fast)
-tar czf config_backup.tar.gz ~/.config/aimodelvault/
+tar czf config_backup.tar.gz ~/.config/ironvault/
 
 # Backup data and models (large, infrequent)
-tar czf data_backup.tar.gz ~/.local/share/aimodelvault/
+tar czf data_backup.tar.gz ~/.local/share/ironvault/
 
 # Skip cache (not needed in backups)
-# ~/.cache/aimodelvault/ - can be regenerated
+# ~/.cache/ironvault/ - can be regenerated
 ```
 
 ### Network Storage
@@ -372,14 +372,14 @@ We map XDG concepts to Windows equivalents (APPDATA/LOCALAPPDATA).
 
 ```bash
 export XDG_DATA_HOME=/new/location
-# Restart AI Model Vault - it will use new location
+# Restart IronVault - it will use new location
 ```
 
 Note: Existing models won't be automatically moved. To migrate the whole vault,
-use `aim vault-export archive.tar.gz` against the old location and
-`aim vault-import archive.tar.gz` against the new one. For individual models,
-`aim export <name> <dir>` then `aim store` into the new vault. (There is no
-`aim import` — it takes the `vault-` prefix.)
+use `iv vault-export archive.tar.gz` against the old location and
+`iv vault-import archive.tar.gz` against the new one. For individual models,
+`iv export <name> <dir>` then `iv store` into the new vault. (There is no
+`iv import` — it takes the `vault-` prefix.)
 
 ### Q: What happens if I delete the cache directory?
 
@@ -436,24 +436,24 @@ This aligns with CMMC AC.3.014 (Separation of Duties).
 
 ```bash
 # Check directory permissions
-ls -la ~/.config/aimodelvault/
-ls -la ~/.local/share/aimodelvault/
+ls -la ~/.config/ironvault/
+ls -la ~/.local/share/ironvault/
 
 # Should show: drwx------ (0700)
 # If not, fix with:
-chmod 700 ~/.config/aimodelvault/
-chmod 700 ~/.local/share/aimodelvault/
+chmod 700 ~/.config/ironvault/
+chmod 700 ~/.local/share/ironvault/
 ```
 
 ### Directory Not Found
 
 ```bash
 # Ensure directories exist
-mkdir -p ~/.config/aimodelvault
-mkdir -p ~/.local/share/aimodelvault
-mkdir -p ~/.cache/aimodelvault
+mkdir -p ~/.config/ironvault
+mkdir -p ~/.local/share/ironvault
+mkdir -p ~/.cache/ironvault
 
-# Or let AI Model Vault create them:
+# Or let IronVault create them:
 cargo run --example xdg_demo
 ```
 
@@ -475,6 +475,6 @@ source ~/.bashrc
 ## Next Steps
 
 - Read [ARCHITECTURE.md](ARCHITECTURE.md) for system design
-- See [SECURITY.md](https://github.com/nervosys/AIModelVault/blob/master/SECURITY.md) for security practices
+- See [SECURITY.md](https://github.com/nervosys/IronVault/blob/master/SECURITY.md) for security practices
 - Check [QUICKSTART.md](QUICKSTART.md) for usage guide
 - Run `cargo run --example xdg_demo` to see it in action

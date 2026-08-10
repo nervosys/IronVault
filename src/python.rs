@@ -346,7 +346,7 @@ impl PyVaultConfig {
 ///
 /// Example::
 ///
-///     from aimodelvault import Vault, VaultConfig, ModelMetadata
+///     from ironvault import Vault, VaultConfig, ModelMetadata
 ///
 ///     vault = Vault()
 ///     vault.unlock(b"my-passphrase")
@@ -536,7 +536,7 @@ impl PyVault {
 ///
 /// Example::
 ///
-///     from aimodelvault import ModelCard
+///     from ironvault import ModelCard
 ///
 ///     card = ModelCard(
 ///         name="my-model", version="1.0",
@@ -736,7 +736,7 @@ impl PyModelStream {
 ///
 /// Example::
 ///
-///     from aimodelvault import VaultBuilder, VaultConfig
+///     from ironvault import VaultBuilder, VaultConfig
 ///
 ///     vault = VaultBuilder() \
 ///         .config(VaultConfig()) \
@@ -1278,10 +1278,10 @@ impl PyVaultRegistry {
 
 // ── module init ──────────────────────────────────────────────────────────────
 
-/// The `aimodelvault._native` extension module.
+/// The `ironvault._native` extension module.
 #[pymodule]
 #[pyo3(name = "_native")]
-fn aimodelvault_native(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn IRONVAULT_NATIVE(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyModelFormat>()?;
     m.add_class::<PyModelMetadata>()?;
     m.add_class::<PyModelVersion>()?;

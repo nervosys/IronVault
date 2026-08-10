@@ -34,7 +34,7 @@ export default function FormatsPage() {
     <>
       <h1 className="text-4xl font-bold mb-4">Format Support</h1>
       <p className="text-lg text-[var(--color-text-secondary)] mb-8">
-        AI Model Vault supports 23+ model formats with automatic detection via magic bytes and file extensions.
+        IronVault supports 23+ model formats with automatic detection via magic bytes and file extensions.
       </p>
 
       {formats.map((group) => (
@@ -65,7 +65,7 @@ export default function FormatsPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="detection">Automatic Detection</h2>
       <p className="text-[var(--color-text-secondary)] mb-4">
-        AI Model Vault uses magic bytes (file signatures) to identify formats automatically:
+        IronVault uses magic bytes (file signatures) to identify formats automatically:
       </p>
       <ul className="space-y-1 text-[var(--color-text-secondary)]">
         <li>• <strong>SafeTensors</strong> — JSON header with tensor metadata</li>

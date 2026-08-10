@@ -1,7 +1,7 @@
 // Assertions in these tests compare literal constants that round-trip
 // bit-for-bit and build fixed strings; the lints below are noise here.
 #![allow(clippy::float_cmp)]
-use ai_model_vault::rag::*;
+use ironvault::rag::*;
 use std::collections::HashMap;
 
 #[test]

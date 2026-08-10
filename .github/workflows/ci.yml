@@ -1,5 +1,5 @@
 name: CI
-# Security note (S-02): The aimodelvault_PASSPHRASE environment variable is
+# Security note (S-02): The IRONVAULT_PASSPHRASE environment variable is
 # used only during integration tests. Configure it as a masked GitHub Actions
 # secret (Settings -> Secrets -> Actions) -- never hardcode it in workflow files.
 # All secret values are automatically masked in logs by GitHub Actions, but
@@ -180,7 +180,7 @@ jobs:
         pip install -e ".[dev]"
 
     - name: Run Python tests
-      run: python -m pytest tests/test_aimodelvault.py -v
+      run: python -m pytest tests/test_ironvault.py -v
 
   fuzz:
     name: Fuzz Testing
@@ -361,7 +361,7 @@ jobs:
     - name: Store benchmark results
       uses: benchmark-action/github-action-benchmark@v1
       with:
-        name: AI Model Vault Benchmarks
+        name: IronVault Benchmarks
         tool: cargo
         output-file-path: bench-output.txt
         github-token: ${{ secrets.GITHUB_TOKEN }}

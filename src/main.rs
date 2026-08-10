@@ -1,4 +1,4 @@
-//! AI Model Vault CLI application
+//! IronVault CLI application
 //!
 //! Supported formats include:
 //! - LLM formats: Safetensors (.safetensors), GGUF (.gguf), PyTorch (.pt/.pth/.bin)
@@ -22,7 +22,7 @@ use cli::handlers::{
     webhooks as webhooks_handler,
 };
 
-use ai_model_vault::{telemetry, Result, VaultConfig, VaultError};
+use ironvault::{telemetry, Result, VaultConfig, VaultError};
 
 fn main() -> std::process::ExitCode {
     // Increase stack size for large clap enum on Windows
@@ -48,7 +48,7 @@ fn main() -> std::process::ExitCode {
 
 /// Names of the invoked command and its immediate subcommand, for telemetry.
 ///
-/// `aim cloud push` -> `("cloud", Some("push"))`; `aim list` -> `("list", None)`.
+/// `iv cloud push` -> `("cloud", Some("push"))`; `iv list` -> `("list", None)`.
 ///
 /// Both values come from clap's own command table, so they can only ever be
 /// literals declared in `args.rs`. That is the whole point: an argument
@@ -70,6 +70,14 @@ fn command_names(matches: &clap::ArgMatches) -> (String, Option<String>) {
 fn run() -> Result<()> {
     // Initialize tracing
     tracing_subscriber::fmt::init();
+
+    // Normalise the 4.x `aimodelvault_*` / `AIM_*` environment onto the 5.0
+    // `IRONVAULT_*` names before clap reads it. Several flags take their value
+    // from `#[arg(env = "...")]`, which consults the process environment
+    // directly and cannot be routed through `env::var`; without this, upgrading
+    // would silently drop an existing deployment's `--jwt-secret`, `--host`,
+    // and `--port` configuration. Warns once per variable.
+    ironvault::env::migrate_legacy();
 
     // Parsed by hand rather than with `Cli::parse()`, which exits 2 on a usage
     // error. Code 2 is `EXIT_AUTH` in the published table, so a mistyped
@@ -226,7 +234,7 @@ fn run() -> Result<()> {
             // `ApiConfig` implements `Drop` (it zeroizes `jwt_secret`), and
             // functional update syntax cannot move a non-`Copy` field out of a
             // `Drop` type.
-            let mut api_config = ai_model_vault::api::ApiConfig::default();
+            let mut api_config = ironvault::api::ApiConfig::default();
             api_config.host = host;
             api_config.port = port;
             api_config.jwt_secret = jwt_secret;
@@ -234,8 +242,8 @@ fn run() -> Result<()> {
             api_config.cors_permissive = cors_permissive;
             api_config.enable_dashboard = !no_dashboard;
             api_config.revocation_store = revocation_store;
-            let rt = tokio::runtime::Runtime::new().map_err(ai_model_vault::VaultError::IoError)?;
-            rt.block_on(ai_model_vault::api::server::serve(config, api_config))
+            let rt = tokio::runtime::Runtime::new().map_err(ironvault::VaultError::IoError)?;
+            rt.block_on(ironvault::api::server::serve(config, api_config))
         }
         Commands::Cache => vault::handle_cache(),
         Commands::Cloud { command } => cloud::handle_cloud(command, config, use_sqlite),
@@ -365,13 +373,13 @@ mod tests {
 
     #[test]
     fn test_flat_command_has_no_subcommand() {
-        assert_eq!(names_for(&["aim", "list"]), ("list".to_string(), None));
+        assert_eq!(names_for(&["iv", "list"]), ("list".to_string(), None));
     }
 
     #[test]
     fn test_nested_command_reports_both_levels() {
         assert_eq!(
-            names_for(&["aim", "cloud", "list", "-p", "s3", "-b", "bucket"]),
+            names_for(&["iv", "cloud", "list", "-p", "s3", "-b", "bucket"]),
             ("cloud".to_string(), Some("list".to_string()))
         );
     }
@@ -384,7 +392,7 @@ mod tests {
     #[test]
     fn test_argument_values_never_leak_into_the_names() {
         let (command, subcommand) = names_for(&[
-            "aim",
+            "iv",
             "cloud",
             "push",
             "customer-proprietary-model",
@@ -412,11 +420,11 @@ mod tests {
     #[test]
     fn test_names_are_the_registered_kebab_case_spelling() {
         assert_eq!(
-            names_for(&["aim", "vault-export", "out.tar.gz"]),
+            names_for(&["iv", "vault-export", "out.tar.gz"]),
             ("vault-export".to_string(), None)
         );
         assert_eq!(
-            names_for(&["aim", "change-passphrase"]),
+            names_for(&["iv", "change-passphrase"]),
             ("change-passphrase".to_string(), None)
         );
     }

@@ -57,23 +57,23 @@ export default function ConversionPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="cli">CLI Usage</h2>
       <CodeBlock language="bash">{`# Direct conversion
-aim convert model.safetensors --from safetensors --to pytorch --output model.pt
+iv convert model.safetensors --from safetensors --to pytorch --output model.pt
 
 # Multi-step (auto-routed via ONNX)
-aim convert model.pt --from pytorch --to tensorrt --output model.engine
+iv convert model.pt --from pytorch --to tensorrt --output model.engine
 
 # With options
-aim convert model.safetensors --from safetensors --to gguf \\
+iv convert model.safetensors --from safetensors --to gguf \\
   --opset 17 --validate
 
 # See the plan without executing
-aim convert model.pt --from pytorch --to coreml --plan-only
+iv convert model.pt --from pytorch --to coreml --plan-only
 
 # List all available conversions
-aim list-conversions`}</CodeBlock>
+iv list-conversions`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="rust">Rust API</h2>
-      <CodeBlock language="rust">{`use ai_model_vault::conversion::{ConversionPipeline, ConversionOptions, ModelFormat};
+      <CodeBlock language="rust">{`use ironvault::conversion::{ConversionPipeline, ConversionOptions, ModelFormat};
 
 // Create pipeline with all built-in converters
 let pipeline = ConversionPipeline::with_builtins();
@@ -113,7 +113,7 @@ println!("Ratio: {:.2}x", result.compression_ratio());`}</CodeBlock>
       </ul>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="custom">Custom Converters</h2>
-      <CodeBlock language="rust">{`use ai_model_vault::conversion::{Converter, ConversionOptions, ConversionResult, ModelFormat};
+      <CodeBlock language="rust">{`use ironvault::conversion::{Converter, ConversionOptions, ConversionResult, ModelFormat};
 
 struct MyConverter;
 

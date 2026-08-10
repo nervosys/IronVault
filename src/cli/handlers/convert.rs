@@ -1,8 +1,8 @@
 //! Convert command handler — model format conversion via ConversionPipeline.
 
-use ai_model_vault::conversion::{ConversionOptions, ConversionPipeline};
-use ai_model_vault::formats::ModelFormat;
-use ai_model_vault::{Result, VaultConfig, VaultError};
+use ironvault::conversion::{ConversionOptions, ConversionPipeline};
+use ironvault::formats::ModelFormat;
+use ironvault::{Result, VaultConfig, VaultError};
 use std::path::PathBuf;
 
 use crate::cli::helpers::{build_vault, prompt_passphrase};
@@ -118,7 +118,7 @@ pub fn handle_convert(
 
     let path = pipeline.find_path(&from_format, &to_format).ok_or_else(|| {
         VaultError::ConversionError(format!(
-            "No conversion path from {} to {}. Run `aim list-conversions` to see available conversions.",
+            "No conversion path from {} to {}. Run `iv list-conversions` to see available conversions.",
             from_format.name(),
             to_format.name(),
         ))
@@ -159,7 +159,7 @@ pub fn handle_convert(
 
     // Execute conversion with progress
     println!("\n⚙️  Converting...");
-    let progress_cb: ai_model_vault::conversion::ProgressCallback = Box::new(|p| {
+    let progress_cb: ironvault::conversion::ProgressCallback = Box::new(|p| {
         println!("   {}", p);
     });
 
@@ -174,7 +174,7 @@ pub fn handle_convert(
         &options,
         Some(&progress_cb),
     );
-    ai_model_vault::telemetry::track_conversion(
+    ironvault::telemetry::track_conversion(
         from_format.telemetry_name(),
         to_format.telemetry_name(),
         started.elapsed(),
@@ -226,7 +226,7 @@ pub fn handle_convert(
 
         println!("\n   After conversion, store back:");
         println!(
-            "      aim store {} {} --format {}",
+            "      iv store {} {} --format {}",
             name,
             output_path.display(),
             to_format_str
@@ -255,7 +255,7 @@ pub fn handle_convert(
         }
 
         println!(
-            "\n   Store back: aim store {} {} --format {}",
+            "\n   Store back: iv store {} {} --format {}",
             name,
             output_path.display(),
             to_format_str

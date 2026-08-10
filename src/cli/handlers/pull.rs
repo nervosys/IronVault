@@ -1,9 +1,9 @@
-//! CLI handler for model download (aim pull).
+//! CLI handler for model download (iv pull).
 
 use std::path::PathBuf;
 
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-use ai_model_vault::{ModelDownloader, ModelSource, Result, VaultConfig};
+use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::{ModelDownloader, ModelSource, Result, VaultConfig};
 
 use crate::cli::helpers::{build_vault, prompt_passphrase};
 

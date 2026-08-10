@@ -1,7 +1,7 @@
 #![no_main]
 use libfuzzer_sys::fuzz_target;
 
-use ai_model_vault::crypto::FipsCrypto;
+use ironvault::crypto::FipsCrypto;
 
 fuzz_target!(|data: &[u8]| {
     if data.is_empty() {

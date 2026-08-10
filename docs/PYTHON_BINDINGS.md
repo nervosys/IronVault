@@ -1,6 +1,6 @@
 # Python Bindings
 
-AI Model Vault provides native Python bindings via [PyO3](https://pyo3.rs/), delivering near-native performance for all vault operations. A pure-Python fallback (CLI subprocess wrapper) is available when the native extension is not installed.
+IronVault provides native Python bindings via [PyO3](https://pyo3.rs/), delivering near-native performance for all vault operations. A pure-Python fallback (CLI subprocess wrapper) is available when the native extension is not installed.
 
 ## Installation
 
@@ -17,7 +17,7 @@ Or build a wheel:
 
 ```bash
 maturin build --release --features python
-pip install target/wheels/aimodelvault-*.whl
+pip install target/wheels/ironvault-*.whl
 ```
 
 ### Pure-Python fallback
@@ -26,12 +26,12 @@ pip install target/wheels/aimodelvault-*.whl
 pip install -e .
 ```
 
-The fallback wraps the `aim` CLI binary via subprocess. It provides `Vault`, `VaultConfig`, and `ModelFormat` but not `ModelCard`, `ModelMetadata`, `ModelVersion`, `ModelStream`, or `VaultBuilder`.
+The fallback wraps the `iv` CLI binary via subprocess. It provides `Vault`, `VaultConfig`, and `ModelFormat` but not `ModelCard`, `ModelMetadata`, `ModelVersion`, `ModelStream`, or `VaultBuilder`.
 
 ## Quick Start
 
 ```python
-from aimodelvault import Vault, ModelMetadata, ModelCard
+from ironvault import Vault, ModelMetadata, ModelCard
 
 # Create and unlock a vault
 vault = Vault()
@@ -65,8 +65,8 @@ vault.lock()
 ### Check native availability
 
 ```python
-import aimodelvault
-print(aimodelvault._NATIVE)  # True if native bindings are loaded
+import ironvault
+print(ironvault._NATIVE)  # True if native bindings are loaded
 ```
 
 ### `ModelFormat`
@@ -74,7 +74,7 @@ print(aimodelvault._NATIVE)  # True if native bindings are loaded
 Identifies an AI model format.
 
 ```python
-from aimodelvault import ModelFormat
+from ironvault import ModelFormat
 
 # From name
 fmt = ModelFormat("safetensors")
@@ -96,7 +96,7 @@ Supported format names: `safetensors`, `gguf`, `pytorch`/`pt`/`pth`, `tensorrt`/
 Metadata attached to a stored model.
 
 ```python
-from aimodelvault import ModelMetadata
+from ironvault import ModelMetadata
 
 meta = ModelMetadata("my-model", "safetensors",
                      description="A fine-tuned model",
@@ -123,7 +123,7 @@ meta.add_custom_field("quantization", "q4_k_m")
 Vault configuration with XDG-compliant paths.
 
 ```python
-from aimodelvault import VaultConfig
+from ironvault import VaultConfig
 
 # Default XDG location
 config = VaultConfig()
@@ -138,7 +138,7 @@ config = VaultConfig("/path/to/vault")
 The main vault for storing and retrieving encrypted models.
 
 ```python
-from aimodelvault import Vault, VaultConfig, ModelMetadata
+from ironvault import Vault, VaultConfig, ModelMetadata
 
 # With default config
 vault = Vault()
@@ -187,7 +187,7 @@ print(stream.total_size, stream.remaining)
 Builder pattern for configuring vaults with optional backends.
 
 ```python
-from aimodelvault import VaultBuilder, VaultConfig
+from ironvault import VaultBuilder, VaultConfig
 
 vault = (VaultBuilder()
          .config(VaultConfig("/my/vault"))
@@ -218,7 +218,7 @@ ver.metadata            # dict[str, str]
 Model documentation following Google/HuggingFace standards.
 
 ```python
-from aimodelvault import ModelCard
+from ironvault import ModelCard
 
 card = ModelCard(
     name="my-llm",
@@ -268,7 +268,7 @@ for chunk in stream:
 ### Utility functions
 
 ```python
-from aimodelvault import sha256_hex, rust_version
+from ironvault import sha256_hex, rust_version
 
 # SHA-256 hex digest
 digest = sha256_hex(b"hello")
@@ -280,7 +280,7 @@ print(rust_version())  # e.g. "1.2.1"
 ## Architecture
 
 ```
-aimodelvault/
+ironvault/
 ├── _native          ← PyO3 Rust extension (src/python.rs)
 ├── __init__.py      ← Auto-selects native or fallback
 ├── core/
@@ -309,7 +309,7 @@ These test the `parse_format` helper and format mapping logic.
 
 ```bash
 pip install -e ".[dev]"
-pytest tests/test_aimodelvault.py -v
+pytest tests/test_ironvault.py -v
 ```
 
 ## Feature matrix

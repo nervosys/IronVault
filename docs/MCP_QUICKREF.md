@@ -3,7 +3,7 @@
 ## Setup (30 seconds)
 
 ```rust
-use ai_model_vault::rag::*;
+use ironvault::rag::*;
 
 // Create server and context
 let mut server = MCPServer::new();
@@ -258,5 +258,5 @@ match server.execute_tool("tool", params, &ctx) {
 ## Next Steps
 
 - See [MCP_TOOLS.md](MCP_TOOLS.md) for complete documentation
-- See [examples/mcp_tools_demo.rs](https://github.com/nervosys/AIModelVault/blob/master/examples/mcp_tools_demo.rs) for working examples
-- See [tests/rag_tests.rs](https://github.com/nervosys/AIModelVault/blob/master/tests/rag_tests.rs) for test patterns
+- See [examples/mcp_tools_demo.rs](https://github.com/nervosys/IronVault/blob/master/examples/mcp_tools_demo.rs) for working examples
+- See [tests/rag_tests.rs](https://github.com/nervosys/IronVault/blob/master/tests/rag_tests.rs) for test patterns

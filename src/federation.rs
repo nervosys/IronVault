@@ -622,7 +622,7 @@ impl FederationManager {
     /// Fetch manifest from peer
     /// Fetch a peer's manifest without syncing.
     ///
-    /// Public so `aim federation plan` can show what a sync would move before
+    /// Public so `iv federation plan` can show what a sync would move before
     /// anything moves.
     pub async fn fetch_peer_manifest(&self, peer: &PeerConfig) -> Result<SyncManifest> {
         self.fetch_manifest(peer).await

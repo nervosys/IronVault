@@ -157,7 +157,7 @@ maturin develop --features python`}</CodeBlock>
             </tr>
           </thead>
           <tbody className="text-[var(--color-text-secondary)]">
-            <tr className="border-b border-[var(--color-border)]"><td className="py-2 pr-4 font-mono text-xs">AIM_SQLITE_VERSIONS</td><td className="py-2 pr-4">sqlite</td><td className="py-2">Use SQLite for version storage</td></tr>
+            <tr className="border-b border-[var(--color-border)]"><td className="py-2 pr-4 font-mono text-xs">IRONVAULT_SQLITE_VERSIONS</td><td className="py-2 pr-4">sqlite</td><td className="py-2">Use SQLite for version storage</td></tr>
             <tr className="border-b border-[var(--color-border)]"><td className="py-2 pr-4 font-mono text-xs">AWS_ACCESS_KEY_ID</td><td className="py-2 pr-4">s3</td><td className="py-2">AWS credentials</td></tr>
             <tr className="border-b border-[var(--color-border)]"><td className="py-2 pr-4 font-mono text-xs">AWS_SECRET_ACCESS_KEY</td><td className="py-2 pr-4">s3</td><td className="py-2">AWS credentials</td></tr>
             <tr className="border-b border-[var(--color-border)]"><td className="py-2 pr-4 font-mono text-xs">AWS_REGION</td><td className="py-2 pr-4">s3</td><td className="py-2">AWS region</td></tr>

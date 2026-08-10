@@ -4,9 +4,9 @@
 //! only through `AuditLogger::log`, so the trail cannot be appended to from the
 //! command line -- which is the point of having it.
 
-use ai_model_vault::audit::AuditEventType;
-use ai_model_vault::blockchain::{AuditProof, BlockchainAudit};
-use ai_model_vault::{Result, VaultConfig, VaultError};
+use ironvault::audit::AuditEventType;
+use ironvault::blockchain::{AuditProof, BlockchainAudit};
+use ironvault::{Result, VaultConfig, VaultError};
 
 use crate::cli::args::ChainCommands;
 
@@ -43,7 +43,7 @@ fn chain_disabled() -> VaultError {
 pub fn handle_chain(command: ChainCommands, config: VaultConfig) -> Result<()> {
     // Opens the chain directly rather than through `Vault`. Going through the
     // vault would log a `VaultOpened` entry, so inspecting the trail would
-    // append to it -- `aim chain verify` on a cron would grow the chain by a
+    // append to it -- `iv chain verify` on a cron would grow the chain by a
     // block per run, and `verify` would report a different height than the
     // `status` printed a moment earlier. Reading evidence must not alter it.
     // It also means these commands need no passphrase.
@@ -96,7 +96,7 @@ fn status(chain: &BlockchainAudit) -> Result<()> {
     if pending > 0 {
         println!(
             "\n⚠️  {pending} entry/entries are in memory and not yet on disk. They are\n   \
-             not covered by `aim chain verify` and would be lost if this process\n   \
+             not covered by `iv chain verify` and would be lost if this process\n   \
              died now. They are written when the block fills (block size {}) or\n   \
              on clean exit.",
             chain.block_size()
@@ -163,7 +163,7 @@ fn verify_proof(path: &std::path::Path) -> Result<()> {
         println!("   Chain of custody reaches genesis {}", proof.genesis_hash);
         println!(
             "\nNote: this checks the proof's own consistency. It does not prove the\n\
-             genesis hash belongs to your vault — compare it against\n`aim chain status` on the vault you trust."
+             genesis hash belongs to your vault — compare it against\n`iv chain status` on the vault you trust."
         );
         return Ok(());
     }
@@ -204,7 +204,7 @@ fn search(
             if audit.success { "" } else { "  (FAILED)" }
         );
         println!("    {}", audit.description);
-        println!("    proof: aim chain proof --block {block_idx} --entry {entry_idx}");
+        println!("    proof: iv chain proof --block {block_idx} --entry {entry_idx}");
     }
 
     Ok(())

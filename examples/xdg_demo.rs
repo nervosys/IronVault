@@ -1,6 +1,6 @@
 //! XDG Base Directory Specification Compliance Demo
 //!
-//! Demonstrates AI Model Vault's full compliance with XDG standards:
+//! Demonstrates IronVault's full compliance with XDG standards:
 //! - XDG_CONFIG_HOME for configuration files
 //! - XDG_DATA_HOME for model storage
 //! - XDG_CACHE_HOME for temporary/cache files
@@ -8,12 +8,12 @@
 //! - Proper fallbacks to default locations
 //! - Cross-platform support (Linux, macOS, Windows)
 
-use ai_model_vault::VaultConfig;
+use ironvault::VaultConfig;
 use std::env;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("\n{}", "=".repeat(70));
-    println!("  AI Model Vault (AIMV) - XDG Base Directory Compliance Demo");
+    println!("  IronVault (AIMV) - XDG Base Directory Compliance Demo");
     println!("{}", "=".repeat(70));
     println!();
 
@@ -55,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", "=".repeat(70));
     println!();
     println!("Key Benefits:");
-    println!("  [+] Shorter paths (ai/models vs aimodelvault)");
+    println!("  [+] Shorter paths (ai/models vs ironvault)");
     println!("  [+] Organized structure (backends, utilities separate)");
     println!("  [+] User-specific directories (no conflicts)");
     println!("  [+] Configurable via environment variables");
@@ -101,7 +101,7 @@ fn print_xdg_directories() -> Result<(), Box<dyn std::error::Error>> {
 
     let base_dirs = BaseDirs::new().ok_or("Failed to get base directories")?;
 
-    println!("XDG-compliant directories for AI Model Vault (AIMV):");
+    println!("XDG-compliant directories for IronVault (AIMV):");
     println!();
 
     // Config directory

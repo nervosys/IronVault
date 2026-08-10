@@ -38,7 +38,7 @@ export default function HomePage() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-6 vault-text">
-              AI Model Vault
+              IronVault
             </h1>
             <p className="text-xl sm:text-2xl text-gray-400 max-w-3xl mx-auto mb-10 leading-relaxed">
               Encrypted storage, versioning, and lifecycle management for AI models.
@@ -67,7 +67,7 @@ export default function HomePage() {
             <div className="relative bg-[#0d1117]/90 backdrop-blur-sm rounded border border-[#21262d] p-4 font-mono text-base text-center corner-brackets">
               <span className="text-[#8b949e]">$</span>{" "}
               <span className="text-emerald-400">cargo install</span>{" "}
-              <span className="text-[#c9d1d9]">ai-model-vault</span>
+              <span className="text-[#c9d1d9]">ironvault</span>
             </div>
           </div>
         </div>
@@ -358,9 +358,9 @@ export default function HomePage() {
               &copy; 2025-2026 NERVOSYS &middot; AGPL-3.0-or-later
             </div>
             <div className="flex gap-6 text-sm font-mono uppercase tracking-wider">
-              <a href="https://github.com/nervosys/AIModelVault" className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors">GitHub</a>
-              <a href="https://crates.io/crates/ai-model-vault" className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors">Crates.io</a>
-              <a href="https://pypi.org/project/aimodelvault" className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors">PyPI</a>
+              <a href="https://github.com/nervosys/IronVault" className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors">GitHub</a>
+              <a href="https://crates.io/crates/ironvault" className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors">Crates.io</a>
+              <a href="https://pypi.org/project/ironvault" className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors">PyPI</a>
             </div>
           </div>
         </div>

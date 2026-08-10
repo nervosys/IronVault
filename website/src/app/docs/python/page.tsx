@@ -5,20 +5,20 @@ export default function PythonPage() {
     <>
       <h1 className="text-4xl font-bold mb-4">Python Bindings</h1>
       <p className="text-lg text-[var(--color-text-secondary)] mb-8">
-        Native PyO3 bindings for using AI Model Vault from Python.
+        Native PyO3 bindings for using IronVault from Python.
       </p>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="install">Installation</h2>
-      <CodeBlock language="bash">{`pip install aimodelvault
+      <CodeBlock language="bash">{`pip install ironvault
 
 # With ML framework support
-pip install "aimodelvault[ml]"
+pip install "ironvault[ml]"
 
 # With development tools
-pip install "aimodelvault[dev]"`}</CodeBlock>
+pip install "ironvault[dev]"`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="basic">Basic Usage</h2>
-      <CodeBlock language="python">{`from aimodelvault import Vault, VaultConfig, ModelFormat
+      <CodeBlock language="python">{`from ironvault import Vault, VaultConfig, ModelFormat
 
 # Create a vault with XDG-compliant paths
 config = VaultConfig()
@@ -75,7 +75,7 @@ vault.lock()`}</CodeBlock>
       </div>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="metadata">Model Metadata</h2>
-      <CodeBlock language="python">{`from aimodelvault import ModelMetadata
+      <CodeBlock language="python">{`from ironvault import ModelMetadata
 
 metadata = ModelMetadata(
     name="my-model",
@@ -100,7 +100,7 @@ print(f"Total size: {stats.total_size_formatted}")`}</CodeBlock>
 pip install maturin
 
 # Build and install
-cd ai-model-vault
+cd ironvault
 maturin develop --features python
 
 # Build wheel

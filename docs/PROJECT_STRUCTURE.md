@@ -1,11 +1,11 @@
-# AI Model Vault - Project Structure
+# IronVault - Project Structure
 
-This document describes the organization of the AI Model Vault project.
+This document describes the organization of the IronVault project.
 
 ## Root Directory
 
 ```
-AIModelVault/
+IronVault/
 ├── src/                    # Source code (Rust)
 ├── tests/                  # Integration and unit tests
 ├── examples/               # Example programs (10)
@@ -114,7 +114,7 @@ src/
 │   ├── azure.rs            # Azure Blob (optional)
 │   └── gcs.rs              # Google Cloud (optional, disabled)
 │
-└── aimodelvault/           # Python package (PyO3 bindings)
+└── ironvault/           # Python package (PyO3 bindings)
     ├── __init__.py
     ├── core/
     ├── crypto/
@@ -139,7 +139,7 @@ tests/
 ├── model_card_tests.rs             # Model card unit tests
 ├── model_card_integration_tests.rs # Model card integration tests
 ├── coverage_tests.rs               # Comprehensive coverage tests
-└── test_aimodelvault.py            # Python bindings tests
+└── test_ironvault.py            # Python bindings tests
 ```
 
 ## Examples (`examples/`)

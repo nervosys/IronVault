@@ -1,15 +1,15 @@
 """
-AI Model Vault - Universal secure vault for AI model formats
+IronVault - Universal secure vault for AI model formats
 
 Native Rust bindings via PyO3. Falls back to pure-Python CLI wrappers
 if the native extension is not available (e.g. source installs without Rust).
 """
 
-__version__ = "4.6.1"
+__version__ = "5.0.0"
 
 try:
     # Native Rust bindings (installed via maturin)
-    from aimodelvault._native import (  # type: ignore[attr-defined]
+    from ironvault._native import (  # type: ignore[attr-defined]
         ModelCard,
         ModelFormat,
         ModelMetadata,
@@ -25,9 +25,9 @@ try:
     _NATIVE = True
 except ImportError:
     # Fallback to pure-Python CLI wrappers
-    from aimodelvault.core.vault import Vault  # type: ignore[assignment]
-    from aimodelvault.core.config import VaultConfig  # type: ignore[assignment]
-    from aimodelvault.formats.registry import ModelFormat  # type: ignore[assignment]
+    from ironvault.core.vault import Vault  # type: ignore[assignment]
+    from ironvault.core.config import VaultConfig  # type: ignore[assignment]
+    from ironvault.formats.registry import ModelFormat  # type: ignore[assignment]
 
     ModelMetadata = None  # type: ignore[assignment,misc]
     ModelStream = None  # type: ignore[assignment,misc]

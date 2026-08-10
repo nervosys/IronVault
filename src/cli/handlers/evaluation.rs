@@ -1,7 +1,7 @@
-//! CLI handler for model evaluations (aim eval).
+//! CLI handler for model evaluations (iv eval).
 
-use ai_model_vault::evaluation::{EvalRun, EvalStore, MetricResult};
-use ai_model_vault::{Result, VaultConfig, VaultError};
+use ironvault::evaluation::{EvalRun, EvalStore, MetricResult};
+use ironvault::{Result, VaultConfig, VaultError};
 
 use crate::cli::args::EvalCommands;
 

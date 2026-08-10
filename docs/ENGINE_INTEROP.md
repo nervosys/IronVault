@@ -6,19 +6,19 @@ Register vault models with local inference engines — Ollama and LM Studio — 
 
 ```bash
 # Register with Ollama
-aim register my-model --engine ollama
+iv register my-model --engine ollama
 
 # Register with custom alias and system prompt
-aim register my-model --engine ollama --alias my-assistant --system-prompt "You are a helpful assistant."
+iv register my-model --engine ollama --alias my-assistant --system-prompt "You are a helpful assistant."
 
 # Register with LM Studio
-aim register my-model --engine lm-studio
+iv register my-model --engine lm-studio
 ```
 
 ## CLI Reference
 
 ```
-aim register <NAME> --engine <ENGINE> [OPTIONS]
+iv register <NAME> --engine <ENGINE> [OPTIONS]
 
 Arguments:
   <NAME>                  Model name in vault
@@ -41,7 +41,7 @@ The `register` command builds an Ollama Modelfile and runs `ollama create`:
 
 ```bash
 # Register and then use with Ollama
-aim register llama2-finetuned --engine ollama --alias my-llama
+iv register llama2-finetuned --engine ollama --alias my-llama
 ollama run my-llama
 ```
 
@@ -69,7 +69,7 @@ For LM Studio, the model is copied to the LM Studio models directory:
 ## Rust API
 
 ```rust
-use ai_model_vault::interop::{register_ollama, register_lm_studio, OllamaOptions, LmStudioOptions};
+use ironvault::interop::{register_ollama, register_lm_studio, OllamaOptions, LmStudioOptions};
 
 // Ollama
 let result = register_ollama(&OllamaOptions {

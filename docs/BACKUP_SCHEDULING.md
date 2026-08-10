@@ -6,22 +6,22 @@ Configurable vault backup schedules with rotation limits and history tracking. A
 
 ```bash
 # Create a daily backup schedule
-aim backup set nightly --frequency daily --max-backups 7 --output-dir /backups/vault
+iv backup set nightly --frequency daily --max-backups 7 --output-dir /backups/vault
 
 # List schedules
-aim backup list
+iv backup list
 
 # View backup history
-aim backup history
+iv backup history
 
 # Remove a schedule
-aim backup remove nightly
+iv backup remove nightly
 ```
 
 ## CLI Reference
 
 ```
-aim backup <COMMAND>
+iv backup <COMMAND>
 
 Commands:
   set      Create or update a backup schedule
@@ -30,10 +30,10 @@ Commands:
   history  Show backup history
 ```
 
-### `aim backup set`
+### `iv backup set`
 
 ```
-aim backup set <NAME> --frequency <FREQ> --output-dir <PATH> [OPTIONS]
+iv backup set <NAME> --frequency <FREQ> --output-dir <PATH> [OPTIONS]
 
 Arguments:
   <NAME>              Schedule name
@@ -44,10 +44,10 @@ Options:
   -o, --output-dir <PATH>      Output directory for backup archives
 ```
 
-### `aim backup history`
+### `iv backup history`
 
 ```
-aim backup history [OPTIONS]
+iv backup history [OPTIONS]
 
 Options:
   -s, --schedule <NAME>    Filter by schedule name
@@ -69,7 +69,7 @@ When max-backups is reached, the oldest backup is removed before creating a new 
 ## Python API
 
 ```python
-from aimodelvault import BackupManager
+from ironvault import BackupManager
 
 manager = BackupManager("/path/to/vault")
 
@@ -111,7 +111,7 @@ curl -X POST http://localhost:8080/api/v1/backups/schedules \
 ## Library API
 
 ```rust
-use ai_model_vault::{BackupManager, BackupFrequency};
+use ironvault::{BackupManager, BackupFrequency};
 
 let manager = BackupManager::new("/path/to/vault")?;
 

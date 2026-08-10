@@ -1,7 +1,7 @@
 """Cryptography module initialization."""
 
-from aimodelvault.crypto.fips import FIPSCrypto, KeyManager
-from aimodelvault.crypto.compression import (
+from ironvault.crypto.fips import FIPSCrypto, KeyManager
+from ironvault.crypto.compression import (
     get_compressor,
     CompressionLevel,
     GzipCompressor,

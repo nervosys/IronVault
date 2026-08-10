@@ -1,9 +1,9 @@
-//! CLI handler for garbage collection (aim gc).
+//! CLI handler for garbage collection (iv gc).
 
-use ai_model_vault::{Result, VaultConfig};
+use ironvault::{Result, VaultConfig};
 
 pub fn handle_gc(dry_run: bool, config: VaultConfig) -> Result<()> {
-    let report = ai_model_vault::gc::gc(&config.dirs.vault_dir, dry_run)?;
+    let report = ironvault::gc::gc(&config.dirs.vault_dir, dry_run)?;
 
     if dry_run {
         println!("Dry-run — no files removed.");

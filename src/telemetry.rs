@@ -1,13 +1,13 @@
-//! Telemetry and analytics module for AI Model Vault.
+//! Telemetry and analytics module for IronVault.
 //!
 //! Collects anonymous usage data to help improve the product.
 //! **Disabled by default** — users can opt in via:
 //! - Config file: `telemetry.enabled = true`
-//! - CLI: `aim telemetry enable`
+//! - CLI: `iv telemetry enable`
 //!
 //! To disable (if previously enabled):
 //! - Config file: `telemetry.enabled = false`
-//! - Environment variable: `AIM_TELEMETRY_ENABLED=false` or `AIM_TELEMETRY_DISABLED=1`
+//! - Environment variable: `IRONVAULT_TELEMETRY_ENABLED=false` or `IRONVAULT_TELEMETRY_DISABLED=1`
 //! - Environment variable: `DO_NOT_TRACK=1`
 //!
 //! ## Data Collected
@@ -32,7 +32,7 @@
 //! [`TelemetryEvent::ModelOperation`] on store/get/delete: operation, format
 //! label, a **size bucket** (never the exact size), duration, outcome.
 //!
-//! [`TelemetryEvent::Conversion`] on `aim convert`: source and target format
+//! [`TelemetryEvent::Conversion`] on `iv convert`: source and target format
 //! labels, duration, outcome.
 //!
 //! [`TelemetryEvent::ApiCall`] per HTTP request: the matched **route
@@ -348,10 +348,10 @@ impl TelemetryClient {
 
     /// Check if telemetry is disabled via environment variable
     fn is_disabled_by_env() -> bool {
-        std::env::var("AIM_TELEMETRY_ENABLED")
+        crate::env::var("IRONVAULT_TELEMETRY_ENABLED").ok_or(())
             .map(|v| v.to_lowercase() == "false" || v == "0")
             .unwrap_or(false)
-            || std::env::var("AIM_TELEMETRY_DISABLED")
+            || crate::env::var("IRONVAULT_TELEMETRY_DISABLED").ok_or(())
                 .map(|v| v == "1" || v.to_lowercase() == "true")
                 .unwrap_or(false)
             || std::env::var("DO_NOT_TRACK")
@@ -495,7 +495,7 @@ impl TelemetryClient {
         let response = client
             .post(endpoint)
             .header("Content-Type", "application/json")
-            .header("User-Agent", format!("aim/{}", env!("CARGO_PKG_VERSION")))
+            .header("User-Agent", format!("iv/{}", env!("CARGO_PKG_VERSION")))
             .json(events)
             .send()
             .map_err(|e| format!("HTTP request failed: {}", e))?;

@@ -1,4 +1,4 @@
-//! Demonstration of AI Model Vault utilities
+//! Demonstration of IronVault utilities
 //!
 //! This example showcases the model utilities including:
 //! - Model archiving (TAR/ZIP)
@@ -8,15 +8,15 @@
 //! - Quantization metadata
 //! - Pruning information
 
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-use ai_model_vault::utils::{
+use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::utils::{
     CompressionAnalyzer, ModelAnalyzer, ModelArchive, ModelDeduplicator, ModelExporter,
     PruningInfo, PruningMethod, QuantizationInfo, RetrievalOptimizer,
 };
 use tempfile::tempdir;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("=== AI Model Vault Utilities Demo ===\n");
+    println!("=== IronVault Utilities Demo ===\n");
 
     // Demo data - simulating model files
     let model_data_1 = vec![0u8; 1_000_000]; // 1 MB

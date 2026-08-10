@@ -1,12 +1,12 @@
 # Model Utilities Quick Reference
 
-Quick reference guide for AI Model Vault utilities. For complete documentation, see [UTILITIES.md](UTILITIES.md).
+Quick reference guide for IronVault utilities. For complete documentation, see [UTILITIES.md](UTILITIES.md).
 
 ## 📦 Archiving
 
 ### Create Archives
 ```rust
-use ai_model_vault::ModelArchive;
+use ironvault::ModelArchive;
 
 // TAR archive
 let models = vec![
@@ -32,7 +32,7 @@ let models = ModelArchive::extract_zip(Path::new("backup.zip"))?;
 
 ### Setup and Use
 ```rust
-use ai_model_vault::RetrievalOptimizer;
+use ironvault::RetrievalOptimizer;
 
 // Create cache (100 MB limit)
 let mut cache = RetrievalOptimizer::new(100 * 1024 * 1024);
@@ -54,7 +54,7 @@ println!("Utilization: {:.1}%", stats.utilization);
 
 ### Find Duplicates
 ```rust
-use ai_model_vault::ModelDeduplicator;
+use ironvault::ModelDeduplicator;
 
 let models = vec![
     ("model1".to_string(), data1),
@@ -78,7 +78,7 @@ println!("Models are {:.1}% similar", similarity);
 
 ### Analyze Model
 ```rust
-use ai_model_vault::{ModelAnalyzer, ModelMetadata};
+use ironvault::{ModelAnalyzer, ModelMetadata};
 
 let analysis = ModelAnalyzer::analyze(&data, &metadata);
 println!("Size: {}", ModelAnalyzer::format_size(analysis.size_bytes));
@@ -104,7 +104,7 @@ ModelAnalyzer::format_parameters(1_500_000);      // "1.50M"
 
 ### Analyze Compression
 ```rust
-use ai_model_vault::CompressionAnalyzer;
+use ironvault::CompressionAnalyzer;
 
 // Calculate ratio
 let ratio = CompressionAnalyzer::compression_ratio(10000, 7500);
@@ -129,7 +129,7 @@ let ratio = CompressionAnalyzer::estimate_ratio(&ModelFormat::PyTorch);
 
 ### Get Schemes
 ```rust
-use ai_model_vault::QuantizationInfo;
+use ironvault::QuantizationInfo;
 
 let schemes = QuantizationInfo::schemes();
 // ["FP32", "FP16", "INT8", "Q4_0", ...]
@@ -157,7 +157,7 @@ println!("{}x smaller", savings.size_ratio);      // 4x
 
 ### Track Pruning
 ```rust
-use ai_model_vault::{PruningInfo, PruningMethod};
+use ironvault::{PruningInfo, PruningMethod};
 
 let pruning = PruningInfo::new(
     PruningMethod::Magnitude,
@@ -184,7 +184,7 @@ PruningMethod::Custom("method_name".to_string())
 
 ### Export with Metadata
 ```rust
-use ai_model_vault::ModelExporter;
+use ironvault::ModelExporter;
 
 // Export single model
 ModelExporter::export_with_metadata(
@@ -282,5 +282,5 @@ for name in vault.list_models() {
 ## 📚 See Also
 
 - [Complete Utilities Guide](UTILITIES.md) - Detailed documentation and examples
-- [API Documentation](https://docs.rs/ai-model-vault) - Full API reference
-- [Examples](https://github.com/nervosys/AIModelVault/blob/master/examples/) - Working code examples
+- [API Documentation](https://docs.rs/ironvault) - Full API reference
+- [Examples](https://github.com/nervosys/IronVault/blob/master/examples/) - Working code examples

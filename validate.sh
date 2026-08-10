@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Quick test and validation script for aimodelvault
+# Quick test and validation script for ironvault
 
 set -e
 
-echo "=== aimodelvault Quick Validation ==="
+echo "=== ironvault Quick Validation ==="
 echo ""
 
 # 1. Format check

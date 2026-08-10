@@ -1,5 +1,5 @@
 """
-Python unit tests for the aimodelvault package.
+Python unit tests for the ironvault package.
 
 Tests cover:
 - ModelFormat detection and enumeration
@@ -23,115 +23,115 @@ import pytest
 # ---------------------------------------------------------------------------
 
 class TestModelFormat:
-    """Tests for aimodelvault.formats.registry.ModelFormat."""
+    """Tests for ironvault.formats.registry.ModelFormat."""
 
     def test_detect_safetensors(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("model.safetensors") == ModelFormat.SAFETENSORS
 
     def test_detect_gguf(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("llama-7b.gguf") == ModelFormat.GGUF
 
     def test_detect_pytorch_pt(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("weights.pt") == ModelFormat.PYTORCH
 
     def test_detect_pytorch_pth(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("weights.pth") == ModelFormat.PYTORCH
 
     def test_detect_pytorch_bin(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("pytorch_model.bin") == ModelFormat.PYTORCH
 
     def test_detect_onnx(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("model.onnx") == ModelFormat.ONNX
 
     def test_detect_tflite(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("model.tflite") == ModelFormat.TFLITE
 
     def test_detect_coreml(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("model.mlmodel") == ModelFormat.COREML
 
     def test_detect_tensorrt_plan(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("engine.plan") == ModelFormat.TENSORRT
 
     def test_detect_openvino(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("model.xml") == ModelFormat.OPENVINO
 
     def test_detect_keras_h5(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("model.h5") == ModelFormat.KERAS
 
     def test_detect_keras_ext(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("model.keras") == ModelFormat.KERAS
 
     def test_detect_tensorflow_pb(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("saved_model.pb") == ModelFormat.TENSORFLOW
 
     def test_detect_pickle(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("model.pkl") == ModelFormat.PICKLE
 
     def test_detect_numpy(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("weights.npy") == ModelFormat.NUMPY
 
     def test_detect_hdf5(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("data.hdf5") == ModelFormat.HDF5
 
     def test_detect_mnn(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("model.mnn") == ModelFormat.MNN
 
     def test_detect_rknn(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("model.rknn") == ModelFormat.RKNN
 
     def test_detect_darknet(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("yolov4.weights") == ModelFormat.DARKNET
 
     def test_detect_caffe(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("model.caffemodel") == ModelFormat.CAFFE
 
     def test_detect_unknown_returns_custom(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.detect("model.xyz") == ModelFormat.CUSTOM
 
     def test_detect_case_insensitive(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         # Path().suffix.lower() ensures case insensitivity
         assert ModelFormat.detect("MODEL.SAFETENSORS") == ModelFormat.SAFETENSORS
 
     def test_file_extensions_pytorch(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         exts = ModelFormat.PYTORCH.file_extensions
         assert ".pt" in exts
         assert ".pth" in exts
 
     def test_file_extensions_empty_for_custom(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert ModelFormat.CUSTOM.file_extensions == []
 
     def test_str_representation(self):
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         assert str(ModelFormat.SAFETENSORS) == "safetensors"
         assert str(ModelFormat.PYTORCH) == "pytorch"
 
     def test_all_rust_variants_present(self):
         """Ensure every Rust ModelFormat variant has a Python counterpart."""
-        from aimodelvault.formats.registry import ModelFormat
+        from ironvault.formats.registry import ModelFormat
         expected = {
             "SAFETENSORS", "GGUF", "PYTORCH", "TENSORRT", "ONNX", "MLX",
             "COREML", "TORCHSCRIPT", "TFLITE", "TENSORFLOW", "KERAS",
@@ -147,25 +147,25 @@ class TestModelFormat:
 # ---------------------------------------------------------------------------
 
 class TestVaultConfig:
-    """Tests for aimodelvault.core.config.VaultConfig."""
+    """Tests for ironvault.core.config.VaultConfig."""
 
     def test_config_creates_directories(self):
-        from aimodelvault.core.config import VaultConfig
+        from ironvault.core.config import VaultConfig
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("aimodelvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
-                 patch("aimodelvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
-                 patch("aimodelvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
+            with patch("ironvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
+                 patch("ironvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
+                 patch("ironvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
                 cfg = VaultConfig()
                 assert cfg.config_dir.exists()
                 assert cfg.data_dir.exists()
                 assert cfg.cache_dir.exists()
 
     def test_default_config_values(self):
-        from aimodelvault.core.config import VaultConfig
+        from ironvault.core.config import VaultConfig
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("aimodelvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
-                 patch("aimodelvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
-                 patch("aimodelvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
+            with patch("ironvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
+                 patch("ironvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
+                 patch("ironvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
                 cfg = VaultConfig()
                 assert cfg.crypto_algorithm == "aes-256-gcm"
                 assert cfg.kdf == "pbkdf2-hmac-sha256"
@@ -176,20 +176,20 @@ class TestVaultConfig:
                 assert cfg.fips_mode is True
 
     def test_config_override(self):
-        from aimodelvault.core.config import VaultConfig
+        from ironvault.core.config import VaultConfig
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("aimodelvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
-                 patch("aimodelvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
-                 patch("aimodelvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
+            with patch("ironvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
+                 patch("ironvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
+                 patch("ironvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
                 cfg = VaultConfig(config_override={"custom_key": "custom_value"})
                 assert cfg.config["custom_key"] == "custom_value"
 
     def test_save_and_reload_config(self):
-        from aimodelvault.core.config import VaultConfig
+        from ironvault.core.config import VaultConfig
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("aimodelvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
-                 patch("aimodelvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
-                 patch("aimodelvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
+            with patch("ironvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
+                 patch("ironvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
+                 patch("ironvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
                 cfg1 = VaultConfig()
                 cfg1.config["test_marker"] = "present"
                 cfg1.save_config()
@@ -198,21 +198,21 @@ class TestVaultConfig:
                 assert cfg2.config.get("test_marker") == "present"
 
     def test_get_vault_path_default(self):
-        from aimodelvault.core.config import VaultConfig
+        from ironvault.core.config import VaultConfig
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("aimodelvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
-                 patch("aimodelvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
-                 patch("aimodelvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
+            with patch("ironvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
+                 patch("ironvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
+                 patch("ironvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
                 cfg = VaultConfig()
                 vault_path = cfg.get_vault_path()
                 assert "default" in str(vault_path)
 
     def test_get_vault_path_named(self):
-        from aimodelvault.core.config import VaultConfig
+        from ironvault.core.config import VaultConfig
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("aimodelvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
-                 patch("aimodelvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
-                 patch("aimodelvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
+            with patch("ironvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
+                 patch("ironvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
+                 patch("ironvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
                 cfg = VaultConfig()
                 vault_path = cfg.get_vault_path("production")
                 assert "production" in str(vault_path)
@@ -223,23 +223,23 @@ class TestVaultConfig:
 # ---------------------------------------------------------------------------
 
 class TestVault:
-    """Tests for aimodelvault.core.vault.Vault subprocess wrapper."""
+    """Tests for ironvault.core.vault.Vault subprocess wrapper."""
 
     def test_vault_init(self):
-        from aimodelvault.core.vault import Vault
+        from ironvault.core.vault import Vault
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("aimodelvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
-                 patch("aimodelvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
-                 patch("aimodelvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
+            with patch("ironvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
+                 patch("ironvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
+                 patch("ironvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
                 vault = Vault(os.path.join(tmpdir, "vault"))
                 assert vault.path == Path(os.path.join(tmpdir, "vault"))
 
     def test_vault_list_models_mock(self):
-        from aimodelvault.core.vault import Vault
+        from ironvault.core.vault import Vault
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("aimodelvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
-                 patch("aimodelvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
-                 patch("aimodelvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
+            with patch("ironvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
+                 patch("ironvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
+                 patch("ironvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
                 vault = Vault(os.path.join(tmpdir, "vault"))
                 with patch("subprocess.run") as mock_run:
                     mock_run.return_value = MagicMock(
@@ -255,41 +255,41 @@ class TestVault:
 # ---------------------------------------------------------------------------
 
 class TestFIPSCrypto:
-    """Tests for aimodelvault.crypto.fips.FIPSCrypto."""
+    """Tests for ironvault.crypto.fips.FIPSCrypto."""
 
     def test_key_generation(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         crypto = FIPSCrypto()
         key, salt = crypto.generate_key(b"test-passphrase")
         assert len(key) == FIPSCrypto.KEY_SIZE
         assert len(salt) == FIPSCrypto.SALT_SIZE
 
     def test_key_deterministic_with_salt(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         crypto = FIPSCrypto()
         key1, salt = crypto.generate_key(b"passphrase")
         key2, _ = crypto.generate_key(b"passphrase", salt=salt)
         assert key1 == key2
 
     def test_different_passwords_different_keys(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         crypto = FIPSCrypto()
         key1, salt = crypto.generate_key(b"password-one")
         key2, _ = crypto.generate_key(b"password-two", salt=salt)
         assert key1 != key2
 
     def test_encrypt_decrypt_roundtrip(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         crypto = FIPSCrypto()
         key, _ = crypto.generate_key(b"roundtrip-test")
-        plaintext = b"Hello, AI Model Vault!"
+        plaintext = b"Hello, IronVault!"
         ciphertext = crypto.encrypt(plaintext, key)
         assert ciphertext != plaintext
         decrypted = crypto.decrypt(ciphertext, key)
         assert decrypted == plaintext
 
     def test_encrypt_produces_different_ciphertexts(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         crypto = FIPSCrypto()
         key, _ = crypto.generate_key(b"nonce-test")
         plaintext = b"Same data, different nonces"
@@ -299,7 +299,7 @@ class TestFIPSCrypto:
         assert ct1 != ct2
 
     def test_decrypt_wrong_key_fails(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         crypto = FIPSCrypto()
         key1, _ = crypto.generate_key(b"correct-password")
         key2, _ = crypto.generate_key(b"wrong-password")
@@ -309,7 +309,7 @@ class TestFIPSCrypto:
             crypto.decrypt(ciphertext, key2)
 
     def test_encrypt_empty_data(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         crypto = FIPSCrypto()
         key, _ = crypto.generate_key(b"empty-test")
         ciphertext = crypto.encrypt(b"", key)
@@ -317,7 +317,7 @@ class TestFIPSCrypto:
         assert decrypted == b""
 
     def test_encrypt_large_data(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         crypto = FIPSCrypto()
         key, _ = crypto.generate_key(b"large-test")
         plaintext = os.urandom(1024 * 1024)  # 1 MB
@@ -331,64 +331,64 @@ class TestFIPSCrypto:
 # ---------------------------------------------------------------------------
 
 class TestCompression:
-    """Tests for aimodelvault.crypto.compression module."""
+    """Tests for ironvault.crypto.compression module."""
 
     def test_gzip_roundtrip(self):
-        from aimodelvault.crypto.compression import GzipCompressor
+        from ironvault.crypto.compression import GzipCompressor
         c = GzipCompressor()
-        data = b"AI Model Vault compression test" * 100
+        data = b"IronVault compression test" * 100
         compressed = c.compress(data)
         assert c.decompress(compressed) == data
 
     def test_zlib_roundtrip(self):
-        from aimodelvault.crypto.compression import ZlibCompressor
+        from ironvault.crypto.compression import ZlibCompressor
         c = ZlibCompressor()
         data = b"Zlib compression test data" * 100
         compressed = c.compress(data)
         assert c.decompress(compressed) == data
 
     def test_lzma_roundtrip(self):
-        from aimodelvault.crypto.compression import LZMACompressor
+        from ironvault.crypto.compression import LZMACompressor
         c = LZMACompressor()
         data = b"LZMA compression test data" * 100
         compressed = c.compress(data)
         assert c.decompress(compressed) == data
 
     def test_compression_reduces_size(self):
-        from aimodelvault.crypto.compression import GzipCompressor
+        from ironvault.crypto.compression import GzipCompressor
         c = GzipCompressor()
         data = b"A" * 10_000
         compressed = c.compress(data)
         assert len(compressed) < len(data)
 
     def test_empty_data_roundtrip(self):
-        from aimodelvault.crypto.compression import GzipCompressor
+        from ironvault.crypto.compression import GzipCompressor
         c = GzipCompressor()
         compressed = c.compress(b"")
         assert c.decompress(compressed) == b""
 
     def test_get_compressor_gzip(self):
-        from aimodelvault.crypto.compression import get_compressor, GzipCompressor
+        from ironvault.crypto.compression import get_compressor, GzipCompressor
         c = get_compressor("gzip")
         assert isinstance(c, GzipCompressor)
 
     def test_get_compressor_lzma(self):
-        from aimodelvault.crypto.compression import get_compressor, LZMACompressor
+        from ironvault.crypto.compression import get_compressor, LZMACompressor
         c = get_compressor("lzma")
         assert isinstance(c, LZMACompressor)
 
     def test_get_compressor_zlib(self):
-        from aimodelvault.crypto.compression import get_compressor, ZlibCompressor
+        from ironvault.crypto.compression import get_compressor, ZlibCompressor
         c = get_compressor("zlib")
         assert isinstance(c, ZlibCompressor)
 
     def test_get_compressor_unknown_raises(self):
-        from aimodelvault.crypto.compression import get_compressor
+        from ironvault.crypto.compression import get_compressor
         with pytest.raises(ValueError):
             get_compressor("brotli")
 
     def test_compression_levels(self):
-        from aimodelvault.crypto.compression import GzipCompressor
+        from ironvault.crypto.compression import GzipCompressor
         c = GzipCompressor()
         data = b"Test data for compression levels" * 500
         fast = c.compress(data, level=1)
@@ -405,7 +405,7 @@ class TestCompression:
 # ---------------------------------------------------------------------------
 
 class TestPackageInit:
-    """Tests for aimodelvault package initialization."""
+    """Tests for ironvault package initialization."""
 
     def test_version_is_set(self):
         """The package version must be a release version, not a hardcoded literal.
@@ -414,22 +414,22 @@ class TestPackageInit:
         while the test still expected 1.2.1 — check the shape instead.
         """
         import re
-        import aimodelvault
-        assert re.fullmatch(r"\d+\.\d+\.\d+", aimodelvault.__version__), (
-            f"unexpected version format: {aimodelvault.__version__!r}"
+        import ironvault
+        assert re.fullmatch(r"\d+\.\d+\.\d+", ironvault.__version__), (
+            f"unexpected version format: {ironvault.__version__!r}"
         )
 
     def test_version_matches_crate(self):
         """The Python package and the Rust crate ship as one release."""
         import re
         from pathlib import Path
-        import aimodelvault
+        import ironvault
 
         cargo = Path(__file__).resolve().parent.parent / "Cargo.toml"
         crate_version = re.search(
             r'^version = "([^"]+)"', cargo.read_text(encoding="utf-8"), re.MULTILINE
         ).group(1)
-        assert aimodelvault.__version__ == crate_version
+        assert ironvault.__version__ == crate_version
 
     def test_pyproject_version_matches_crate(self):
         """The wheel's metadata version is a third place the number lives.
@@ -456,19 +456,19 @@ class TestPackageInit:
         assert pyproject_version == crate_version
 
     def test_native_flag_exists(self):
-        import aimodelvault
-        assert isinstance(aimodelvault._NATIVE, bool)
+        import ironvault
+        assert isinstance(ironvault._NATIVE, bool)
 
     def test_vault_is_importable(self):
-        from aimodelvault import Vault
+        from ironvault import Vault
         assert Vault is not None
 
     def test_vault_config_is_importable(self):
-        from aimodelvault import VaultConfig
+        from ironvault import VaultConfig
         assert VaultConfig is not None
 
     def test_model_format_is_importable(self):
-        from aimodelvault import ModelFormat
+        from ironvault import ModelFormat
         assert ModelFormat is not None
 
 
@@ -480,32 +480,32 @@ class TestVaultProperties:
     """Tests for Vault class properties and initialization."""
 
     def test_vault_path_property(self):
-        from aimodelvault.core.vault import Vault
+        from ironvault.core.vault import Vault
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("aimodelvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
-                 patch("aimodelvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
-                 patch("aimodelvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
+            with patch("ironvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
+                 patch("ironvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
+                 patch("ironvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
                 vault_dir = os.path.join(tmpdir, "test_vault")
                 vault = Vault(vault_dir)
                 assert vault.path == Path(vault_dir)
                 assert vault.path.exists()
 
     def test_vault_creates_directory(self):
-        from aimodelvault.core.vault import Vault
+        from ironvault.core.vault import Vault
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("aimodelvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
-                 patch("aimodelvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
-                 patch("aimodelvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
+            with patch("ironvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
+                 patch("ironvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
+                 patch("ironvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
                 vault_dir = os.path.join(tmpdir, "nested", "vault", "dir")
                 vault = Vault(vault_dir)
                 assert Path(vault_dir).exists()
 
     def test_vault_store_calls_aim(self):
-        from aimodelvault.core.vault import Vault
+        from ironvault.core.vault import Vault
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("aimodelvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
-                 patch("aimodelvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
-                 patch("aimodelvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
+            with patch("ironvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
+                 patch("ironvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
+                 patch("ironvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
                 vault = Vault(os.path.join(tmpdir, "vault"))
                 with patch("subprocess.run") as mock_run:
                     mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
@@ -518,28 +518,28 @@ class TestVaultProperties:
                     assert "--description" in args
 
     def test_vault_aim_not_found_raises(self):
-        from aimodelvault.core.vault import Vault
+        from ironvault.core.vault import Vault
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("aimodelvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
-                 patch("aimodelvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
-                 patch("aimodelvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
+            with patch("ironvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
+                 patch("ironvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
+                 patch("ironvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
                 vault = Vault(os.path.join(tmpdir, "vault"))
                 with patch("subprocess.run", side_effect=FileNotFoundError):
-                    with pytest.raises(FileNotFoundError, match="aim"):
+                    with pytest.raises(FileNotFoundError, match="iv"):
                         vault.list_models()
 
     def test_vault_aim_error_raises_runtime(self):
-        from aimodelvault.core.vault import Vault
+        from ironvault.core.vault import Vault
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("aimodelvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
-                 patch("aimodelvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
-                 patch("aimodelvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
+            with patch("ironvault.core.config.user_config_dir", return_value=os.path.join(tmpdir, "config")), \
+                 patch("ironvault.core.config.user_data_dir", return_value=os.path.join(tmpdir, "data")), \
+                 patch("ironvault.core.config.user_cache_dir", return_value=os.path.join(tmpdir, "cache")):
                 vault = Vault(os.path.join(tmpdir, "vault"))
                 with patch("subprocess.run") as mock_run:
                     mock_run.return_value = MagicMock(
                         returncode=1, stdout="", stderr="error: vault not found"
                     )
-                    with pytest.raises(RuntimeError, match="aim command failed"):
+                    with pytest.raises(RuntimeError, match="iv command failed"):
                         vault.list_models()
 
 
@@ -551,7 +551,7 @@ class TestVersionControl:
     """Tests for version control system."""
 
     def test_model_version_dataclass(self):
-        from aimodelvault.version.control import ModelVersion
+        from ironvault.version.control import ModelVersion
         ver = ModelVersion(
             version=1,
             checkpoint_id="m1-v1-abc",
@@ -569,7 +569,7 @@ class TestVersionControl:
         assert ver.parent_version is None
 
     def test_model_version_to_dict(self):
-        from aimodelvault.version.control import ModelVersion
+        from ironvault.version.control import ModelVersion
         ver = ModelVersion(1, "id", "ts", None, "onnx", 100, 50, "abc", {}, "/f")
         d = ver.to_dict()
         assert d["version"] == 1
@@ -577,7 +577,7 @@ class TestVersionControl:
         assert isinstance(d, dict)
 
     def test_model_version_from_dict(self):
-        from aimodelvault.version.control import ModelVersion
+        from ironvault.version.control import ModelVersion
         data = {
             "version": 2, "checkpoint_id": "cp2", "timestamp": "t",
             "parent_version": 1, "format": "pytorch", "size_bytes": 200,
@@ -590,7 +590,7 @@ class TestVersionControl:
         assert ver.metadata["key"] == "val"
 
     def test_version_control_add_and_list(self):
-        from aimodelvault.version.control import VersionControl
+        from ironvault.version.control import VersionControl
         with tempfile.TemporaryDirectory() as tmpdir:
             vc = VersionControl(Path(tmpdir))
             v1 = vc.add_version("model", "/f", "safetensors", 100, 50, "abc")
@@ -603,7 +603,7 @@ class TestVersionControl:
             assert versions[1].version == 2
 
     def test_version_control_get_latest(self):
-        from aimodelvault.version.control import VersionControl
+        from ironvault.version.control import VersionControl
         with tempfile.TemporaryDirectory() as tmpdir:
             vc = VersionControl(Path(tmpdir))
             vc.add_version("m", "/f", "pt", 1, 1, "a")
@@ -612,7 +612,7 @@ class TestVersionControl:
             assert latest.version == 2
 
     def test_version_control_get_specific(self):
-        from aimodelvault.version.control import VersionControl
+        from ironvault.version.control import VersionControl
         with tempfile.TemporaryDirectory() as tmpdir:
             vc = VersionControl(Path(tmpdir))
             vc.add_version("m", "/f", "pt", 1, 1, "a")
@@ -621,14 +621,14 @@ class TestVersionControl:
             assert v1.version == 1
 
     def test_version_control_get_nonexistent(self):
-        from aimodelvault.version.control import VersionControl
+        from ironvault.version.control import VersionControl
         with tempfile.TemporaryDirectory() as tmpdir:
             vc = VersionControl(Path(tmpdir))
             assert vc.get_version("nonexistent") is None
             assert vc.get_version("nonexistent", 1) is None
 
     def test_version_control_delete(self):
-        from aimodelvault.version.control import VersionControl
+        from ironvault.version.control import VersionControl
         with tempfile.TemporaryDirectory() as tmpdir:
             vc = VersionControl(Path(tmpdir))
             vc.add_version("m", "/f", "pt", 1, 1, "a")
@@ -637,7 +637,7 @@ class TestVersionControl:
             assert vc.delete_version("x", 1) is False
 
     def test_version_control_lineage(self):
-        from aimodelvault.version.control import VersionControl
+        from ironvault.version.control import VersionControl
         with tempfile.TemporaryDirectory() as tmpdir:
             vc = VersionControl(Path(tmpdir))
             vc.add_version("m", "/f", "pt", 1, 1, "a")
@@ -648,7 +648,7 @@ class TestVersionControl:
             assert lineage[1].version == 2
 
     def test_version_control_persistence(self):
-        from aimodelvault.version.control import VersionControl
+        from ironvault.version.control import VersionControl
         with tempfile.TemporaryDirectory() as tmpdir:
             vc1 = VersionControl(Path(tmpdir))
             vc1.add_version("m", "/f", "pt", 100, 50, "abc")
@@ -659,13 +659,13 @@ class TestVersionControl:
             assert versions[0].checksum_sha256 == "abc"
 
     def test_version_control_list_empty_model(self):
-        from aimodelvault.version.control import VersionControl
+        from ironvault.version.control import VersionControl
         with tempfile.TemporaryDirectory() as tmpdir:
             vc = VersionControl(Path(tmpdir))
             assert vc.list_versions("none") == []
 
     def test_version_control_cleanup(self):
-        from aimodelvault.version.control import VersionControl
+        from ironvault.version.control import VersionControl
         with tempfile.TemporaryDirectory() as tmpdir:
             vc = VersionControl(Path(tmpdir))
             for i in range(5):
@@ -683,41 +683,41 @@ class TestFIPSCryptoExtended:
     """Extended tests for FIPS crypto module."""
 
     def test_generate_passphrase_default_length(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         pp = FIPSCrypto.generate_passphrase()
         assert len(pp) == 64  # 32 bytes = 64 hex chars
 
     def test_generate_passphrase_custom_length(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         pp = FIPSCrypto.generate_passphrase(16)
         assert len(pp) == 32
 
     def test_secure_compare_equal(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         assert FIPSCrypto.secure_compare(b"abc", b"abc") is True
 
     def test_secure_compare_different(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         assert FIPSCrypto.secure_compare(b"abc", b"xyz") is False
 
     def test_secure_compare_different_length(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         assert FIPSCrypto.secure_compare(b"ab", b"abc") is False
 
     def test_encrypt_bad_key_size(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         crypto = FIPSCrypto()
         with pytest.raises(ValueError, match="Key must be"):
             crypto.encrypt(b"data", b"short_key")
 
     def test_decrypt_bad_key_size(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         crypto = FIPSCrypto()
         with pytest.raises(ValueError, match="Key must be"):
             crypto.decrypt(b"\x00" * 28, b"short_key")
 
     def test_decrypt_tampered_data(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         from cryptography.exceptions import InvalidTag
         crypto = FIPSCrypto()
         key, salt = crypto.generate_key(b"testpass")
@@ -729,7 +729,7 @@ class TestFIPSCryptoExtended:
             crypto.decrypt(bytes(tampered), key)
 
     def test_key_derivation_with_explicit_salt(self):
-        from aimodelvault.crypto.fips import FIPSCrypto
+        from ironvault.crypto.fips import FIPSCrypto
         crypto = FIPSCrypto()
         salt = b"\x00" * 32
         key1, _ = crypto.generate_key(b"pass", salt)

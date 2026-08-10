@@ -29,7 +29,7 @@ Please include the following information:
 
 ## Security Measures
 
-aimodelvault implements multiple layers of security:
+ironvault implements multiple layers of security:
 
 ### Cryptography (FIPS 140-3 Compliant)
 - **AES-256-GCM** for data encryption
@@ -57,18 +57,18 @@ aimodelvault implements multiple layers of security:
 
 ## Security Best Practices
 
-When using aimodelvault:
+When using ironvault:
 
 1. **Use strong passphrases**: Minimum 20 characters with high entropy
 2. **Protect your passphrase**: Never commit passphrases to version control
-3. **Regular updates**: Keep aimodelvault and dependencies updated
+3. **Regular updates**: Keep ironvault and dependencies updated
 4. **Secure storage**: Ensure vault directory has appropriate file permissions
 5. **Audit logs**: Regularly review audit logs for suspicious activity
 6. **Backup strategy**: Maintain encrypted backups of critical models
 
 ## Compliance Standards
 
-aimodelvault is designed to comply with:
+ironvault is designed to comply with:
 
 - **FIPS 140-3**: Federal cryptographic module validation
 - **NIST SP 800-53**: Security and privacy controls
@@ -77,7 +77,7 @@ aimodelvault is designed to comply with:
 
 ## Threat Model
 
-aimodelvault protects against:
+ironvault protects against:
 
 - **Unauthorized Access** (MITRE T1078): Passphrase-protected encryption
 - **Data Theft** (MITRE T1005): Encryption at rest

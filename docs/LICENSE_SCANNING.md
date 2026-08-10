@@ -6,19 +6,19 @@ Detect licenses from model cards, GGUF metadata, config files, and LICENSE files
 
 ```bash
 # Scan a directory (looks for README.md, LICENSE, config.json)
-aim license-scan ./my-model/
+iv license-scan ./my-model/
 
 # Scan a single file (GGUF metadata, LICENSE text, etc.)
-aim license-scan model.gguf
+iv license-scan model.gguf
 
 # JSON output
-aim license-scan ./my-model/ --format json
+iv license-scan ./my-model/ --format json
 ```
 
 ## CLI Reference
 
 ```
-aim license-scan <PATH> [OPTIONS]
+iv license-scan <PATH> [OPTIONS]
 
 Arguments:
   <PATH>              File or directory to scan
@@ -79,7 +79,7 @@ Has License: yes
 ## Rust API
 
 ```rust
-use ai_model_vault::license_scan::LicenseScanner;
+use ironvault::license_scan::LicenseScanner;
 
 // Scan a directory
 let report = LicenseScanner::scan_directory(Path::new("./my-model/"))?;

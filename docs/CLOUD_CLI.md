@@ -1,6 +1,6 @@
 # ☁️ Cloud Storage CLI Guide
 
-Complete guide to using AI Model Vault's cloud storage commands.
+Complete guide to using IronVault's cloud storage commands.
 
 ## 📋 Table of Contents
 
@@ -16,12 +16,12 @@ Complete guide to using AI Model Vault's cloud storage commands.
 
 ## Overview
 
-AI Model Vault supports pushing and pulling models to/from cloud storage providers:
+IronVault supports pushing and pulling models to/from cloud storage providers:
 - **AWS S3** - Amazon Simple Storage Service
 - **Azure Blob Storage** - Microsoft Azure cloud storage
 - **Google Cloud Storage** - Google Cloud Platform storage (temporarily disabled)
 
-Since 4.3.0, `aim cloud push` seals the payload with AES-256-GCM before it
+Since 4.3.0, `iv cloud push` seals the payload with AES-256-GCM before it
 leaves the process, so the bucket holds ciphertext. See
 [Security Notes](#security-notes) before choosing a bucket.
 
@@ -64,7 +64,7 @@ export AWS_SECRET_ACCESS_KEY=your_secret_key_here
 export AWS_REGION=us-west-2
 
 # Verify configuration
-aim cloud config --provider s3 --show
+iv cloud config --provider s3 --show
 ```
 
 **Windows PowerShell**:
@@ -73,7 +73,7 @@ $env:AWS_ACCESS_KEY_ID = "your_access_key_here"
 $env:AWS_SECRET_ACCESS_KEY = "your_secret_key_here"
 $env:AWS_REGION = "us-west-2"
 
-aim cloud config --provider s3 --show
+iv cloud config --provider s3 --show
 ```
 
 ### Azure Blob Storage Setup
@@ -84,7 +84,7 @@ export AZURE_STORAGE_ACCOUNT=your_account_name
 export AZURE_STORAGE_SAS_TOKEN=your_sas_token
 
 # Verify configuration
-aim cloud config --provider azure --show
+iv cloud config --provider azure --show
 ```
 
 **Windows PowerShell**:
@@ -92,20 +92,20 @@ aim cloud config --provider azure --show
 $env:AZURE_STORAGE_ACCOUNT = "your_account_name"
 $env:AZURE_STORAGE_SAS_TOKEN = "your_sas_token"
 
-aim cloud config --provider azure --show
+iv cloud config --provider azure --show
 ```
 
 ---
 
 ## Commands
 
-### `aim cloud push`
+### `iv cloud push`
 
 Upload a model from your local vault to cloud storage.
 
 **Usage**:
 ```bash
-aim cloud push <MODEL> --provider <PROVIDER> --bucket <BUCKET> [--version <VERSION>]
+iv cloud push <MODEL> --provider <PROVIDER> --bucket <BUCKET> [--version <VERSION>]
 ```
 
 **Arguments**:
@@ -117,13 +117,13 @@ aim cloud push <MODEL> --provider <PROVIDER> --bucket <BUCKET> [--version <VERSI
 **Examples**:
 ```bash
 # Push latest version to S3
-aim cloud push gpt2-finetuned --provider s3 --bucket my-models
+iv cloud push gpt2-finetuned --provider s3 --bucket my-models
 
 # Push specific version to Azure
-aim cloud push bert-classifier --provider azure --bucket ml-models --version 3
+iv cloud push bert-classifier --provider azure --bucket ml-models --version 3
 
 # Push to S3 with short flags
-aim cloud push llama-7b -p s3 -b production-models
+iv cloud push llama-7b -p s3 -b production-models
 ```
 
 **Output**:
@@ -139,16 +139,16 @@ aim cloud push llama-7b -p s3 -b production-models
    Size: 548576768 bytes
 
 ✅ Model pushed successfully!
-   Use 'aim cloud pull' to retrieve from cloud
+   Use 'iv cloud pull' to retrieve from cloud
 ```
 
-### `aim cloud pull`
+### `iv cloud pull`
 
 Download a model from cloud storage to your local vault.
 
 **Usage**:
 ```bash
-aim cloud pull <MODEL> --provider <PROVIDER> --bucket <BUCKET> --remote-path <PATH>
+iv cloud pull <MODEL> --provider <PROVIDER> --bucket <BUCKET> --remote-path <PATH>
 ```
 
 **Arguments**:
@@ -160,10 +160,10 @@ aim cloud pull <MODEL> --provider <PROVIDER> --bucket <BUCKET> --remote-path <PA
 **Examples**:
 ```bash
 # Pull from S3
-aim cloud pull gpt2-finetuned --provider s3 --bucket my-models --remote-path gpt2-finetuned/safetensors/v2.vault
+iv cloud pull gpt2-finetuned --provider s3 --bucket my-models --remote-path gpt2-finetuned/safetensors/v2.vault
 
 # Pull from Azure
-aim cloud pull bert-classifier --provider azure --bucket ml-models --remote-path models/bert/v1.vault
+iv cloud pull bert-classifier --provider azure --bucket ml-models --remote-path models/bert/v1.vault
 ```
 
 **Output**:
@@ -181,16 +181,16 @@ aim cloud pull bert-classifier --provider azure --bucket ml-models --remote-path
    2. Appropriate IAM permissions for S3 access
    3. The model to be stored in the specified bucket/path
 
-💡 After downloading, use 'aim store' to import into vault
+💡 After downloading, use 'iv store' to import into vault
 ```
 
-### `aim cloud list`
+### `iv cloud list`
 
 List models stored in cloud storage.
 
 **Usage**:
 ```bash
-aim cloud list --provider <PROVIDER> --bucket <BUCKET> [--prefix <PREFIX>]
+iv cloud list --provider <PROVIDER> --bucket <BUCKET> [--prefix <PREFIX>]
 ```
 
 **Arguments**:
@@ -201,22 +201,22 @@ aim cloud list --provider <PROVIDER> --bucket <BUCKET> [--prefix <PREFIX>]
 **Examples**:
 ```bash
 # List all models in S3 bucket
-aim cloud list --provider s3 --bucket my-models
+iv cloud list --provider s3 --bucket my-models
 
 # List models with prefix
-aim cloud list --provider azure --bucket ml-models --prefix production/
+iv cloud list --provider azure --bucket ml-models --prefix production/
 
 # List with short flags
-aim cloud list -p s3 -b my-models
+iv cloud list -p s3 -b my-models
 ```
 
-### `aim cloud config`
+### `iv cloud config`
 
 View or configure cloud storage credentials.
 
 **Usage**:
 ```bash
-aim cloud config --provider <PROVIDER> [--show]
+iv cloud config --provider <PROVIDER> [--show]
 ```
 
 **Arguments**:
@@ -226,13 +226,13 @@ aim cloud config --provider <PROVIDER> [--show]
 **Examples**:
 ```bash
 # Show S3 configuration
-aim cloud config --provider s3 --show
+iv cloud config --provider s3 --show
 
 # Show Azure configuration
-aim cloud config --provider azure --show
+iv cloud config --provider azure --show
 
 # Show help for configuring
-aim cloud config --provider s3
+iv cloud config --provider s3
 ```
 
 **Output (S3)**:
@@ -265,19 +265,19 @@ export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 export AWS_REGION=us-west-2
 
 # 2. Verify configuration
-aim cloud config --provider s3 --show
+iv cloud config --provider s3 --show
 
 # 3. Store a model locally first
-aim store gpt2-finetuned pytorch_model.bin --format safetensors
+iv store gpt2-finetuned pytorch_model.bin --format safetensors
 
 # 4. Push to S3
-aim cloud push gpt2-finetuned --provider s3 --bucket my-ai-models
+iv cloud push gpt2-finetuned --provider s3 --bucket my-ai-models
 
 # 5. List models in S3
-aim cloud list --provider s3 --bucket my-ai-models
+iv cloud list --provider s3 --bucket my-ai-models
 
 # 6. Pull model on another machine
-aim cloud pull gpt2-finetuned --provider s3 --bucket my-ai-models --remote-path gpt2-finetuned/safetensors/v1.vault
+iv cloud pull gpt2-finetuned --provider s3 --bucket my-ai-models --remote-path gpt2-finetuned/safetensors/v1.vault
 ```
 
 ### Complete Workflow: Azure
@@ -288,34 +288,34 @@ export AZURE_STORAGE_ACCOUNT=mystorageaccount
 export AZURE_STORAGE_SAS_TOKEN="sv=2024-11-04&ss=b&srt=co&sp=rwdlac&sig=..."
 
 # 2. Verify configuration
-aim cloud config --provider azure --show
+iv cloud config --provider azure --show
 
 # 3. Store model locally
-aim store bert-classifier model.safetensors --format safetensors
+iv store bert-classifier model.safetensors --format safetensors
 
 # 4. Push to Azure
-aim cloud push bert-classifier --provider azure --bucket ml-models
+iv cloud push bert-classifier --provider azure --bucket ml-models
 
 # 5. List models
-aim cloud list --provider azure --bucket ml-models
+iv cloud list --provider azure --bucket ml-models
 
 # 6. Pull on another machine
-aim cloud pull bert-classifier --provider azure --bucket ml-models --remote-path bert-classifier/safetensors/v1.vault
+iv cloud pull bert-classifier --provider azure --bucket ml-models --remote-path bert-classifier/safetensors/v1.vault
 ```
 
 ### Multi-Version Workflow
 
 ```bash
 # Push multiple versions
-aim cloud push mymodel --provider s3 --bucket models --version 1
-aim cloud push mymodel --provider s3 --bucket models --version 2
-aim cloud push mymodel --provider s3 --bucket models --version 3
+iv cloud push mymodel --provider s3 --bucket models --version 1
+iv cloud push mymodel --provider s3 --bucket models --version 2
+iv cloud push mymodel --provider s3 --bucket models --version 3
 
 # List all versions
-aim cloud list --provider s3 --bucket models --prefix mymodel/
+iv cloud list --provider s3 --bucket models --prefix mymodel/
 
 # Pull specific version
-aim cloud pull mymodel-v2 --provider s3 --bucket models --remote-path mymodel/safetensors/v2.vault
+iv cloud pull mymodel-v2 --provider s3 --bucket models --remote-path mymodel/safetensors/v2.vault
 ```
 
 ---
@@ -324,7 +324,7 @@ aim cloud pull mymodel-v2 --provider s3 --bucket models --remote-path mymodel/sa
 
 ### Encryption
 
-**As of 4.3.0 `aim cloud push` encrypts before upload.** The payload is sealed
+**As of 4.3.0 `iv cloud push` encrypts before upload.** The payload is sealed
 with AES-256-GCM under an Argon2id key derived from your vault passphrase,
 with a fresh salt per object.
 
@@ -369,10 +369,10 @@ object. See [CLOUD_STORAGE.md](CLOUD_STORAGE.md#security-model).
 **Solution**: Use `s3`, `azure`, or `gcs` (case-insensitive).
 ```bash
 # Wrong
-aim cloud push model --provider aws --bucket mybucket
+iv cloud push model --provider aws --bucket mybucket
 
 # Correct
-aim cloud push model --provider s3 --bucket mybucket
+iv cloud push model --provider s3 --bucket mybucket
 ```
 
 ### Error: "AWS credentials not set"
@@ -381,7 +381,7 @@ aim cloud push model --provider s3 --bucket mybucket
 ```bash
 export AWS_ACCESS_KEY_ID=your_key
 export AWS_SECRET_ACCESS_KEY=your_secret
-aim cloud config --provider s3 --show
+iv cloud config --provider s3 --show
 ```
 
 ### Error: "Azure credentials not set"
@@ -390,15 +390,15 @@ aim cloud config --provider s3 --show
 ```bash
 export AZURE_STORAGE_ACCOUNT=your_account
 export AZURE_STORAGE_SAS_TOKEN=your_sas_token
-aim cloud config --provider azure --show
+iv cloud config --provider azure --show
 ```
 
 ### Error: "Model not found"
 **Problem**: Model doesn't exist in local vault.  
 **Solution**: List models and check name:
 ```bash
-aim list
-aim cloud push correct-model-name --provider s3 --bucket mybucket
+iv list
+iv cloud push correct-model-name --provider s3 --bucket mybucket
 ```
 
 ### Error: "Bucket access denied"
@@ -414,11 +414,11 @@ aim cloud push correct-model-name --provider s3 --bucket mybucket
 **Solution**: Use S3 or Azure instead:
 ```bash
 # Instead of GCS
-aim cloud push model --provider gcs --bucket mybucket
+iv cloud push model --provider gcs --bucket mybucket
 
 # Use S3 or Azure
-aim cloud push model --provider s3 --bucket mybucket
-aim cloud push model --provider azure --bucket mybucket
+iv cloud push model --provider s3 --bucket mybucket
+iv cloud push model --provider azure --bucket mybucket
 ```
 
 ### Feature Flag: S3 Support
@@ -449,7 +449,7 @@ BUCKET="my-models"
 PROVIDER="s3"
 
 for model in model1 model2 model3; do
-    aim cloud push $model --provider $PROVIDER --bucket $BUCKET
+    iv cloud push $model --provider $PROVIDER --bucket $BUCKET
 done
 ```
 
@@ -478,10 +478,10 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          aim cloud config --provider s3 --show
+          iv cloud config --provider s3 --show
       - name: Push model
         run: |
-          aim cloud push production-model --provider s3 --bucket prod-models
+          iv cloud push production-model --provider s3 --bucket prod-models
 ```
 
 ### Backup Script
@@ -494,9 +494,9 @@ PROVIDER="s3"
 DATE=$(date +%Y%m%d)
 
 # Get all models
-for model in $(aim list | grep -v "^No models" | awk '{print $1}'); do
+for model in $(iv list | grep -v "^No models" | awk '{print $1}'); do
     echo "Backing up $model..."
-    aim cloud push $model --provider $PROVIDER --bucket $BUCKET
+    iv cloud push $model --provider $PROVIDER --bucket $BUCKET
 done
 
 echo "Backup complete: $DATE"
@@ -521,8 +521,8 @@ Planned features for future releases:
 ## See Also
 
 - [CLI Guide](CLI.md) - Complete CLI reference
-- [Cloud Storage Implementation](https://github.com/nervosys/AIModelVault/blob/master/reports/CLOUD_STORAGE_COMPLETE.md) - Technical details
-- [Security Guide](https://github.com/nervosys/AIModelVault/blob/master/SECURITY.md) - Security best practices
+- [Cloud Storage Implementation](https://github.com/nervosys/IronVault/blob/master/reports/CLOUD_STORAGE_COMPLETE.md) - Technical details
+- [Security Guide](https://github.com/nervosys/IronVault/blob/master/SECURITY.md) - Security best practices
 - [Quick Start](QUICKSTART.md) - Getting started guide
 
 ---

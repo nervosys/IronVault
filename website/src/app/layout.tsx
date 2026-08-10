@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Model Vault — Docs",
+  title: "IronVault — Docs",
   description: "Universal cross-platform secure vault for AI model storage, versioning, and management with military-grade encryption.",
 };
 

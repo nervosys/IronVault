@@ -14,14 +14,14 @@
 
 use std::collections::HashMap;
 
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-use ai_model_vault::scanning::PickleScanner;
-use ai_model_vault::signing::ModelSigner;
-use ai_model_vault::tags::{SearchQuery, TagStore};
-use ai_model_vault::{VaultBuilder, VaultConfig};
+use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::scanning::PickleScanner;
+use ironvault::signing::ModelSigner;
+use ironvault::tags::{SearchQuery, TagStore};
+use ironvault::{VaultBuilder, VaultConfig};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("=== AI Model Vault — Automated Agent Pipeline ===\n");
+    println!("=== IronVault — Automated Agent Pipeline ===\n");
 
     // ── 0. Synthetic checkpoint on disk (stand-in for a real download) ────
     let tmp = tempfile::tempdir()?;
@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut vault = VaultBuilder::new().config(config).build()?;
     // In CI an agent would source this from KMS / GitHub secrets, never inline.
-    let passphrase = std::env::var("aimodelvault_PASSPHRASE")
+    let passphrase = std::env::var("IRONVAULT_PASSPHRASE")
         .unwrap_or_else(|_| "demo-passphrase-not-for-production".to_string());
     vault.unlock(passphrase.into_bytes())?;
     println!(
@@ -99,7 +99,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         tags.get_annotations(model_name),
     );
 
-    // ── 5. Tag-driven search (what `aim search --tag production` does) ────
+    // ── 5. Tag-driven search (what `iv search --tag production` does) ────
     let query = SearchQuery {
         tags: vec!["production".to_string()],
         ..Default::default()

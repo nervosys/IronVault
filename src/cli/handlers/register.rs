@@ -1,6 +1,6 @@
-//! CLI handler for inference engine registration (aim register).
+//! CLI handler for inference engine registration (iv register).
 
-use ai_model_vault::{
+use ironvault::{
     register_lm_studio, register_ollama, LmStudioOptions, OllamaOptions, Result, VaultConfig,
     VaultError,
 };

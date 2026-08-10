@@ -1,6 +1,6 @@
 # Database Support for RAG Knowledge Base
 
-AI Model Vault provides comprehensive database support for building RAG (Retrieval-Augmented Generation) systems with persistent knowledge bases.
+IronVault provides comprehensive database support for building RAG (Retrieval-Augmented Generation) systems with persistent knowledge bases.
 
 ## Overview
 
@@ -69,10 +69,10 @@ Create a new database for your RAG system:
 
 ```bash
 # SQLite database
-aim database init --path knowledge.db --db-type sqlite
+iv database init --path knowledge.db --db-type sqlite
 
 # Sled database
-aim database init --path knowledge --db-type sled
+iv database init --path knowledge --db-type sled
 ```
 
 ### Store Documents
@@ -81,13 +81,13 @@ Add documents to your knowledge base:
 
 ```bash
 # Store a document
-aim database store --path knowledge.db --input document.txt
+iv database store --path knowledge.db --input document.txt
 
 # Store with ID
-aim database store --path knowledge.db --input doc.txt --id doc-001
+iv database store --path knowledge.db --input doc.txt --id doc-001
 
 # Store with metadata
-aim database store --path knowledge.db --input paper.txt \
+iv database store --path knowledge.db --input paper.txt \
     --metadata "category=research" \
     --metadata "author=Smith" \
     --metadata "year=2025"
@@ -98,7 +98,7 @@ aim database store --path knowledge.db --input paper.txt \
 Get a specific document by ID:
 
 ```bash
-aim database get --path knowledge.db fccdbda6-b414-4980-bd87-7027763159b1
+iv database get --path knowledge.db fccdbda6-b414-4980-bd87-7027763159b1
 ```
 
 Output:
@@ -119,10 +119,10 @@ Full-text search across your knowledge base:
 
 ```bash
 # Search for documents
-aim database search --path knowledge.db "machine learning"
+iv database search --path knowledge.db "machine learning"
 
 # Limit results
-aim database search --path knowledge.db "AI" --limit 5
+iv database search --path knowledge.db "AI" --limit 5
 ```
 
 Output:
@@ -138,7 +138,7 @@ Output:
 View all documents in the database:
 
 ```bash
-aim database list --path knowledge.db
+iv database list --path knowledge.db
 ```
 
 Output:
@@ -152,7 +152,7 @@ Output:
 Remove a document from the database:
 
 ```bash
-aim database delete --path knowledge.db doc-001
+iv database delete --path knowledge.db doc-001
 ```
 
 ### Export Database
@@ -160,7 +160,7 @@ aim database delete --path knowledge.db doc-001
 Export all documents to JSON:
 
 ```bash
-aim database export --path knowledge.db --output backup.json
+iv database export --path knowledge.db --output backup.json
 ```
 
 ### Import Documents
@@ -168,7 +168,7 @@ aim database export --path knowledge.db --output backup.json
 Import documents from JSON:
 
 ```bash
-aim database import --path knowledge.db --input backup.json
+iv database import --path knowledge.db --input backup.json
 ```
 
 ### Database Statistics
@@ -176,7 +176,7 @@ aim database import --path knowledge.db --input backup.json
 View database statistics:
 
 ```bash
-aim database stats --path knowledge.db
+iv database stats --path knowledge.db
 ```
 
 Output:
@@ -197,7 +197,7 @@ Output:
 ### SQLite Backend
 
 ```rust
-use ai_model_vault::rag::{SQLiteDatabase, Document};
+use ironvault::rag::{SQLiteDatabase, Document};
 use std::collections::HashMap;
 use std::path::Path;
 
@@ -234,7 +234,7 @@ for doc in results {
 ### Sled Backend
 
 ```rust
-use ai_model_vault::rag::{SledDatabase, Document};
+use ironvault::rag::{SledDatabase, Document};
 use std::path::Path;
 
 // Create database
@@ -261,7 +261,7 @@ let results = db.search_prefix("doc-")?;
 Both backends implement a common `Database` trait:
 
 ```rust
-use ai_model_vault::rag::Database;
+use ironvault::rag::Database;
 use std::collections::HashMap;
 
 // Generic database operations
@@ -339,7 +339,7 @@ pub struct ChunkInfo {
 ### Storing Embeddings
 
 ```rust
-use ai_model_vault::rag::{SQLiteDatabase, Document};
+use ironvault::rag::{SQLiteDatabase, Document};
 
 // Create document with embedding
 let embedding = vec![0.1, 0.2, 0.3, 0.4]; // Your embedding vector
@@ -358,7 +358,7 @@ db.store_document(&doc)?;
 ### Similarity Search
 
 ```rust
-use ai_model_vault::rag::DocumentStore;
+use ironvault::rag::DocumentStore;
 
 // Create document store
 let mut store = DocumentStore::new();
@@ -386,7 +386,7 @@ for (doc_id, similarity) in results {
 For large documents, split into manageable chunks:
 
 ```rust
-use ai_model_vault::rag::{Document, ChunkInfo};
+use ironvault::rag::{Document, ChunkInfo};
 
 fn chunk_document(content: &str, chunk_size: usize, overlap: usize) -> Vec<Document> {
     let mut chunks = Vec::new();
@@ -448,7 +448,7 @@ for chunk in chunks {
 Store useful metadata for filtering:
 
 ```bash
-aim database store --path kb.db --input paper.txt \
+iv database store --path kb.db --input paper.txt \
     --metadata "type=research" \
     --metadata "domain=ml" \
     --metadata "year=2025" \
@@ -493,10 +493,10 @@ Export your database regularly:
 
 ```bash
 # Daily backup
-aim database export --path knowledge.db --output "backup-$(date +%Y%m%d).json"
+iv database export --path knowledge.db --output "backup-$(date +%Y%m%d).json"
 
 # Restore if needed
-aim database import --path knowledge-new.db --input backup-20250107.json
+iv database import --path knowledge-new.db --input backup-20250107.json
 ```
 
 ---
@@ -560,7 +560,7 @@ Error: StorageError("Failed to open database")
 
 **Solution**: Initialize the database first:
 ```bash
-aim database init --path knowledge.db --db-type sqlite
+iv database init --path knowledge.db --db-type sqlite
 ```
 
 ### Permission Denied
@@ -598,7 +598,7 @@ conn.busy_timeout(Duration::from_secs(5))?;
 ### Complete RAG Pipeline
 
 ```rust
-use ai_model_vault::rag::{SQLiteDatabase, Document, DocumentStore};
+use ironvault::rag::{SQLiteDatabase, Document, DocumentStore};
 
 // 1. Initialize database
 let db = SQLiteDatabase::new(Path::new("rag_kb.db"))?;
@@ -652,22 +652,22 @@ fn retrieve_context(query: &str, db: &SQLiteDatabase, store: &DocumentStore) -> 
 
 ```bash
 # Export from SQLite
-aim database export --path old.db --output data.json
+iv database export --path old.db --output data.json
 
 # Import to Sled
-aim database init --path new_sled --db-type sled
-aim database import --path new_sled --input data.json
+iv database init --path new_sled --db-type sled
+iv database import --path new_sled --input data.json
 ```
 
 ### Sled to SQLite
 
 ```bash
 # Export from Sled
-aim database export --path old_sled --output data.json
+iv database export --path old_sled --output data.json
 
 # Import to SQLite
-aim database init --path new.db --db-type sqlite
-aim database import --path new.db --input data.json
+iv database init --path new.db --db-type sqlite
+iv database import --path new.db --input data.json
 ```
 
 ---
@@ -698,7 +698,7 @@ See the `examples/` directory for complete examples:
 
 ## Summary
 
-AI Model Vault provides production-ready database support for RAG systems with:
+IronVault provides production-ready database support for RAG systems with:
 
 ✅ **SQLite** - Full SQL database with excellent performance  
 ✅ **Sled** - Lightning-fast embedded KV store  

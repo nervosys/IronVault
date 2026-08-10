@@ -5,14 +5,14 @@ A terminal UI built on `ratatui` for browsing vault contents without leaving the
 ## Launch
 
 ```bash
-aim browse
+iv browse
 ```
 
 ## Panels
 
 - **Models** — name, latest version, size, last touch.
 - **Versions** — per-selection lineage and metadata.
-- **Tags & annotations** — read-only view of `aim tag` data.
+- **Tags & annotations** — read-only view of `iv tag` data.
 - **Stats** — vault total size and dedup ratio.
 
 ## Key bindings
@@ -24,4 +24,4 @@ aim browse
 | `q`/`Esc` | Quit                    |
 | `/`       | Filter by name fragment |
 
-See [src/tui.rs](https://github.com/nervosys/AIModelVault/blob/master/src/tui.rs).
+See [src/tui.rs](https://github.com/nervosys/IronVault/blob/master/src/tui.rs).

@@ -2,13 +2,13 @@
 
 **Document Version**: 1.0  
 **Date**: November 4, 2025  
-**Applies To**: AI Model Vault v0.1.0+
+**Applies To**: IronVault v0.1.0+
 
 ---
 
 ## Overview
 
-This guide provides security hardening recommendations for deploying AI Model Vault in production environments. Following these guidelines will maximize the security posture of your AI model storage infrastructure.
+This guide provides security hardening recommendations for deploying IronVault in production environments. Following these guidelines will maximize the security posture of your AI model storage infrastructure.
 
 ---
 
@@ -68,38 +68,38 @@ $env:VAULT_PASSPHRASE = Get-Content C:\secure\passphrase.enc | Decrypt-Secret
 #### Vault Directory
 ```bash
 # Restrict vault directory to owner only
-chmod 700 ~/.local/share/aimodelvault/vaults/
-chmod 700 ~/.local/share/aimodelvault/vaults/default/
+chmod 700 ~/.local/share/ironvault/vaults/
+chmod 700 ~/.local/share/ironvault/vaults/default/
 
 # Verify permissions
-ls -la ~/.local/share/aimodelvault/vaults/
+ls -la ~/.local/share/ironvault/vaults/
 # Should show: drwx------ (700)
 ```
 
 #### Configuration Files
 ```bash
 # Restrict config files
-chmod 600 ~/.config/aimodelvault/config.yaml
+chmod 600 ~/.config/ironvault/config.yaml
 
 # Verify
-ls -la ~/.config/aimodelvault/
+ls -la ~/.config/ironvault/
 # Should show: -rw------- (600)
 ```
 
 #### Audit Logs
 ```bash
 # Append-only audit logs (recommended)
-chattr +a ~/.local/share/aimodelvault/logs/audit.log
+chattr +a ~/.local/share/ironvault/logs/audit.log
 
 # Or restrict to read-only after creation
-chmod 400 ~/.local/share/aimodelvault/logs/audit.log
+chmod 400 ~/.local/share/ironvault/logs/audit.log
 ```
 
 ### Windows
 
 ```powershell
 # Restrict vault directory to current user
-$path = "$env:LOCALAPPDATA\aimodelvault\vaults"
+$path = "$env:LOCALAPPDATA\ironvault\vaults"
 $acl = Get-Acl $path
 $acl.SetAccessRuleProtection($true, $false)
 $rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
@@ -118,7 +118,7 @@ Get-Acl $path | Format-List
 
 ### Local-Only Access (Default)
 
-AI Model Vault operates locally by default. No network exposure required for basic operation.
+IronVault operates locally by default. No network exposure required for basic operation.
 
 ### Cloud Storage Security
 
@@ -127,10 +127,10 @@ When using cloud backends:
 #### AWS S3
 ```bash
 # Use IAM roles (recommended)
-export AWS_PROFILE=aimodelvault
+export AWS_PROFILE=ironvault
 
 # Enable MFA for sensitive operations
-aws configure set profile.aimodelvault.mfa_serial arn:aws:iam::ACCOUNT:mfa/USER
+aws configure set profile.ironvault.mfa_serial arn:aws:iam::ACCOUNT:mfa/USER
 
 # Enable versioning and encryption
 aws s3api put-bucket-versioning \
@@ -174,7 +174,7 @@ gsutil versioning set on gs://my-models
 ### Enable Comprehensive Logging
 
 ```yaml
-# ~/.config/aimodelvault/config.yaml
+# ~/.config/ironvault/config.yaml
 security:
   audit_log: true
   session_timeout: 3600  # 1 hour
@@ -189,10 +189,10 @@ compliance:
 
 ```bash
 # Real-time monitoring (Linux/macOS)
-tail -f ~/.local/share/aimodelvault/logs/audit.log
+tail -f ~/.local/share/ironvault/logs/audit.log
 
 # Search for failed authentications
-grep "Authentication failed" ~/.local/share/aimodelvault/logs/audit.log
+grep "Authentication failed" ~/.local/share/ironvault/logs/audit.log
 
 # Count operations by type
 grep -o '"operation":"[^"]*"' audit.log | sort | uniq -c
@@ -207,7 +207,7 @@ sudo apt-get install rsyslog
 
 # Configure forwarding
 echo '*.* @@remote-syslog-server:514' | \
-    sudo tee -a /etc/rsyslog.d/50-aimodelvault.conf
+    sudo tee -a /etc/rsyslog.d/50-ironvault.conf
 
 sudo systemctl restart rsyslog
 ```
@@ -263,7 +263,7 @@ Set-MpPreference -DisableRealtimeMonitoring $false
 #### Linux (mlock)
 ```bash
 # Allow memory locking
-sudo setcap cap_ipc_lock=+ep /path/to/aim
+sudo setcap cap_ipc_lock=+ep /path/to/iv
 
 # Or increase locked memory limit
 ulimit -l unlimited
@@ -278,7 +278,7 @@ ulimit -l unlimited
 ```bash
 # Backup vault with encryption intact
 tar czf vault-backup-$(date +%Y%m%d).tar.gz \
-    ~/.local/share/aimodelvault/vaults/
+    ~/.local/share/ironvault/vaults/
 
 # Encrypt backup
 gpg --symmetric --cipher-algo AES256 \
@@ -286,7 +286,7 @@ gpg --symmetric --cipher-algo AES256 \
 
 # Store offsite
 aws s3 cp vault-backup-*.tar.gz.gpg \
-    s3://my-backups/aimodelvault/ \
+    s3://my-backups/ironvault/ \
     --storage-class GLACIER
 ```
 
@@ -328,7 +328,7 @@ compliance:
 **Verification**:
 ```bash
 # Check compliance status
-aim compliance
+iv compliance
 
 # Should show all checks passing
 ```
@@ -392,10 +392,10 @@ cargo clippy -- -D warnings
 ## 10. Production Deployment
 
 Containers were removed in 4.5.0 — there is no first-party `Dockerfile`, image,
-or Helm chart. `aim` ships as a static binary, a crate, and a Python wheel.
+or Helm chart. `iv` ships as a static binary, a crate, and a Python wheel.
 
 For a hardened service install, use `deploy/systemd/install.sh`: it creates the
-`aim` system user and `/var/lib/aim`, writes `/etc/aim/server.env` at `0600`
+`ironvault` system user and `/var/lib/ironvault`, writes `/etc/ironvault/server.env` at `0600`
 root-owned, and installs a unit that reads credentials via `EnvironmentFile=`
 rather than `Environment=` — the latter is readable by any local user through
 `systemctl show`. See [TELEMETRY.md](TELEMETRY.md#service-scoped-configuration).
@@ -440,7 +440,7 @@ into a layer, and inject secrets at runtime instead of at build time.
 ## 12. Additional Resources
 
 ### Documentation
-- [SECURITY.md](https://github.com/nervosys/AIModelVault/blob/master/SECURITY.md) - Security policy
+- [SECURITY.md](https://github.com/nervosys/IronVault/blob/master/SECURITY.md) - Security policy
 - [SECURITY_AUDIT.md](SECURITY_AUDIT.md) - Latest audit report
 - [docs/ARCHITECTURE.md](ARCHITECTURE.md) - System architecture
 
@@ -461,8 +461,8 @@ into a layer, and inject secrets at runtime instead of at build time.
 
 For security questions or concerns:
 - **Email**: security@nervosys.ai
-- **GitHub**: https://github.com/nervosys/AIModelVault/security
-- **Documentation**: https://aimodelvault.nervosys.ai/docs/security
+- **GitHub**: https://github.com/nervosys/IronVault/security
+- **Documentation**: https://ironvault.nervosys.ai/docs/security
 
 **Remember**: Security is a continuous process, not a one-time setup. Regular reviews and updates are essential.
 

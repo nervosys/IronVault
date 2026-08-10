@@ -9,7 +9,7 @@ use std::path::PathBuf;
 use crate::crypto::compression::{CompressionAlgorithm, CompressionLevel};
 use crate::error::{Result, VaultError};
 
-/// AI Model Vault (AIMV) Configuration
+/// IronVault (AIMV) Configuration
 ///
 /// Directory structure:
 /// - Config: ~/.config/ai/models/ (or platform equivalent)
@@ -139,9 +139,9 @@ pub struct ComplianceSettings {
     pub audit_retention_days: u32,
 }
 
-/// Federation settings — syncing models between `aim` nodes.
+/// Federation settings — syncing models between `iv` nodes.
 ///
-/// Off by default. Enabling it exposes `/api/v1/federation/*` on `aim serve`,
+/// Off by default. Enabling it exposes `/api/v1/federation/*` on `iv serve`,
 /// which hands model bytes to any caller presenting an accepted key, so it is
 /// a deliberate act rather than something an upgrade turns on.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -163,7 +163,7 @@ pub struct FederationSettings {
     ///
     /// TLS protects the hop; this protects the object, so a peer's reverse
     /// proxy, request log, or on-disk cache never holds a readable model. It
-    /// requires both nodes to share `$aimodelvault_FEDERATION_PASSPHRASE`.
+    /// requires both nodes to share `$IRONVAULT_FEDERATION_PASSPHRASE`.
     /// Turning it off is only defensible on a network you fully control.
     #[serde(default = "default_true")]
     pub seal_transfers: bool,
@@ -228,7 +228,7 @@ pub struct TelemetrySettings {
     /// This is a gate, not the switch. Setting it `false` disables telemetry
     /// outright; leaving it `true` defers to `telemetry.yaml`, whose own
     /// `enabled` defaults to **false**. A default install therefore sends
-    /// nothing — `aim` is opt-in, as the README states.
+    /// nothing — `iv` is opt-in, as the README states.
     ///
     /// The gate defaults open on purpose: flipping it to `false` would
     /// override users who opted in via `telemetry.yaml`.
@@ -252,11 +252,11 @@ impl Default for TelemetrySettings {
 }
 
 /// Relocates every config/data/cache directory under one root.
-pub const ENV_HOME: &str = "aimodelvault_HOME";
+pub const ENV_HOME: &str = "IRONVAULT_HOME";
 /// Overrides the config directory (holds `config.yaml`, profiles, plugins).
-pub const ENV_CONFIG: &str = "aimodelvault_CONFIG";
+pub const ENV_CONFIG: &str = "IRONVAULT_CONFIG";
 /// Overrides the default vault name.
-pub const ENV_VAULT: &str = "aimodelvault_VAULT";
+pub const ENV_VAULT: &str = "IRONVAULT_VAULT";
 
 /// Serialises directory creation and permission tightening within the process.
 static INIT_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
@@ -280,11 +280,11 @@ fn create_dir_resilient(dir: &std::path::Path) -> Result<()> {
 }
 
 /// Read an environment variable, treating empty/whitespace values as unset.
+///
+/// Delegates to [`crate::env::var`] so the 4.x `aimodelvault_*` / `AIM_*`
+/// spellings keep working through the 5.0 rename.
 fn non_empty_env(name: &str) -> Option<String> {
-    std::env::var(name)
-        .ok()
-        .map(|v| v.trim().to_string())
-        .filter(|v| !v.is_empty())
+    crate::env::var(name)
 }
 
 /// XDG-compliant directory paths for config, data, cache, and logs.
@@ -304,9 +304,9 @@ impl VaultConfig {
     /// Create new configuration with defaults
     ///
     /// Honors three environment overrides:
-    /// - `aimodelvault_HOME` — relocate all config/data/cache directories
-    /// - `aimodelvault_CONFIG` — path to the config file to load
-    /// - `aimodelvault_VAULT` — default vault name
+    /// - `IRONVAULT_HOME` — relocate all config/data/cache directories
+    /// - `IRONVAULT_CONFIG` — path to the config file to load
+    /// - `IRONVAULT_VAULT` — default vault name
     pub fn new() -> Result<Self> {
         let dirs = Self::get_project_dirs()?;
         Self::ensure_directories(&dirs)?;
@@ -334,7 +334,7 @@ impl VaultConfig {
         Ok(Self::default_with_dirs(dirs))
     }
 
-    /// Get XDG project directories for AI Model Vault (AIMV)
+    /// Get XDG project directories for IronVault (AIMV)
     ///
     /// Uses shorter, organized paths:
     /// - ~/.config/ai/models/
@@ -346,7 +346,7 @@ impl VaultConfig {
     fn get_project_dirs() -> Result<DirectoryPaths> {
         let mut dirs = Self::platform_dirs()?;
 
-        // `aimodelvault_CONFIG` relocates just the config tree.
+        // `IRONVAULT_CONFIG` relocates just the config tree.
         if let Some(config_root) = non_empty_env(ENV_CONFIG) {
             let config_dir = PathBuf::from(config_root);
             dirs.backends_dir = config_dir.join("backends");
@@ -362,7 +362,7 @@ impl VaultConfig {
     fn platform_dirs() -> Result<DirectoryPaths> {
         use directories::BaseDirs;
 
-        // `aimodelvault_HOME` relocates every directory under one root. Used for
+        // `IRONVAULT_HOME` relocates every directory under one root. Used for
         // test isolation, containers, and per-project vaults.
         if let Some(root) = non_empty_env(ENV_HOME) {
             let root = PathBuf::from(root);

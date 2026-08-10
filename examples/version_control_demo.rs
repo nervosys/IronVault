@@ -9,8 +9,8 @@
 //! - Checksum verification
 //! - Metadata tracking across versions
 
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-use ai_model_vault::VaultConfig;
+use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::VaultConfig;
 use chrono::Utc;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -53,7 +53,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 fn print_header() {
     println!("\n{}", "=".repeat(70));
-    println!("  AI Model Vault (AIMV) - Version Control Demo");
+    println!("  IronVault (AIMV) - Version Control Demo");
     println!("{}\n", "=".repeat(70));
 }
 
@@ -83,7 +83,7 @@ fn print_footer() {
 fn demonstrate_initialization() -> Result<(), Box<dyn std::error::Error>> {
     print_separator("Step 1: Version Control Initialization");
 
-    println!("🔧 Initializing AI Model Vault with version control:");
+    println!("🔧 Initializing IronVault with version control:");
     println!();
 
     let config = VaultConfig::new()?;

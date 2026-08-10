@@ -1,4 +1,4 @@
-//! REST API server for AI Model Vault
+//! REST API server for IronVault
 //!
 //! Provides a network-accessible interface for vault management with:
 //! - JWT-based authentication

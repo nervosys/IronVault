@@ -10,7 +10,7 @@ ignore = [
     # RUSTSEC-2023-0071 -- `rsa` 0.9.x, "Marvin Attack: potential key recovery
     # through timing sidechannels". No fixed upgrade exists.
     #
-    # Path: ai-model-vault -> jsonwebtoken 11 (`rust_crypto` provider) -> rsa.
+    # Path: ironvault -> jsonwebtoken 11 (`rust_crypto` provider) -> rsa.
     # The provider feature is all-or-nothing; `rust_crypto` cannot be taken
     # without `rsa`, and the only alternative provider (`aws_lc_rs`) hard-requires
     # NASM on Windows, which breaks `cargo install --features api` there.

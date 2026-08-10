@@ -7,9 +7,9 @@
 
 use proptest::prelude::*;
 
-use ai_model_vault::crypto::FipsCrypto;
-use ai_model_vault::formats::ModelFormat;
-use ai_model_vault::version::ModelVersion;
+use ironvault::crypto::FipsCrypto;
+use ironvault::formats::ModelFormat;
+use ironvault::version::ModelVersion;
 
 // ── Crypto round-trip ────────────────────────────────────────────────────────
 

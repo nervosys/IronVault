@@ -80,7 +80,7 @@ function Start-Demo {
 # Main script
 Write-Host ""
 Write-Host "$ColorBlue═══════════════════════════════════════════════════════$ColorReset"
-Write-Host "$ColorBlue  AI Model Vault - PyTorch Demo Setup (uv)$ColorReset"
+Write-Host "$ColorBlue  IronVault - PyTorch Demo Setup (uv)$ColorReset"
 Write-Host "$ColorBlue═══════════════════════════════════════════════════════$ColorReset"
 Write-Host ""
 

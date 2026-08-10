@@ -1,6 +1,6 @@
 # UV Integration Complete! ✅
 
-AI Model Vault now uses **uv** for fast Python package management.
+IronVault now uses **uv** for fast Python package management.
 
 ## What Changed
 
@@ -45,7 +45,7 @@ AI Model Vault now uses **uv** for fast Python package management.
 
 The PyTorch demo (`demo_pytorch.py`) demonstrates 11 complete steps:
 
-1. ✅ Initialize AI Model Vault
+1. ✅ Initialize IronVault
 2. ✅ Create PyTorch CNN model (SimpleCNN)
 3. ✅ Store initial model (v1)
 4. ✅ Train and store checkpoint (v2 - 5 epochs)
@@ -80,7 +80,7 @@ The PyTorch demo (`demo_pytorch.py`) demonstrates 11 complete steps:
 ## Files Overview
 
 ```
-AIModelVault/
+IronVault/
 ├── requirements.txt           # PyTorch dependencies
 ├── setup_pytorch.ps1          # Windows setup script
 ├── setup_pytorch.sh           # Linux/macOS setup script
@@ -98,9 +98,9 @@ AIModelVault/
 ## Documentation
 
 - 📖 [PYTORCH_UV_GUIDE.md](PYTORCH_UV_GUIDE.md) - Complete PyTorch guide
-- 📖 [README.md](https://github.com/nervosys/AIModelVault/blob/master/README.md) - Main documentation
+- 📖 [README.md](https://github.com/nervosys/IronVault/blob/master/README.md) - Main documentation
 - 📖 [DEMO_GUIDE.md](DEMO_GUIDE.md) - All demo scripts
-- 📖 [FEATURES_DEMO.md](https://github.com/nervosys/AIModelVault/blob/master/reports/FEATURES_DEMO.md) - Feature showcase
+- 📖 [FEATURES_DEMO.md](https://github.com/nervosys/IronVault/blob/master/reports/FEATURES_DEMO.md) - Feature showcase
 
 ## Troubleshooting
 
@@ -124,7 +124,7 @@ uv pip install -r requirements.txt
 
 ## Summary
 
-🎉 **AI Model Vault now has complete uv integration for PyTorch!**
+🎉 **IronVault now has complete uv integration for PyTorch!**
 
 - Fast installation with uv (10-100x faster than pip)
 - Cross-platform setup scripts (Windows, Linux, macOS)

@@ -2,7 +2,7 @@
 
 ## Overview
 
-AI Model Vault (AIMV) provides a **Git-like version control system** specifically designed for AI models. Track every checkpoint, branch experiments, trace lineage, and rollback instantly - all with military-grade encryption and data integrity verification.
+IronVault (AIMV) provides a **Git-like version control system** specifically designed for AI models. Track every checkpoint, branch experiments, trace lineage, and rollback instantly - all with military-grade encryption and data integrity verification.
 
 ## Table of Contents
 
@@ -60,7 +60,7 @@ pub struct ModelVersion {
 ### Creating Versions
 
 ```rust
-use ai_model_vault::{VaultConfig, formats::ModelMetadata};
+use ironvault::{VaultConfig, formats::ModelMetadata};
 
 // Initialize vault
 let config = VaultConfig::new()?;
@@ -802,4 +802,4 @@ cargo run --example version_control_demo --release
 
 ---
 
-**AI Model Vault (AIMV)** - Git-like version control for AI models with military-grade security.
+**IronVault (AIMV)** - Git-like version control for AI models with military-grade security.

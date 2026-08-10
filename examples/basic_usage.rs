@@ -1,10 +1,10 @@
-//! Example: Basic usage of AI Model Vault
+//! Example: Basic usage of IronVault
 
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-use ai_model_vault::{VaultBuilder, VaultConfig};
+use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::{VaultBuilder, VaultConfig};
 
-fn main() -> ai_model_vault::Result<()> {
-    println!("=== AI Model Vault Basic Example ===\n");
+fn main() -> ironvault::Result<()> {
+    println!("=== IronVault Basic Example ===\n");
 
     // 1. Create and configure vault (using VaultBuilder)
     println!("1. Creating vault with VaultBuilder...");

@@ -6,19 +6,19 @@ Compare model versions at the tensor level — shapes, data types, parameter cou
 
 ```bash
 # Compare two files
-aim diff model_v1.safetensors model_v2.safetensors
+iv diff model_v1.safetensors model_v2.safetensors
 
 # Compare vault model versions
-aim diff mymodel@v1 mymodel@v2
+iv diff mymodel@v1 mymodel@v2
 
 # JSON output
-aim diff model_v1.gguf model_v2.gguf --format json
+iv diff model_v1.gguf model_v2.gguf --format json
 ```
 
 ## CLI Reference
 
 ```
-aim diff <LEFT> <RIGHT> [OPTIONS]
+iv diff <LEFT> <RIGHT> [OPTIONS]
 
 Arguments:
   <LEFT>              Left model (file path or name@version)
@@ -70,7 +70,7 @@ Summary:
 ## Rust API
 
 ```rust
-use ai_model_vault::diff::ModelDiffer;
+use ironvault::diff::ModelDiffer;
 
 let diff = ModelDiffer::diff_files(
     Path::new("model_v1.safetensors"),

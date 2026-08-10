@@ -1,4 +1,4 @@
-//! Error types for AI Model Vault
+//! Error types for IronVault
 //!
 //! The top-level [`VaultError`] enum covers all failure modes.  Domain-specific
 //! sub-error types ([`CryptoError`], [`StorageError`], [`ConversionError`])
@@ -7,7 +7,7 @@
 use std::io;
 use thiserror::Error;
 
-/// Result type alias for AI Model Vault operations
+/// Result type alias for IronVault operations
 pub type Result<T> = std::result::Result<T, VaultError>;
 
 // ── Domain-specific error types ─────────────────────────────────────────────
@@ -110,7 +110,7 @@ impl From<ConversionError> for VaultError {
 
 // ── Top-level error ─────────────────────────────────────────────────────────
 
-/// AI Model Vault error types
+/// IronVault error types
 ///
 /// Marked `#[non_exhaustive]` so that adding a category later is not a breaking
 /// change for downstream matches. Inside this crate the enum is still

@@ -10,16 +10,16 @@ export default function DownloadPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="quick-start">Quick Start</h2>
       <CodeBlock language="bash">{`# Download from HuggingFace
-aim pull hf://TheBloke/Llama-2-7B-GGUF/llama-2-7b.Q4_K_M.gguf
+iv pull hf://TheBloke/Llama-2-7B-GGUF/llama-2-7b.Q4_K_M.gguf
 
 # Download from Ollama
-aim pull ollama://llama2:7b
+iv pull ollama://llama2:7b
 
 # Download from URL with checksum verification
-aim pull https://example.com/model.safetensors --sha256 abc123...
+iv pull https://example.com/model.safetensors --sha256 abc123...
 
 # Download and auto-store in vault
-aim pull hf://user/repo/model.safetensors --store --name my-model`}</CodeBlock>
+iv pull hf://user/repo/model.safetensors --store --name my-model`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="sources">Source Formats</h2>
       <div className="overflow-x-auto">
@@ -48,7 +48,7 @@ aim pull hf://user/repo/model.safetensors --store --name my-model`}</CodeBlock>
       </div>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="options">CLI Options</h2>
-      <CodeBlock language="bash">{`aim pull <SOURCE> [OPTIONS]
+      <CodeBlock language="bash">{`iv pull <SOURCE> [OPTIONS]
 
 Options:
   -o, --output <DIR>     Output directory (default: current directory)
@@ -62,11 +62,11 @@ Options:
         For private HuggingFace repositories, provide a token via CLI flag or environment variable:
       </p>
       <CodeBlock language="bash">{`# Via CLI flag
-aim pull hf://private/repo/model.safetensors --token hf_xxxxx
+iv pull hf://private/repo/model.safetensors --token hf_xxxxx
 
 # Via environment variable
 export HF_TOKEN=hf_xxxxx
-aim pull hf://private/repo/model.safetensors`}</CodeBlock>
+iv pull hf://private/repo/model.safetensors`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="security">Security</h2>
       <ul className="space-y-2 text-[var(--color-text-secondary)]">

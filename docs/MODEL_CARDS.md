@@ -2,7 +2,7 @@
 
 ## Overview
 
-AI Model Vault (AIMV) includes comprehensive **Model Card** support following industry standards. Model cards provide standardized documentation for AI models, including details about intended use, training data, evaluation metrics, ethical considerations, and limitations.
+IronVault (AIMV) includes comprehensive **Model Card** support following industry standards. Model cards provide standardized documentation for AI models, including details about intended use, training data, evaluation metrics, ethical considerations, and limitations.
 
 **Standards Supported**:
 - Google's Model Cards for Model Reporting (Mitchell et al., 2019)
@@ -199,7 +199,7 @@ CaveatsAndRecommendations {
 ### Basic Example
 
 ```rust
-use ai_model_vault::model_card::*;
+use ironvault::model_card::*;
 
 // 1. Create model details
 let details = ModelDetails {
@@ -422,7 +422,7 @@ let card = ModelCard::from_yaml(&yaml_string)?;
 Model cards can be stored alongside models in the vault:
 
 ```rust
-use ai_model_vault::{VaultConfig, model_card::*};
+use ironvault::{VaultConfig, model_card::*};
 
 let config = VaultConfig::new()?;
 let mut vault = config.build()?;
@@ -730,6 +730,6 @@ This demonstrates:
 
 ---
 
-**AI Model Vault (AIMV)** - Standardized model documentation for responsible AI.
+**IronVault (AIMV)** - Standardized model documentation for responsible AI.
 
 *Last Updated: November 6, 2024*

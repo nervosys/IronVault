@@ -3,7 +3,7 @@
 //! Outputs a complete machine-readable CLI schema for agent discovery.
 //! Supports JSON, YAML, and JSON-LD output formats.
 
-use ai_model_vault::Result;
+use ironvault::Result;
 use serde_json::{json, Value};
 
 /// Handle the introspect command — output full CLI schema for agents.
@@ -14,16 +14,16 @@ pub fn handle_introspect(format: String, compact: bool) -> Result<()> {
         "json" => {
             let output = if compact {
                 serde_json::to_string(&schema)
-                    .map_err(|e| ai_model_vault::VaultError::SerializationError(e.to_string()))?
+                    .map_err(|e| ironvault::VaultError::SerializationError(e.to_string()))?
             } else {
                 serde_json::to_string_pretty(&schema)
-                    .map_err(|e| ai_model_vault::VaultError::SerializationError(e.to_string()))?
+                    .map_err(|e| ironvault::VaultError::SerializationError(e.to_string()))?
             };
             println!("{output}");
         }
         "yaml" | "yml" => {
             let output = serde_yaml_ng::to_string(&schema)
-                .map_err(|e| ai_model_vault::VaultError::SerializationError(e.to_string()))?;
+                .map_err(|e| ironvault::VaultError::SerializationError(e.to_string()))?;
             println!("{output}");
         }
         "jsonld" | "json-ld" => {
@@ -31,7 +31,12 @@ pub fn handle_introspect(format: String, compact: bool) -> Result<()> {
             ld.insert(
                 "@context".to_string(),
                 json!({
-                    "aimv": "https://aimodelvault.dev/ontology#",
+                    // Must match the `aimv` term in `.well-known/ontology.jsonld`.
+                    // It previously pointed at a different host, so the CLI's
+                    // JSON-LD and the published ontology minted distinct IRIs
+                    // for the same terms — consumers that joined them saw two
+                    // unrelated vocabularies.
+                    "aimv": "https://nervosys.com/ontology/aimv#",
                     "schema": "https://schema.org/",
                     "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
                 }),
@@ -44,11 +49,11 @@ pub fn handle_introspect(format: String, compact: bool) -> Result<()> {
                 }
             }
             let output = serde_json::to_string_pretty(&Value::Object(ld))
-                .map_err(|e| ai_model_vault::VaultError::SerializationError(e.to_string()))?;
+                .map_err(|e| ironvault::VaultError::SerializationError(e.to_string()))?;
             println!("{output}");
         }
         other => {
-            return Err(ai_model_vault::VaultError::InvalidInput(format!(
+            return Err(ironvault::VaultError::InvalidInput(format!(
                 "Unknown format {other:?}. Supported: json, yaml, jsonld"
             )))
         }
@@ -59,9 +64,9 @@ pub fn handle_introspect(format: String, compact: bool) -> Result<()> {
 
 fn build_cli_schema(compact: bool) -> Value {
     let mut schema = json!({
-        "binary": "aim",
+        "binary": "iv",
         "version": env!("CARGO_PKG_VERSION"),
-        "install": "cargo install ai-model-vault",
+        "install": "cargo install ironvault",
         "globalFlags": [
             flag("--vault", "-v", "string", false, null_val(), desc(compact, "Vault name (uses default if not specified)")),
             flag("--config", "-c", "path", false, null_val(), desc(compact, "Config file path")),
@@ -106,7 +111,7 @@ fn build_commands(compact: bool) -> Value {
                 Some(json!("default")),
                 desc(compact, "Vault name")
             )],
-            ex(compact, &["aim init", "aim init --name production"])
+            ex(compact, &["iv init", "iv init --name production"])
         ),
         cmd(
             "store",
@@ -163,7 +168,7 @@ fn build_commands(compact: bool) -> Value {
                     desc(compact, "ML task (text-generation, etc.)")
                 ),
             ],
-            ex(compact, &["aim store my-llm ./model.safetensors"])
+            ex(compact, &["iv store my-llm ./model.safetensors"])
         ),
         cmd(
             "get",
@@ -196,7 +201,7 @@ fn build_commands(compact: bool) -> Value {
                     desc(compact, "Version number")
                 ),
             ],
-            ex(compact, &["aim get my-llm ./output.safetensors"])
+            ex(compact, &["iv get my-llm ./output.safetensors"])
         ),
         cmd(
             "list",
@@ -204,7 +209,7 @@ fn build_commands(compact: bool) -> Value {
             compact,
             "List all models in the vault",
             vec![],
-            ex(compact, &["aim list"])
+            ex(compact, &["iv list"])
         ),
         cmd(
             "versions",
@@ -219,7 +224,7 @@ fn build_commands(compact: bool) -> Value {
                 None,
                 desc(compact, "Model name")
             ),],
-            ex(compact, &["aim versions my-llm"])
+            ex(compact, &["iv versions my-llm"])
         ),
         cmd(
             "lineage",
@@ -244,7 +249,7 @@ fn build_commands(compact: bool) -> Value {
                     desc(compact, "Version number")
                 ),
             ],
-            ex(compact, &["aim lineage my-llm 5"])
+            ex(compact, &["iv lineage my-llm 5"])
         ),
         cmd(
             "delete",
@@ -279,7 +284,7 @@ fn build_commands(compact: bool) -> Value {
             ],
             ex(
                 compact,
-                &["aim delete my-llm 2", "aim delete my-llm 2 --force"]
+                &["iv delete my-llm 2", "iv delete my-llm 2 --force"]
             )
         ),
         cmd(
@@ -288,7 +293,7 @@ fn build_commands(compact: bool) -> Value {
             compact,
             "Show vault storage statistics",
             vec![],
-            ex(compact, &["aim stats"])
+            ex(compact, &["iv stats"])
         ),
         cmd(
             "compliance",
@@ -296,7 +301,7 @@ fn build_commands(compact: bool) -> Value {
             compact,
             "Run FIPS/CMMC/MITRE compliance checks",
             vec![],
-            ex(compact, &["aim compliance"])
+            ex(compact, &["iv compliance"])
         ),
         cmd(
             "change-passphrase",
@@ -304,7 +309,7 @@ fn build_commands(compact: bool) -> Value {
             compact,
             "Change vault encryption passphrase",
             vec![],
-            ex(compact, &["aim change-passphrase"])
+            ex(compact, &["iv change-passphrase"])
         ),
         cmd(
             "archive",
@@ -345,7 +350,7 @@ fn build_commands(compact: bool) -> Value {
                     desc(compact, "Version numbers")
                 ),
             ],
-            ex(compact, &["aim archive my-llm ./models.tar"])
+            ex(compact, &["iv archive my-llm ./models.tar"])
         ),
         cmd(
             "extract",
@@ -370,7 +375,7 @@ fn build_commands(compact: bool) -> Value {
                     desc(compact, "Output directory")
                 ),
             ],
-            ex(compact, &["aim extract ./models.tar"])
+            ex(compact, &["iv extract ./models.tar"])
         ),
         cmd(
             "analyze",
@@ -395,7 +400,7 @@ fn build_commands(compact: bool) -> Value {
                     desc(compact, "Version number")
                 ),
             ],
-            ex(compact, &["aim analyze my-llm"])
+            ex(compact, &["iv analyze my-llm"])
         ),
         cmd(
             "deduplicate",
@@ -410,7 +415,7 @@ fn build_commands(compact: bool) -> Value {
                 None,
                 desc(compact, "Show similarity scores")
             ),],
-            ex(compact, &["aim deduplicate"])
+            ex(compact, &["iv deduplicate"])
         ),
         cmd(
             "export",
@@ -443,7 +448,7 @@ fn build_commands(compact: bool) -> Value {
                     desc(compact, "Version number")
                 ),
             ],
-            ex(compact, &["aim export my-llm ./exported/"])
+            ex(compact, &["iv export my-llm ./exported/"])
         ),
         cmd(
             "cache",
@@ -451,7 +456,7 @@ fn build_commands(compact: bool) -> Value {
             compact,
             "Show cache statistics",
             vec![],
-            ex(compact, &["aim cache"])
+            ex(compact, &["iv cache"])
         ),
         cmd(
             "convert",
@@ -526,7 +531,7 @@ fn build_commands(compact: bool) -> Value {
             ],
             ex(
                 compact,
-                &["aim convert my-llm -t gguf -q q4_k_m --validate"]
+                &["iv convert my-llm -t gguf -q q4_k_m --validate"]
             )
         ),
         cmd(
@@ -535,7 +540,7 @@ fn build_commands(compact: bool) -> Value {
             compact,
             "List supported format conversion paths",
             vec![],
-            ex(compact, &["aim list-conversions"])
+            ex(compact, &["iv list-conversions"])
         ),
         cmd(
             "serve",
@@ -592,7 +597,7 @@ fn build_commands(compact: bool) -> Value {
                     desc(compact, "Disable web dashboard")
                 ),
             ],
-            ex(compact, &["aim serve --jwt-secret mysecret"])
+            ex(compact, &["iv serve --jwt-secret mysecret"])
         ),
         cmd_sub(
             "cloud",
@@ -991,9 +996,9 @@ fn build_commands(compact: bool) -> Value {
             ex(
                 compact,
                 &[
-                    "aim introspect",
-                    "aim introspect --format yaml",
-                    "aim introspect --compact"
+                    "iv introspect",
+                    "iv introspect --format yaml",
+                    "iv introspect --compact"
                 ]
             )
         ),

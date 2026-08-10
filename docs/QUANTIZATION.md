@@ -6,22 +6,22 @@ Profile-based quantization management for AI/ML models. Create named quantizatio
 
 ```bash
 # Create a quantization profile
-aim quantize set fast-q4 --method q4_k_m --description "Fast 4-bit quantization"
+iv quantize set fast-q4 --method q4_k_m --description "Fast 4-bit quantization"
 
 # List profiles
-aim quantize list
+iv quantize list
 
 # Estimate output size (1GB model → Q4_K_M)
-aim quantize estimate --size 1000000000 --to q4_k_m
+iv quantize estimate --size 1000000000 --to q4_k_m
 
 # Remove a profile
-aim quantize remove fast-q4
+iv quantize remove fast-q4
 ```
 
 ## CLI Reference
 
 ```
-aim quantize <COMMAND>
+iv quantize <COMMAND>
 
 Commands:
   set       Create or update a quantization profile
@@ -30,10 +30,10 @@ Commands:
   estimate  Estimate output size for a quantization method
 ```
 
-### `aim quantize set`
+### `iv quantize set`
 
 ```
-aim quantize set <NAME> --method <METHOD> [--description <DESC>]
+iv quantize set <NAME> --method <METHOD> [--description <DESC>]
 
 Arguments:
   <NAME>              Profile name
@@ -43,10 +43,10 @@ Options:
   -d, --description <DESC>    Description
 ```
 
-### `aim quantize estimate`
+### `iv quantize estimate`
 
 ```
-aim quantize estimate --size <BYTES> --to <METHOD> [--from <METHOD>]
+iv quantize estimate --size <BYTES> --to <METHOD> [--from <METHOD>]
 
 Options:
   -s, --size <BYTES>    Original file size in bytes
@@ -68,7 +68,7 @@ Options:
 ## Python API
 
 ```python
-from aimodelvault import QuantProfileStore
+from ironvault import QuantProfileStore
 
 store = QuantProfileStore("/path/to/vault")
 store.set("fast-q4", "q4_k_m", "Fast 4-bit quantization")
@@ -108,7 +108,7 @@ curl -X POST http://localhost:8080/api/v1/quantization/estimate \
 ## Library API
 
 ```rust
-use ai_model_vault::{QuantProfileStore, QuantMethod, QuantProfile};
+use ironvault::{QuantProfileStore, QuantMethod, QuantProfile};
 
 let store = QuantProfileStore::new("/path/to/vault")?;
 store.set(QuantProfile {
@@ -121,5 +121,5 @@ let profiles = store.list()?;
 store.remove("fast-q4")?;
 
 // Estimate size
-let estimated = ai_model_vault::estimate_quantized_size(1_000_000_000, &QuantMethod::F32, &QuantMethod::Q4KM);
+let estimated = ironvault::estimate_quantized_size(1_000_000_000, &QuantMethod::F32, &QuantMethod::Q4KM);
 ```

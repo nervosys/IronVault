@@ -1,8 +1,8 @@
 {
   "$schema": "https://modelcontextprotocol.io/schema/tools.json",
-  "name": "ai-model-vault",
-  "version": "4.6.1",
-  "description": "MCP tool manifest for AI Model Vault — encrypted AI/ML model management with versioning, conversion, compliance, RAG, signing, scanning, diffing, license scanning, tagging, quantization, evaluation, backup scheduling, multi-vault, policies, plugins, profiles, webhooks, ACL, validation, GC, and lineage-graph tools.",
+  "name": "ironvault",
+  "version": "5.0.0",
+  "description": "MCP tool manifest for IronVault — encrypted AI/ML model management with versioning, conversion, compliance, RAG, signing, scanning, diffing, license scanning, tagging, quantization, evaluation, backup scheduling, multi-vault, policies, plugins, profiles, webhooks, ACL, validation, GC, and lineage-graph tools.",
   "protocol_version": "2024-11-05",
   "capabilities": {
     "tools": true,

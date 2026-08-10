@@ -1,18 +1,18 @@
 //! Benchmarks for v1.3–v1.5 feature modules: tags, signing, scanning, diff,
 //! lineage, access control, validation, policies, plugins, profiles, webhooks.
 
-use ai_model_vault::access_control::{AclGuard, Role};
-use ai_model_vault::diff::ModelDiffer;
-use ai_model_vault::license_scan::LicenseScanner;
-use ai_model_vault::lineage_graph::{DerivationKind, LineageEdge, LineageGraph};
-use ai_model_vault::plugins::{PluginManifest, PluginRegistry};
-use ai_model_vault::policies::{PolicyStore, RetentionPolicy};
-use ai_model_vault::profiles::{Profile, ProfileStore};
-use ai_model_vault::scanning::PickleScanner;
-use ai_model_vault::signing::ModelSigner;
-use ai_model_vault::tags::{SearchQuery, TagStore};
-use ai_model_vault::validation::ValidationStore;
-use ai_model_vault::webhooks::{WebhookStore, WebhookTarget};
+use ironvault::access_control::{AclGuard, Role};
+use ironvault::diff::ModelDiffer;
+use ironvault::license_scan::LicenseScanner;
+use ironvault::lineage_graph::{DerivationKind, LineageEdge, LineageGraph};
+use ironvault::plugins::{PluginManifest, PluginRegistry};
+use ironvault::policies::{PolicyStore, RetentionPolicy};
+use ironvault::profiles::{Profile, ProfileStore};
+use ironvault::scanning::PickleScanner;
+use ironvault::signing::ModelSigner;
+use ironvault::tags::{SearchQuery, TagStore};
+use ironvault::validation::ValidationStore;
+use ironvault::webhooks::{WebhookStore, WebhookTarget};
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use std::collections::BTreeMap;
 use tempfile::tempdir;

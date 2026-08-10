@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] - 2026-08-10
+
+### Changed
+
+- **The project is now IronVault.** Every identity moves at once, which is why this is a major:
+
+  | | 4.x | 5.0 |
+  |---|---|---|
+  | crates.io | `ai-model-vault` | `ironvault` |
+  | PyPI | `aimodelvault` | `ironvault` |
+  | Rust lib path | `ai_model_vault::` | `ironvault::` |
+  | Binary | `aim` | `iv` |
+  | Environment | `aimodelvault_*`, `AIM_*` | `IRONVAULT_*` |
+  | Repository | `nervosys/AIModelVault` | `nervosys/IronVault` |
+  | Python import | `import aimodelvault` | `import ironvault` |
+
+  The old crate and PyPI names stay published and installable at 4.6.x. They receive no further releases; there is no meta-package forwarding to the new name, because a package that silently installs something else is worse than one that stops moving.
+
+- **Two environment prefixes collapse into one.** 4.x read `aimodelvault_*` (the package name) and `AIM_*` (the binary name) as unrelated families. Both are now `IRONVAULT_*` — `IRONVAULT_HOME`, `IRONVAULT_PASSPHRASE`, `IRONVAULT_JWT_SECRET`, `IRONVAULT_TELEMETRY_DISABLED`, and the rest.
+
+  **The old names still work in 5.0**, and warn once each to stderr naming only the variable, never its value — several of them carry passphrases. A rename that silently stops reading a deployment's `EnvironmentFile` is a bad rename, so the fallback exists to make the upgrade non-breaking in practice; it is scheduled for removal in 6.0.
+
+  Two mechanisms, because one was not enough. `env::var` covers reads inside the library, but several flags take their value from clap's `#[arg(env = "…")]`, which consults the process environment directly and cannot be intercepted — `--jwt-secret`, `--host`, `--port`, `--revocation-store`. Without the second mechanism those would have been the one family that silently stopped working, so `iv` normalises the environment via `env::migrate_legacy()` before parsing arguments. An explicitly-set new name always wins.
+
+- **systemd installs use `ironvault`, not `iv`.** The unit is `ironvault-server.service`, the service user and group are `ironvault`, state lives in `/var/lib/ironvault`, and credentials in `/etc/ironvault/server.env`. Only the executable is `iv` — a two-letter system user and a `/etc/iv` are needlessly collision-prone for no readability gain. Existing installs are not migrated in place; see `docs/MIGRATION.md`.
+
+### Unchanged, deliberately
+
+- **`AIMVSEAL`, `AIMV`, and `aimv://` keep their names.** These are format and interface identifiers that the rename does not touch:
+
+  - `AIMVSEAL` is the 8-byte magic at the head of every sealed cloud object and every federation transfer.
+  - `AIMV` is the 4-byte magic at the head of every chunked-encrypted model on disk.
+  - `aimv://` is the published URI scheme, and `aimv:` the JSON-LD term prefix in `.well-known/ontology.jsonld`.
+
+  Renaming the first two would not rename the bytes already written: `is_sealed` would report plaintext for sealed objects, and `is_chunked_format` would reject encrypted models as corrupt. That is a data migration wearing a find-and-replace costume. The third would invalidate every stored `aimv://` reference for cosmetic gain. All three now carry comments saying so, so this does not get "finished" later by someone tidying up.
+
+- **The Rust vault directory does not move.** The XDG layout was already name-neutral (`~/.config/ai/models/`, `~/.local/share/ai/models/`), so existing vaults are found exactly where they were. Only the *Python* package had a name-derived directory; see `docs/MIGRATION.md` for that one.
+
+### Fixed
+
+- **The CLI's JSON-LD and the published ontology minted different IRIs for the same terms.** `iv introspect` bound the `aimv` prefix to one host while `.well-known/ontology.jsonld` bound it to `https://nervosys.com/ontology/aimv#`, so a consumer joining the two saw two unrelated vocabularies. The CLI now uses the published namespace. Pre-existing; found while auditing which names were branding and which were interfaces.
+
 ## [4.6.1] - 2026-08-10
 
 ### Changed

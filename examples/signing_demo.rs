@@ -2,12 +2,12 @@
 //!
 //! Run with: cargo run --example signing_demo
 
-use ai_model_vault::signing::ModelSigner;
+use ironvault::signing::ModelSigner;
 use std::collections::HashMap;
 use std::path::Path;
 
-fn main() -> ai_model_vault::Result<()> {
-    println!("=== AI Model Vault Signing Example ===\n");
+fn main() -> ironvault::Result<()> {
+    println!("=== IronVault Signing Example ===\n");
 
     // 1. Generate a signing keypair
     println!("1. Generating signing keypair...");

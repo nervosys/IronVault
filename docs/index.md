@@ -1,12 +1,12 @@
-# AI Model Vault
+# IronVault
 
 **Universal cross-platform secure vault for AI model storage, versioning, and management with military-grade encryption.**
 
 ---
 
-## What is AI Model Vault?
+## What is IronVault?
 
-AI Model Vault (`aim`) is a production-ready, FIPS-approved-algorithm encrypted storage system for AI/ML models. It provides:
+IronVault (`iv`) is a production-ready, FIPS-approved-algorithm encrypted storage system for AI/ML models. It provides:
 
 - **Encrypted Storage** — AES-256-GCM encryption with Argon2id key derivation
 - **Version Control** — Sequential versioning with parent lineage trees and instant rollback
@@ -22,8 +22,8 @@ AI Model Vault (`aim`) is a production-ready, FIPS-approved-algorithm encrypted 
 === "From source (Rust)"
 
     ```bash
-    git clone https://github.com/nervosys/AIModelVault.git
-    cd AIModelVault
+    git clone https://github.com/nervosys/IronVault.git
+    cd IronVault
     cargo build --release
     ```
 
@@ -31,8 +31,8 @@ AI Model Vault (`aim`) is a production-ready, FIPS-approved-algorithm encrypted 
 
     ```bash
     pip install maturin
-    git clone https://github.com/nervosys/AIModelVault.git
-    cd AIModelVault
+    git clone https://github.com/nervosys/IronVault.git
+    cd IronVault
     maturin develop --features python
     ```
 
@@ -40,16 +40,16 @@ AI Model Vault (`aim`) is a production-ready, FIPS-approved-algorithm encrypted 
 
 ```bash
 # Initialize an encrypted vault
-aim init
+iv init
 
 # Store a model (format auto-detected)
-aim store my-model ./model.safetensors -d "Fine-tuned LLaMA 7B"
+iv store my-model ./model.safetensors -d "Fine-tuned LLaMA 7B"
 
 # List stored models
-aim list
+iv list
 
 # Retrieve and decrypt
-aim get my-model ./output.safetensors
+iv get my-model ./output.safetensors
 ```
 
 ## Next Steps
@@ -57,10 +57,10 @@ aim get my-model ./output.safetensors
 | Guide                                 | Description                   |
 | ------------------------------------- | ----------------------------- |
 | [Quick Start](QUICKSTART.md)          | Full walkthrough in 5 minutes |
-| [CLI Reference](CLI.md)               | All `aim` commands documented |
-| [Top 10 Features](TOP_10_FEATURES.md) | Why users love AI Model Vault |
+| [CLI Reference](CLI.md)               | All `iv` commands documented |
+| [Top 10 Features](TOP_10_FEATURES.md) | Why users love IronVault |
 | [Security Audit](SECURITY_AUDIT.md)   | Complete security review      |
 | [Architecture](ARCHITECTURE.md)       | System design deep-dive       |
 
 !!! info "1,831 tests passing"
-    AI Model Vault has comprehensive test coverage across encryption, format detection, version control, model cards, RAG, API, and CLI — all verified on every commit.
+    IronVault has comprehensive test coverage across encryption, format detection, version control, model cards, RAG, API, and CLI — all verified on every commit.

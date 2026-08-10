@@ -1,7 +1,7 @@
-//! CLI handler for access control (aim acl).
+//! CLI handler for access control (iv acl).
 
-use ai_model_vault::access_control::Role;
-use ai_model_vault::{AclGuard, Result, VaultConfig};
+use ironvault::access_control::Role;
+use ironvault::{AclGuard, Result, VaultConfig};
 
 use crate::cli::args::AclCommands;
 

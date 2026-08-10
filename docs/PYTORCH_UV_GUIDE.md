@@ -1,6 +1,6 @@
 # PyTorch Integration with uv
 
-This guide shows how to use AI Model Vault with PyTorch using [uv](https://astral.sh/uv/) for fast Python package management.
+This guide shows how to use IronVault with PyTorch using [uv](https://astral.sh/uv/) for fast Python package management.
 
 ## Why uv?
 
@@ -130,14 +130,14 @@ chmod +x setup_pytorch.sh demo.sh
 
 ## Using with Your Models
 
-To use AI Model Vault with your own PyTorch models:
+To use IronVault with your own PyTorch models:
 
 ```python
 import subprocess
 import json
 
-class AIModelVault:
-    """Wrapper for AI Model Vault CLI"""
+class IronVault:
+    """Wrapper for IronVault CLI"""
     
     def __init__(self, vault_path="./model_vault"):
         self.vault_path = vault_path
@@ -146,7 +146,7 @@ class AIModelVault:
     def store_model(self, model_path, model_id, metadata=None):
         """Store a PyTorch model"""
         cmd = [
-            "aim", "store",
+            "iv", "store",
             "--model", model_path,
             "--id", model_id,
             "--vault-path", self.vault_path,
@@ -161,7 +161,7 @@ class AIModelVault:
     def load_model(self, model_id, output_path, version=None):
         """Load a model from vault"""
         cmd = [
-            "aim", "get",
+            "iv", "get",
             "--id", model_id,
             "--output", output_path,
             "--vault-path", self.vault_path,
@@ -174,7 +174,7 @@ class AIModelVault:
         subprocess.run(cmd, check=True)
 
 # Example usage
-vault = AIModelVault()
+vault = IronVault()
 
 # Save your model
 torch.save(model.state_dict(), "my_model.pt")
@@ -194,10 +194,10 @@ model.load_state_dict(torch.load("restored_model.pt"))
 - Read the [PyTorch demo source](demo_pytorch.py) for detailed examples
 - Check [DEMO_GUIDE.md](DEMO_GUIDE.md) for more demo options
 - See [UTILITIES.md](UTILITIES.md) for model utilities
-- Read [FEATURES_DEMO.md](https://github.com/nervosys/AIModelVault/blob/master/reports/FEATURES_DEMO.md) for all features
+- Read [FEATURES_DEMO.md](https://github.com/nervosys/IronVault/blob/master/reports/FEATURES_DEMO.md) for all features
 
 ## Learn More
 
 - **uv documentation**: https://docs.astral.sh/uv/
-- **AI Model Vault docs**: [Quick Start](QUICKSTART.md)
+- **IronVault docs**: [Quick Start](QUICKSTART.md)
 - **PyTorch tutorials**: https://pytorch.org/tutorials/

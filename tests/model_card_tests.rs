@@ -4,7 +4,7 @@
 //! Comprehensive model card tests
 //! Tests every feature, edge case, and validation
 
-use ai_model_vault::model_card::*;
+use ironvault::model_card::*;
 use std::collections::HashMap;
 
 // ============================================================================

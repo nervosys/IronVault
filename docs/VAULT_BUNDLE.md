@@ -5,8 +5,8 @@ Portable `tar.gz` bundles of an entire vault — encrypted blobs, manifests, ACL
 ## CLI
 
 ```bash
-aim vault-export ./my-vault-2025-01-01.tar.gz
-aim vault-import ./my-vault-2025-01-01.tar.gz /path/to/target
+iv vault-export ./my-vault-2025-01-01.tar.gz
+iv vault-import ./my-vault-2025-01-01.tar.gz /path/to/target
 ```
 
 ## MCP tools
@@ -24,4 +24,4 @@ aim vault-import ./my-vault-2025-01-01.tar.gz /path/to/target
 - Version manifests, model cards, lineage, tags, ACLs.
 - Vault config (without the master passphrase).
 
-The passphrase is **never** included — the recipient supplies it at first open. See [src/vault_bundle.rs](https://github.com/nervosys/AIModelVault/blob/master/src/vault_bundle.rs).
+The passphrase is **never** included — the recipient supplies it at first open. See [src/vault_bundle.rs](https://github.com/nervosys/IronVault/blob/master/src/vault_bundle.rs).

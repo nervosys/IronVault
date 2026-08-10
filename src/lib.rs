@@ -1,4 +1,4 @@
-//! AI Model Vault - Universal secure vault for AI model formats
+//! IronVault - Universal secure vault for AI model formats
 //!
 //! A cross-platform, XDG-compliant secure storage system for Neural and Neurosymbolic AI models with:
 //! - FIPS 140-3 compliant encryption
@@ -21,6 +21,7 @@ pub mod conversion;
 pub mod crypto;
 pub mod diff;
 pub mod download;
+pub mod env;
 pub mod error;
 pub mod evaluation;
 pub mod federation;

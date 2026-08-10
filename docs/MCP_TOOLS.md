@@ -2,7 +2,7 @@
 
 ## Overview
 
-AI Model Vault provides comprehensive support for **Model Context Protocol (MCP)** and tool-based interactions, enabling AI agents and applications to execute structured operations on RAG systems, knowledge bases, and custom workflows.
+IronVault provides comprehensive support for **Model Context Protocol (MCP)** and tool-based interactions, enabling AI agents and applications to execute structured operations on RAG systems, knowledge bases, and custom workflows.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@ AI Model Vault provides comprehensive support for **Model Context Protocol (MCP)
 ## Quick Start
 
 ```rust
-use ai_model_vault::rag::*;
+use ironvault::rag::*;
 
 // Create MCP server
 let mut server = MCPServer::new();
@@ -45,7 +45,7 @@ println!("Results: {:?}", result.data);
 
 ### What is MCP?
 
-Model Context Protocol (MCP) provides a standardized way for AI models and agents to interact with external tools and services. In AI Model Vault, MCP enables:
+Model Context Protocol (MCP) provides a standardized way for AI models and agents to interact with external tools and services. In IronVault, MCP enables:
 
 - **Structured Tool Invocation**: Define tools with clear input/output schemas
 - **Context Management**: Pass contextual information to tools
@@ -170,7 +170,7 @@ if result.success {
 
 ## Built-in Tools
 
-AI Model Vault includes 4 built-in RAG tools:
+IronVault includes 4 built-in RAG tools:
 
 ### 1. search_documents
 
@@ -447,7 +447,7 @@ match server.execute_tool("my_tool", params, &ctx) {
 ### RAG Query Pipeline with MCP
 
 ```rust
-use ai_model_vault::rag::*;
+use ironvault::rag::*;
 
 fn rag_pipeline_with_mcp(query: &str) -> Result<String, Box<dyn std::error::Error>> {
     // 1. Setup MCP server
@@ -662,5 +662,5 @@ impl MCPServer {
 
 - [RAG Guide](RAG.md) - Complete RAG documentation
 - [RAG Quick Reference](RAG_QUICKREF.md) - Quick reference card
-- [Examples](https://github.com/nervosys/AIModelVault/blob/master/examples/mcp_tools_demo.rs) - Working examples
-- [Tests](https://github.com/nervosys/AIModelVault/blob/master/tests/rag_tests.rs) - Test suite
+- [Examples](https://github.com/nervosys/IronVault/blob/master/examples/mcp_tools_demo.rs) - Working examples
+- [Tests](https://github.com/nervosys/IronVault/blob/master/tests/rag_tests.rs) - Test suite

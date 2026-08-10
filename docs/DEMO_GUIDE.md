@@ -1,6 +1,6 @@
 # Demo Scripts - Quick Reference
 
-AI Model Vault includes interactive demonstration scripts in both PowerShell and Bash.
+IronVault includes interactive demonstration scripts in both PowerShell and Bash.
 
 ## 📋 Available Scripts
 
@@ -131,15 +131,15 @@ Runs all of the above plus:
 ### First Time Setup
 ```powershell
 # Windows
-git clone https://github.com/yourusername/ai-model-vault
-cd ai-model-vault
+git clone https://github.com/yourusername/ironvault
+cd ironvault
 .\demo.ps1 -Quick
 ```
 
 ```bash
 # Linux/macOS
-git clone https://github.com/yourusername/ai-model-vault
-cd ai-model-vault
+git clone https://github.com/yourusername/ironvault
+cd ironvault
 chmod +x demo.sh
 ./demo.sh --quick
 ```
@@ -201,23 +201,23 @@ chmod +x demo.sh
 ### Successful Quick Demo
 ```
 ╔═══════════════════════════════════════════════════╗
-║     AI Model Vault - Demonstration Script        ║
+║     IronVault - Demonstration Script        ║
 ╚═══════════════════════════════════════════════════╝
 
 === Prerequisites Check ===
 ✓ Cargo found: cargo 1.70.0+
 
-=== Building AI Model Vault ===
+=== Building IronVault ===
 → Building release version (optimized)...
 ✓ Build completed successfully!
 
 === Running: basic_usage ===
 → Basic vault operations: store, retrieve, version control
 
-=== AI Model Vault Basic Example ===
+=== IronVault Basic Example ===
 
 1. Creating vault...
-   ✓ Vault created at: ~/.local/share/aimodelvault/vaults
+   ✓ Vault created at: ~/.local/share/ironvault/vaults
 
 2. Unlocking vault...
    ✓ Vault unlocked
@@ -276,27 +276,27 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ## 📚 Related Documentation
 
-- **[README.md](https://github.com/nervosys/AIModelVault/blob/master/README.md)** - Complete project documentation
-- **[FEATURES_DEMO.md](https://github.com/nervosys/AIModelVault/blob/master/reports/FEATURES_DEMO.md)** - Detailed feature showcase
+- **[README.md](https://github.com/nervosys/IronVault/blob/master/README.md)** - Complete project documentation
+- **[FEATURES_DEMO.md](https://github.com/nervosys/IronVault/blob/master/reports/FEATURES_DEMO.md)** - Detailed feature showcase
 - **[QUICKSTART.md](QUICKSTART.md)** - 5-minute setup guide
-- **[PRODUCTION_READY.md](https://github.com/nervosys/AIModelVault/blob/master/reports/PRODUCTION_READY.md)** - Production deployment guide
-- **[examples/](https://github.com/nervosys/AIModelVault/blob/master/examples/)** - Source code for all demos
+- **[PRODUCTION_READY.md](https://github.com/nervosys/IronVault/blob/master/reports/PRODUCTION_READY.md)** - Production deployment guide
+- **[examples/](https://github.com/nervosys/IronVault/blob/master/examples/)** - Source code for all demos
 
 ## 🤝 Contributing
 
 Found an issue with the demo scripts? Please:
-1. Check [CONTRIBUTING.md](https://github.com/nervosys/AIModelVault/blob/master/CONTRIBUTING.md) for guidelines
+1. Check [CONTRIBUTING.md](https://github.com/nervosys/IronVault/blob/master/CONTRIBUTING.md) for guidelines
 2. Open an issue on GitHub
 3. Submit a pull request with improvements
 
 ## 📝 License
 
-Demo scripts are part of AI Model Vault and licensed under AGPL-3.0-or-later.
-See [LICENSE](https://github.com/nervosys/AIModelVault/blob/master/LICENSE) for details.
+Demo scripts are part of IronVault and licensed under AGPL-3.0-or-later.
+See [LICENSE](https://github.com/nervosys/IronVault/blob/master/LICENSE) for details.
 
 ---
 
-**Ready to see AI Model Vault in action?**
+**Ready to see IronVault in action?**
 
 ```powershell
 # Windows
@@ -306,4 +306,4 @@ See [LICENSE](https://github.com/nervosys/AIModelVault/blob/master/LICENSE) for 
 ./demo.sh --quick
 ```
 
-**Questions?** Check out the [README.md](https://github.com/nervosys/AIModelVault/blob/master/README.md) or open an issue!
+**Questions?** Check out the [README.md](https://github.com/nervosys/IronVault/blob/master/README.md) or open an issue!

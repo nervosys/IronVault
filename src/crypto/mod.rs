@@ -337,7 +337,7 @@ mod tests {
         let passphrase = b"test_passphrase_with_sufficient_entropy".to_vec();
         let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
-        let plaintext = b"Hello, AI Model Vault!";
+        let plaintext = b"Hello, IronVault!";
         let encrypted = crypto.encrypt(plaintext, &key).unwrap();
         let decrypted = crypto.decrypt(&encrypted, &key).unwrap();
 

@@ -1,6 +1,6 @@
 # Feature Flags
 
-AI Model Vault uses Cargo feature flags to keep the default binary lean while enabling optional capabilities.
+IronVault uses Cargo feature flags to keep the default binary lean while enabling optional capabilities.
 
 ## Default Features
 
@@ -81,7 +81,7 @@ maturin develop --features python
 
 | Variable                | Feature  | Purpose                        |
 | ----------------------- | -------- | ------------------------------ |
-| `AIM_SQLITE_VERSIONS`   | `sqlite` | Use SQLite for version storage |
+| `IRONVAULT_SQLITE_VERSIONS`   | `sqlite` | Use SQLite for version storage |
 | `AWS_ACCESS_KEY_ID`     | `s3`     | AWS credentials                |
 | `AWS_SECRET_ACCESS_KEY` | `s3`     | AWS credentials                |
 | `AWS_REGION`            | `s3`     | AWS region                     |

@@ -1,7 +1,7 @@
-//! Integration tests for AI Model Vault
+//! Integration tests for IronVault
 
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-use ai_model_vault::{Vault, VaultConfig};
+use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::{Vault, VaultConfig};
 use tempfile::tempdir;
 
 #[test]

@@ -1,6 +1,6 @@
 //! Client-side encryption for objects leaving the machine.
 //!
-//! `aim cloud push` used to upload what [`crate::Vault::get_model`] returns,
+//! `iv cloud push` used to upload what [`crate::Vault::get_model`] returns,
 //! which is plaintext — the vault decrypts on read. The object in the bucket
 //! was therefore the bare model, and confidentiality depended entirely on the
 //! bucket's own server-side encryption and access policy.
@@ -40,6 +40,13 @@ use crate::error::{Result, VaultError};
 /// Identifies a sealed object. Chosen to be unambiguous in the first bytes of
 /// a file so [`is_sealed`] can distinguish a sealed upload from one made by an
 /// older version, which wrote plaintext.
+///
+/// Deliberately **not** renamed for IronVault. This is an on-disk and on-wire
+/// identifier, not branding: it is the first eight bytes of every object
+/// already sitting in a customer's S3 bucket and of every federation transfer
+/// in flight. Changing it would make all of them unreadable — [`is_sealed`]
+/// would report plaintext, and `open` would refuse them. A rename here is a
+/// data migration, not a find-and-replace.
 pub const MAGIC: &[u8; 8] = b"AIMVSEAL";
 
 /// Envelope format version.
@@ -108,7 +115,7 @@ pub fn open(sealed: &[u8], passphrase: Vec<u8>) -> Result<Vec<u8>> {
     if version != FORMAT_VERSION {
         return Err(VaultError::CryptoError(format!(
             "Unsupported envelope version {version}: this build understands \
-             version {FORMAT_VERSION}. Upgrade `aim` to read it."
+             version {FORMAT_VERSION}. Upgrade `iv` to read it."
         )));
     }
 

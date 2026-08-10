@@ -1,4 +1,4 @@
-//! Example: REST API usage with AI Model Vault
+//! Example: REST API usage with IronVault
 //!
 //! Demonstrates how to start the API server and interact with it
 //! programmatically using `reqwest`.
@@ -12,14 +12,14 @@
 #[cfg(feature = "api")]
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    use ai_model_vault::api::server::{create_router, AppState, RateLimiter};
-    use ai_model_vault::api::ApiConfig;
-    use ai_model_vault::config::VaultConfig;
-    use ai_model_vault::vault::Vault;
+    use ironvault::api::server::{create_router, AppState, RateLimiter};
+    use ironvault::api::ApiConfig;
+    use ironvault::config::VaultConfig;
+    use ironvault::vault::Vault;
     use std::sync::Arc;
     use tokio::sync::RwLock;
 
-    println!("=== AI Model Vault REST API Demo ===\n");
+    println!("=== IronVault REST API Demo ===\n");
 
     // ── 1. Set up vault and API config ───────────────────────────────────
     println!("1. Setting up vault and API configuration...");

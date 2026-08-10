@@ -1,7 +1,7 @@
-//! CLI handler for model tags and search (aim tag / aim search).
+//! CLI handler for model tags and search (iv tag / iv search).
 
-use ai_model_vault::tags::SearchQuery;
-use ai_model_vault::{Result, TagStore, VaultConfig, VaultError};
+use ironvault::tags::SearchQuery;
+use ironvault::{Result, TagStore, VaultConfig, VaultError};
 
 use crate::cli::args::TagCommands;
 
@@ -47,7 +47,7 @@ pub fn handle_search(
     };
 
     // We need model names for the search — get from version control
-    let vc = ai_model_vault::version::VersionControl::new(&config.dirs.vault_dir)?;
+    let vc = ironvault::version::VersionControl::new(&config.dirs.vault_dir)?;
     let models = vc.list_models_owned();
 
     let results = store.search(&sq, &models);

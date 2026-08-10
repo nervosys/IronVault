@@ -11,13 +11,13 @@ export default function DiffingPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="quick-start">Quick Start</h2>
       <CodeBlock language="bash">{`# Compare two files
-aim diff model_v1.safetensors model_v2.safetensors
+iv diff model_v1.safetensors model_v2.safetensors
 
 # Compare vault model versions
-aim diff mymodel@v1 mymodel@v2
+iv diff mymodel@v1 mymodel@v2
 
 # JSON output
-aim diff model_v1.gguf model_v2.gguf --format json`}</CodeBlock>
+iv diff model_v1.gguf model_v2.gguf --format json`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="formats">Supported Formats</h2>
       <div className="overflow-x-auto">
@@ -50,7 +50,7 @@ aim diff model_v1.gguf model_v2.gguf --format json`}</CodeBlock>
       </ul>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="options">CLI Options</h2>
-      <CodeBlock language="bash">{`aim diff <LEFT> <RIGHT> [OPTIONS]
+      <CodeBlock language="bash">{`iv diff <LEFT> <RIGHT> [OPTIONS]
 
 Arguments:
   <LEFT>              Left model (file path or name@version)

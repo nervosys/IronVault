@@ -15,10 +15,10 @@ export default function APIPage() {
       </Callout>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="start">Starting the Server</h2>
-      <CodeBlock language="bash">{`aim serve --host 0.0.0.0 --port 8080
+      <CodeBlock language="bash">{`iv serve --host 0.0.0.0 --port 8080
 
 # With environment variables
-AIM_HOST=0.0.0.0 AIM_PORT=8080 AIM_JWT_SECRET=my-secret aim serve`}</CodeBlock>
+IRONVAULT_HOST=0.0.0.0 IRONVAULT_PORT=8080 IRONVAULT_JWT_SECRET=my-secret iv serve`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="auth">Authentication</h2>
       <p className="text-[var(--color-text-secondary)] mb-4">

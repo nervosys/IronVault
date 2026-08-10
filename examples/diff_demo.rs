@@ -2,11 +2,11 @@
 //!
 //! Run with: cargo run --example diff_demo
 
-use ai_model_vault::diff::ModelDiffer;
+use ironvault::diff::ModelDiffer;
 use std::path::Path;
 
-fn main() -> ai_model_vault::Result<()> {
-    println!("=== AI Model Vault Diff Example ===\n");
+fn main() -> ironvault::Result<()> {
+    println!("=== IronVault Diff Example ===\n");
 
     // 1. Diff two files (if they exist)
     println!("1. Diffing model files...");
@@ -26,13 +26,13 @@ fn main() -> ai_model_vault::Result<()> {
         println!("   (No model files found — showing CLI usage instead)");
         println!();
         println!("   Compare two files:");
-        println!("     aim diff model_v1.safetensors model_v2.safetensors");
+        println!("     iv diff model_v1.safetensors model_v2.safetensors");
         println!();
         println!("   Compare vault versions:");
-        println!("     aim diff mymodel@v1 mymodel@v2");
+        println!("     iv diff mymodel@v1 mymodel@v2");
         println!();
         println!("   JSON output:");
-        println!("     aim diff left.gguf right.gguf --format json");
+        println!("     iv diff left.gguf right.gguf --format json");
     }
     println!();
 

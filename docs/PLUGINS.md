@@ -1,6 +1,6 @@
 # Plugin System
 
-Out-of-process extensions described by JSON manifests. Plugins surface their own CLI commands and event subscribers without recompiling `aim`.
+Out-of-process extensions described by JSON manifests. Plugins surface their own CLI commands and event subscribers without recompiling `iv`.
 
 ## Manifest
 
@@ -20,15 +20,15 @@ Out-of-process extensions described by JSON manifests. Plugins surface their own
 ## CLI
 
 ```bash
-aim plugin discover                # scan well-known paths
-aim plugin install ./manifest.json
-aim plugin list
-aim plugin info my-plugin
-aim plugin uninstall my-plugin
+iv plugin discover                # scan well-known paths
+iv plugin install ./manifest.json
+iv plugin list
+iv plugin info my-plugin
+iv plugin uninstall my-plugin
 ```
 
 ## MCP tools
 
 `plugin_discover`, `plugin_install`, `plugin_uninstall`, `plugin_list`, `plugin_info`.
 
-Plugins run with the same user-account permissions as `aim` — only install plugins you trust. See [src/plugins.rs](https://github.com/nervosys/AIModelVault/blob/master/src/plugins.rs).
+Plugins run with the same user-account permissions as `iv` — only install plugins you trust. See [src/plugins.rs](https://github.com/nervosys/IronVault/blob/master/src/plugins.rs).

@@ -1,8 +1,8 @@
-//! CLI handler for model diffing (aim diff).
+//! CLI handler for model diffing (iv diff).
 
 use std::path::Path;
 
-use ai_model_vault::{ModelDiffer, Result, VaultConfig, VaultError};
+use ironvault::{ModelDiffer, Result, VaultConfig, VaultError};
 
 use crate::cli::helpers::{build_vault, prompt_passphrase};
 

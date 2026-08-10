@@ -1,9 +1,9 @@
 //! Federation command handlers — the client side of peer sync.
 
-use ai_model_vault::federation::{FederationManager, PeerConfig, SyncManifest};
-use ai_model_vault::federation_transport as transport;
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-use ai_model_vault::{Result, VaultConfig, VaultError};
+use ironvault::federation::{FederationManager, PeerConfig, SyncManifest};
+use ironvault::federation_transport as transport;
+use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::{Result, VaultConfig, VaultError};
 
 use crate::cli::args::FederationCommands;
 use crate::cli::helpers::{build_vault, prompt_passphrase};
@@ -14,7 +14,7 @@ fn manager(config: &VaultConfig) -> Result<FederationManager> {
         return Err(VaultError::ConfigError(
             "federation is not enabled -- set federation.enabled = true in config.yaml \
              and add at least one peer. Enabling it also exposes \
-             /api/v1/federation/* on `aim serve`."
+             /api/v1/federation/* on `iv serve`."
                 .to_string(),
         ));
     }
@@ -38,15 +38,15 @@ fn find_peer(mgr: &FederationManager, peer_id: &str) -> Result<PeerConfig> {
         })
         .ok_or_else(|| {
             VaultError::ConfigError(format!(
-                "no peer with node id '{peer_id}' -- see `aim federation status`"
+                "no peer with node id '{peer_id}' -- see `iv federation status`"
             ))
         })
 }
 
 /// Collect this vault's models into the shape `generate_manifest` wants.
 fn local_models(
-    vault: &ai_model_vault::vault::Vault,
-) -> Vec<(String, Vec<ai_model_vault::version::ModelVersion>)> {
+    vault: &ironvault::vault::Vault,
+) -> Vec<(String, Vec<ironvault::version::ModelVersion>)> {
     vault
         .list_models()
         .into_iter()

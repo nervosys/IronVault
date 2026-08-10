@@ -10,13 +10,13 @@ use crate::config::{FederationPeerSettings, FederationSettings};
 use crate::error::{Result, VaultError};
 
 /// Environment variable holding the shared sealing passphrase.
-pub const SEAL_PASSPHRASE_ENV: &str = "aimodelvault_FEDERATION_PASSPHRASE";
+pub const SEAL_PASSPHRASE_ENV: &str = "IRONVAULT_FEDERATION_PASSPHRASE";
 
 /// Header carrying the peer's shared key.
 pub const API_KEY_HEADER: &str = "X-API-Key";
 
 /// Environment variable holding the vault passphrase, mirroring the CLI's.
-pub const VAULT_PASSPHRASE_ENV: &str = "aimodelvault_PASSPHRASE";
+pub const VAULT_PASSPHRASE_ENV: &str = "IRONVAULT_PASSPHRASE";
 
 /// Version-metadata key recording the checkpoint id a model arrived with.
 ///
@@ -61,12 +61,9 @@ pub fn origin_metadata(origin_id: &str) -> std::collections::HashMap<String, Str
 /// Accepts a literal or a KMS URI, same as the CLI. Returns `None` when unset,
 /// leaving the vault locked rather than guessing.
 pub fn startup_passphrase() -> Result<Option<Zeroizing<String>>> {
-    let Ok(value) = std::env::var(VAULT_PASSPHRASE_ENV) else {
+    let Some(value) = crate::env::var_secret(VAULT_PASSPHRASE_ENV) else {
         return Ok(None);
     };
-    if value.trim().is_empty() {
-        return Ok(None);
-    }
     crate::kms::resolve(&value).map(Some)
 }
 
@@ -186,22 +183,18 @@ pub fn key_is_accepted(presented: &str, accepted: &[Zeroizing<String>]) -> bool 
 /// Never read from the config file. It is the one secret both nodes must share
 /// to exchange models, and a config file is the wrong place for it.
 pub fn seal_passphrase() -> Result<Zeroizing<String>> {
-    let value = std::env::var(SEAL_PASSPHRASE_ENV).map_err(|_| {
+    // Set-but-empty and unset are the same failure to an operator, and the
+    // remedy is identical, so they share one message.
+    let value = crate::env::var_secret(SEAL_PASSPHRASE_ENV).ok_or_else(|| {
         VaultError::ConfigError(format!(
-            "federation.seal_transfers is on but ${SEAL_PASSPHRASE_ENV} is not set. \
-             Both peers must share the same value. Set it, or set \
+            "federation.seal_transfers is on but ${SEAL_PASSPHRASE_ENV} is not set \
+             (or is empty). Both peers must share the same value. Set it, or set \
              federation.seal_transfers = false to send models unencrypted \
              (only defensible on a network you fully control)."
         ))
     })?;
 
-    if value.trim().is_empty() {
-        return Err(VaultError::ConfigError(format!(
-            "${SEAL_PASSPHRASE_ENV} is set but empty"
-        )));
-    }
-
-    Ok(Zeroizing::new(value))
+    Ok(value)
 }
 
 /// Seal model bytes for transit when configured to.

@@ -1,7 +1,7 @@
-//! CLI handler for webhook management (aim webhook).
+//! CLI handler for webhook management (iv webhook).
 
-use ai_model_vault::webhooks::WebhookTarget;
-use ai_model_vault::{Result, VaultConfig, WebhookStore};
+use ironvault::webhooks::WebhookTarget;
+use ironvault::{Result, VaultConfig, WebhookStore};
 
 use crate::cli::args::WebhookCommands;
 

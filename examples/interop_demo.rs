@@ -2,11 +2,11 @@
 //!
 //! Run with: cargo run --example interop_demo
 
-use ai_model_vault::interop::{InferenceEngine, LmStudioOptions, OllamaOptions};
+use ironvault::interop::{InferenceEngine, LmStudioOptions, OllamaOptions};
 use std::path::PathBuf;
 
-fn main() -> ai_model_vault::Result<()> {
-    println!("=== AI Model Vault Engine Interop Example ===\n");
+fn main() -> ironvault::Result<()> {
+    println!("=== IronVault Engine Interop Example ===\n");
 
     // 1. Ollama registration
     println!("1. Ollama registration...");
@@ -48,12 +48,12 @@ fn main() -> ai_model_vault::Result<()> {
 
     // 3. CLI usage
     println!("3. CLI commands:");
-    println!("   aim register my-model --engine ollama");
+    println!("   iv register my-model --engine ollama");
     println!(
-        "   aim register my-model --engine ollama --alias chat-bot --system-prompt 'Be helpful'"
+        "   iv register my-model --engine ollama --alias chat-bot --system-prompt 'Be helpful'"
     );
-    println!("   aim register my-model --engine lm-studio");
-    println!("   aim register my-model --engine lm-studio --version 2\n");
+    println!("   iv register my-model --engine lm-studio");
+    println!("   iv register my-model --engine lm-studio --version 2\n");
 
     // 4. Supported engines
     println!("4. Supported engines:");

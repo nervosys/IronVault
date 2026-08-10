@@ -3,7 +3,7 @@ export default function CompliancePage() {
     <>
       <h1 className="text-4xl font-bold mb-4">Compliance</h1>
       <p className="text-lg text-[var(--color-text-secondary)] mb-8">
-        Standards and certifications supported by AI Model Vault.
+        Standards and certifications supported by IronVault.
       </p>
 
       <h2 className="text-2xl font-bold mt-10 mb-4">FIPS 140-3</h2>

@@ -69,7 +69,7 @@ pub(crate) fn export(
         .with_resource(resource)
         .build();
 
-    let logger = provider.logger("ai-model-vault");
+    let logger = provider.logger("ironvault");
 
     for envelope in events {
         let mut record = logger.create_log_record();

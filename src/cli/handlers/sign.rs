@@ -1,9 +1,9 @@
-//! CLI handlers for model signing and verification (aim sign, aim verify).
+//! CLI handlers for model signing and verification (iv sign, iv verify).
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-use ai_model_vault::{kms, ModelSigner, Result, SigningKeyPair, VaultConfig, VaultError};
+use ironvault::{kms, ModelSigner, Result, SigningKeyPair, VaultConfig, VaultError};
 
 use crate::cli::helpers::{build_vault, prompt_passphrase};
 
@@ -148,7 +148,7 @@ pub fn handle_verify(
     }
 
     println!("\n✗ Verification FAILED");
-    // Fail the process too. `aim verify` is what a pipeline gates on; exiting 0
+    // Fail the process too. `iv verify` is what a pipeline gates on; exiting 0
     // after printing FAILED means every non-interactive caller treats a
     // tampered or unverifiable model as good.
     Err(VaultError::IntegrityError(result.reason.unwrap_or_else(

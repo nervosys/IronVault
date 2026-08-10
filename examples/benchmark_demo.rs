@@ -2,11 +2,11 @@
 //!
 //! Run with: cargo run --example benchmark_demo
 
-use ai_model_vault::benchmark::{BenchmarkRecord, BenchmarkStore};
+use ironvault::benchmark::{BenchmarkRecord, BenchmarkStore};
 use std::collections::BTreeMap;
 
-fn main() -> ai_model_vault::Result<()> {
-    println!("=== AI Model Vault Benchmark Example ===\n");
+fn main() -> ironvault::Result<()> {
+    println!("=== IronVault Benchmark Example ===\n");
 
     // 1. Create a benchmark record
     println!("1. Creating benchmark record...");
@@ -69,9 +69,9 @@ fn main() -> ai_model_vault::Result<()> {
     // 7. CLI commands
     println!("7. CLI usage:");
     println!(
-        "   aim benchmark add my-model --version 1 --benchmark mmlu --score 72.5 --unit percent"
+        "   iv benchmark add my-model --version 1 --benchmark mmlu --score 72.5 --unit percent"
     );
-    println!("   aim benchmark show my-model --version 1 --format json\n");
+    println!("   iv benchmark show my-model --version 1 --format json\n");
 
     println!("=== Benchmark example complete ===");
     Ok(())

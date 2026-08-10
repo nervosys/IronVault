@@ -1,5 +1,5 @@
 """
-Model format registry for AI Model Vault.
+Model format registry for IronVault.
 
 Enumerates supported model formats and provides detection/conversion guidance.
 Mirrors the Rust `ModelFormat` enum in src/formats.rs.
@@ -17,7 +17,7 @@ class ModelFormat(Enum):
     """
     Supported AI model formats.
 
-    Each variant corresponds to a file format that AI Model Vault
+    Each variant corresponds to a file format that IronVault
     can store, retrieve, and (where applicable) convert between.
 
     This enum mirrors the Rust ``ModelFormat`` in ``src/formats.rs``.

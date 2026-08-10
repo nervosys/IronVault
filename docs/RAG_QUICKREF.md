@@ -3,7 +3,7 @@
 ## Import
 
 ```rust
-use ai_model_vault::rag::*;
+use ironvault::rag::*;
 use std::collections::HashMap;
 ```
 
@@ -281,5 +281,5 @@ fn cached_retrieve(
 ## See Also
 
 - [Full Documentation](RAG.md)
-- [Examples](https://github.com/nervosys/AIModelVault/blob/master/examples/rag_demo.rs)
-- [Tests](https://github.com/nervosys/AIModelVault/blob/master/tests/rag_tests.rs)
+- [Examples](https://github.com/nervosys/IronVault/blob/master/examples/rag_demo.rs)
+- [Tests](https://github.com/nervosys/IronVault/blob/master/tests/rag_tests.rs)

@@ -1,6 +1,6 @@
 //! Benchmarks for v1.5.0 modules — quantization, evaluation, scheduler, multi-vault.
 
-use ai_model_vault::{
+use ironvault::{
     BackupFrequency, BackupManager, BackupSchedule, EvalRun, EvalStore, MetricResult, QuantMethod,
     QuantProfile, QuantProfileStore, VaultEntry, VaultRegistry,
 };
@@ -53,7 +53,7 @@ fn bench_quant_profile_store(c: &mut Criterion) {
 
     group.bench_function("estimate_size", |b| {
         b.iter(|| {
-            black_box(ai_model_vault::quantization::estimate_quantized_size(
+            black_box(ironvault::quantization::estimate_quantized_size(
                 1_000_000_000,
                 QuantMethod::F32,
                 QuantMethod::Q4KM,

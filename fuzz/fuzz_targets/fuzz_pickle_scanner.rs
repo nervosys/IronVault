@@ -1,7 +1,7 @@
 #![no_main]
 use libfuzzer_sys::fuzz_target;
 
-use ai_model_vault::scanning::PickleScanner;
+use ironvault::scanning::PickleScanner;
 
 fuzz_target!(|data: &[u8]| {
     // Fuzz the pickle scanner with arbitrary byte sequences.
@@ -16,8 +16,8 @@ fuzz_target!(|data: &[u8]| {
     if report.safe {
         for f in &report.findings {
             assert!(
-                f.severity != ai_model_vault::scanning::Severity::Critical
-                    && f.severity != ai_model_vault::scanning::Severity::Warning,
+                f.severity != ironvault::scanning::Severity::Critical
+                    && f.severity != ironvault::scanning::Severity::Warning,
                 "report marked safe but has critical/warning finding"
             );
         }

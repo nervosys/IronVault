@@ -2,28 +2,28 @@
 //!
 //! This example shows the canonical agent-first integration pattern:
 //!
-//!   1. Shell out to `aim introspect --format json` to get the machine-
+//!   1. Shell out to `iv introspect --format json` to get the machine-
 //!      readable CLI schema (commands, flags, types, examples, exit codes).
 //!   2. Parse it. Pick a capability. Build an argv. Invoke. Parse JSON output.
 //!
-//! Every read-only `aim` subcommand accepts `--format json` and emits
+//! Every read-only `iv` subcommand accepts `--format json` and emits
 //! structured output suitable for an LLM tool-calling loop. Errors come
 //! back as `{ "code", "message", "hint" }` on stderr with stable exit codes
 //! (0 ok · 1 user · 2 not-found · 3 integrity · 4 permission).
 //!
 //! Run with:  `cargo run --example agent_bootstrap`
 //!
-//! Requires the `aim` binary on `PATH` (build it first with `cargo build --release`
+//! Requires the `iv` binary on `PATH` (build it first with `cargo build --release`
 //! and add `target/release/` to PATH, or just run `cargo install --path .`).
 
 use serde_json::Value;
 use std::process::{Command, Output};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("=== AI Model Vault — Agent Bootstrap Demo ===\n");
+    println!("=== IronVault — Agent Bootstrap Demo ===\n");
 
     // ── Step 1 — Discover the full CLI surface ────────────────────────────
-    println!("1. `aim introspect --format json` — fetch machine-readable schema");
+    println!("1. `iv introspect --format json` — fetch machine-readable schema");
     let schema = aim_json(&["introspect", "--format", "json", "--compact"])?;
 
     let commands = schema
@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // ── Step 3 — Invoke a capability and parse the JSON envelope ──────────
-    println!("3. Invoke `aim list --format json` to enumerate models");
+    println!("3. Invoke `iv list --format json` to enumerate models");
     match aim_json(&["list", "--format", "json"]) {
         Ok(models) => {
             let n = models.as_array().map(|a| a.len()).unwrap_or(0);
@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Err(e) => {
             // The agent should recover gracefully — no vault yet is normal.
-            println!("   · no vault yet ({}). Run `aim init` to create one.", e);
+            println!("   · no vault yet ({}). Run `iv init` to create one.", e);
         }
     }
     println!();
@@ -98,21 +98,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ── Pattern summary ───────────────────────────────────────────────────
     println!("─── Agent integration pattern ─────────────────────────────────");
     println!("  loop:                                                       ");
-    println!("    schema  = aim introspect --format json                    ");
+    println!("    schema  = iv introspect --format json                    ");
     println!("    tool    = llm.pick_tool(schema.commands, user_goal)      ");
-    println!("    result  = subprocess.run([\"aim\", tool, ...], json)     ");
+    println!("    result  = subprocess.run([\"iv\", tool, ...], json)     ");
     println!("    if exit != 0: parse stderr JSON envelope, retry or back off");
     println!("───────────────────────────────────────────────────────────────");
 
     Ok(())
 }
 
-/// Run `aim ARGS` and parse stdout as JSON.
+/// Run `iv ARGS` and parse stdout as JSON.
 fn aim_json(args: &[&str]) -> Result<Value, Box<dyn std::error::Error>> {
     let out = aim_raw(args)?;
     if !out.status.success() {
         return Err(format!(
-            "aim {} exited with code {}",
+            "iv {} exited with code {}",
             args.join(" "),
             out.status.code().unwrap_or(-1)
         )
@@ -122,11 +122,11 @@ fn aim_json(args: &[&str]) -> Result<Value, Box<dyn std::error::Error>> {
     Ok(v)
 }
 
-/// Run `aim ARGS` and return the raw `Output` (no exit-code check).
+/// Run `iv ARGS` and return the raw `Output` (no exit-code check).
 fn aim_raw(args: &[&str]) -> Result<Output, Box<dyn std::error::Error>> {
-    Command::new("aim").args(args).output().map_err(|e| {
+    Command::new("iv").args(args).output().map_err(|e| {
         format!(
-            "failed to spawn `aim {}` — is it on PATH? ({})",
+            "failed to spawn `iv {}` — is it on PATH? ({})",
             args.join(" "),
             e
         )

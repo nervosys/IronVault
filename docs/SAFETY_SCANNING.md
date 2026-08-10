@@ -6,22 +6,22 @@ Static analysis of PyTorch/pickle files for dangerous opcodes and malicious patt
 
 ```bash
 # Scan a vault model
-aim scan my-model
+iv scan my-model
 
 # Scan a specific version
-aim scan my-model --version 2
+iv scan my-model --version 2
 
 # Scan a file on disk
-aim scan --file ./model.pt
+iv scan --file ./model.pt
 
 # JSON output for CI/CD integration
-aim scan --file ./model.pt --format json
+iv scan --file ./model.pt --format json
 ```
 
 ## CLI Reference
 
 ```
-aim scan [<NAME>] [OPTIONS]
+iv scan [<NAME>] [OPTIONS]
 
 Arguments:
   [NAME]              Model name in vault (optional)
@@ -77,7 +77,7 @@ Recommendation: Do not load this file with torch.load(). Consider converting to 
 ## Rust API
 
 ```rust
-use ai_model_vault::scanning::PickleScanner;
+use ironvault::scanning::PickleScanner;
 
 // Scan a file
 let report = PickleScanner::scan(Path::new("model.pt"))?;
@@ -95,5 +95,5 @@ let report = PickleScanner::scan_bytes(&data, "model.pt");
 
 ```bash
 # Fail pipeline if model is unsafe
-aim scan --file model.pt --format json | jq -e '.safe == true'
+iv scan --file model.pt --format json | jq -e '.safe == true'
 ```

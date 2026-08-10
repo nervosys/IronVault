@@ -1,10 +1,10 @@
 //! Cloud storage command handlers (push, pull, list, config).
 
-use ai_model_vault::{Result, VaultConfig, VaultError};
+use ironvault::{Result, VaultConfig, VaultError};
 // Only the `cloud pull --store` path constructs metadata, and that path is
 // compiled behind the cloud backend features.
 #[cfg(any(feature = "s3", feature = "azure"))]
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
+use ironvault::formats::{ModelFormat, ModelMetadata};
 
 use crate::cli::args::CloudCommands;
 use crate::cli::helpers::{build_vault, prompt_passphrase};
@@ -17,7 +17,7 @@ use crate::cli::helpers::{build_vault, prompt_passphrase};
 /// sitting in cloud storage is exactly the exposure sealing exists to close.
 #[cfg(any(feature = "s3", feature = "azure"))]
 fn unseal_downloaded(data: Vec<u8>, passphrase: &[u8]) -> Result<Vec<u8>> {
-    use ai_model_vault::cloud_envelope;
+    use ironvault::cloud_envelope;
 
     if cloud_envelope::is_sealed(&data) {
         println!("🔓 Sealed object — decrypting");
@@ -81,7 +81,7 @@ pub fn handle_cloud(command: CloudCommands, config: VaultConfig, use_sqlite: boo
                 .find(|v| v.version == version_num)
                 .ok_or_else(|| VaultError::VersionNotFound(version_num, model.clone()))?;
 
-            let _data = ai_model_vault::cloud_envelope::seal(&plaintext, seal_passphrase)?;
+            let _data = ironvault::cloud_envelope::seal(&plaintext, seal_passphrase)?;
             drop(plaintext);
             println!("🔒 Sealed with AES-256-GCM (Argon2id, per-object salt)");
 
@@ -93,7 +93,7 @@ pub fn handle_cloud(command: CloudCommands, config: VaultConfig, use_sqlite: boo
                 "s3" => {
                     #[cfg(feature = "s3")]
                     {
-                        use ai_model_vault::storage::StorageConfig;
+                        use ironvault::storage::StorageConfig;
                         println!("📤 Uploading to S3...");
                         let region =
                             std::env::var("AWS_REGION").unwrap_or_else(|_| "us-east-1".to_string());
@@ -130,7 +130,7 @@ pub fn handle_cloud(command: CloudCommands, config: VaultConfig, use_sqlite: boo
                 "azure" => {
                     #[cfg(feature = "azure")]
                     {
-                        use ai_model_vault::storage::StorageConfig;
+                        use ironvault::storage::StorageConfig;
                         let account = std::env::var("AZURE_STORAGE_ACCOUNT").map_err(|_| {
                             VaultError::ConfigError(
                                 "AZURE_STORAGE_ACCOUNT env var not set".to_string(),
@@ -196,7 +196,7 @@ pub fn handle_cloud(command: CloudCommands, config: VaultConfig, use_sqlite: boo
                 "s3" => {
                     #[cfg(feature = "s3")]
                     {
-                        use ai_model_vault::storage::StorageConfig;
+                        use ironvault::storage::StorageConfig;
                         let region =
                             std::env::var("AWS_REGION").unwrap_or_else(|_| "us-east-1".to_string());
                         println!("📥 Downloading from S3...");
@@ -244,7 +244,7 @@ pub fn handle_cloud(command: CloudCommands, config: VaultConfig, use_sqlite: boo
                 "azure" => {
                     #[cfg(feature = "azure")]
                     {
-                        use ai_model_vault::storage::StorageConfig;
+                        use ironvault::storage::StorageConfig;
                         let account = std::env::var("AZURE_STORAGE_ACCOUNT").map_err(|_| {
                             VaultError::ConfigError(
                                 "AZURE_STORAGE_ACCOUNT env var not set".to_string(),
@@ -323,7 +323,7 @@ pub fn handle_cloud(command: CloudCommands, config: VaultConfig, use_sqlite: boo
                 "s3" => {
                     #[cfg(feature = "s3")]
                     {
-                        use ai_model_vault::storage::StorageConfig;
+                        use ironvault::storage::StorageConfig;
                         let region =
                             std::env::var("AWS_REGION").unwrap_or_else(|_| "us-east-1".to_string());
 
@@ -364,7 +364,7 @@ pub fn handle_cloud(command: CloudCommands, config: VaultConfig, use_sqlite: boo
                 "azure" => {
                     #[cfg(feature = "azure")]
                     {
-                        use ai_model_vault::storage::StorageConfig;
+                        use ironvault::storage::StorageConfig;
                         let account = std::env::var("AZURE_STORAGE_ACCOUNT").map_err(|_| {
                             VaultError::ConfigError(
                                 "AZURE_STORAGE_ACCOUNT env var not set".to_string(),
@@ -528,7 +528,7 @@ pub fn handle_cloud(command: CloudCommands, config: VaultConfig, use_sqlite: boo
                 }
             } else {
                 println!("\n💡 Use --show flag to display current configuration");
-                println!("   Example: aim cloud config --provider s3 --show");
+                println!("   Example: iv cloud config --provider s3 --show");
             }
         }
     }

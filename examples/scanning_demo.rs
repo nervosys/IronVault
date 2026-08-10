@@ -2,11 +2,11 @@
 //!
 //! Run with: cargo run --example scanning_demo
 
-use ai_model_vault::scanning::PickleScanner;
+use ironvault::scanning::PickleScanner;
 use std::path::Path;
 
-fn main() -> ai_model_vault::Result<()> {
-    println!("=== AI Model Vault Scanning Example ===\n");
+fn main() -> ironvault::Result<()> {
+    println!("=== IronVault Scanning Example ===\n");
 
     // 1. Scan bytes in memory (simulate a pickle file)
     println!("1. Scanning in-memory data...");
@@ -54,7 +54,7 @@ fn main() -> ai_model_vault::Result<()> {
 
     // 5. CI/CD usage
     println!("5. CI/CD integration:");
-    println!("   aim scan --file model.pt --format json | jq -e '.safe == true'\n");
+    println!("   iv scan --file model.pt --format json | jq -e '.safe == true'\n");
 
     println!("=== Scanning example complete ===");
     Ok(())

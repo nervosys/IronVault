@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
-# Quick test and validation script for aimodelvault
+# Quick test and validation script for ironvault
 
-Write-Host "=== aimodelvault Quick Validation ===" -ForegroundColor Cyan
+Write-Host "=== ironvault Quick Validation ===" -ForegroundColor Cyan
 Write-Host ""
 
 # 1. Format check

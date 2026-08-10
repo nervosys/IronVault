@@ -2,7 +2,7 @@
 
 ## Overview
 
-AI Model Vault (AIMV) supports **23+ model formats** across the entire AI/ML ecosystem, from large language models to computer vision, mobile deployment, and edge computing. This guide provides comprehensive coverage of supported formats, providers, and conversion paths.
+IronVault (AIMV) supports **23+ model formats** across the entire AI/ML ecosystem, from large language models to computer vision, mobile deployment, and edge computing. This guide provides comprehensive coverage of supported formats, providers, and conversion paths.
 
 ## Table of Contents
 
@@ -746,7 +746,7 @@ aimv formats list
 ### Detecting Model Format
 
 ```rust
-use ai_model_vault::formats::ModelFormat;
+use ironvault::formats::ModelFormat;
 
 let format = ModelFormat::from_extension("safetensors");
 println!("Format: {}", format.name()); // "Safetensors"
@@ -755,7 +755,7 @@ println!("Format: {}", format.name()); // "Safetensors"
 ### Creating Model Metadata
 
 ```rust
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
+use ironvault::formats::{ModelFormat, ModelMetadata};
 
 let metadata = ModelMetadata::new(
     "llama-2-7b-chat".to_string(),
@@ -773,7 +773,7 @@ let metadata = ModelMetadata::new(
 ### Format Converter Registry
 
 ```rust
-use ai_model_vault::formats::FormatConverter;
+use ironvault::formats::FormatConverter;
 
 let mut converter = FormatConverter::new();
 
@@ -824,4 +824,4 @@ if converter.can_convert(from_format, to_format) {
 
 ---
 
-**AI Model Vault (AIMV)** - Universal model storage with support for 23+ formats across the entire AI/ML ecosystem.
+**IronVault (AIMV)** - Universal model storage with support for 23+ formats across the entire AI/ML ecosystem.

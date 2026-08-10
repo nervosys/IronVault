@@ -107,7 +107,7 @@ mod tests {
 
     #[test]
     fn test_gzip_compress_decompress() {
-        let data = b"Hello, AI Model Vault! This is test data for compression.".repeat(100);
+        let data = b"Hello, IronVault! This is test data for compression.".repeat(100);
         let compressed = compress(
             &data,
             CompressionAlgorithm::Gzip,
@@ -122,7 +122,7 @@ mod tests {
 
     #[test]
     fn test_lzma_compress_decompress() {
-        let data = b"Hello, AI Model Vault! This is test data for compression.".repeat(100);
+        let data = b"Hello, IronVault! This is test data for compression.".repeat(100);
         let compressed = compress(
             &data,
             CompressionAlgorithm::Lzma,

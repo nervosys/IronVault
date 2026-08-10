@@ -1,4 +1,4 @@
-//! GraphQL API for AI Model Vault
+//! GraphQL API for IronVault
 //!
 //! Provides a GraphQL interface alongside the REST API with:
 //! - Queries: models, versions, lineage, stats

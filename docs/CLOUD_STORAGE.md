@@ -19,7 +19,7 @@ Push and pull vault models to AWS S3 or Azure Blob Storage.
 
 ## Security model
 
-**As of 4.3.0, `aim cloud push` encrypts before upload.** The payload is
+**As of 4.3.0, `iv cloud push` encrypts before upload.** The payload is
 sealed with AES-256-GCM under a key derived from your vault passphrase with
 Argon2id, using a fresh random salt per object. What lands in the bucket is
 ciphertext; the cloud provider never sees the model.
@@ -91,15 +91,15 @@ anything.
 
 ## Command surface
 
-Four subcommands under `aim cloud`. There is no persistent "remote"
+Four subcommands under `iv cloud`. There is no persistent "remote"
 configuration — the provider and bucket are passed per invocation, and
 credentials come from the environment.
 
 ```bash
-aim cloud push   <MODEL> --provider <s3|azure> --bucket <NAME> [--version N]
-aim cloud pull   <MODEL> --provider <s3|azure> --bucket <NAME> --remote-path <KEY>
-aim cloud list   --provider <s3|azure> --bucket <NAME> [--prefix <PATH>]
-aim cloud config --provider <s3|azure|gcs> [--show]
+iv cloud push   <MODEL> --provider <s3|azure> --bucket <NAME> [--version N]
+iv cloud pull   <MODEL> --provider <s3|azure> --bucket <NAME> --remote-path <KEY>
+iv cloud list   --provider <s3|azure> --bucket <NAME> [--prefix <PATH>]
+iv cloud config --provider <s3|azure|gcs> [--show]
 ```
 
 `push` takes the model name positionally and derives the remote key as
@@ -132,12 +132,12 @@ Both `push` and `pull` prompt for the vault passphrase.
 }
 ```
 
-`aim` never calls `DeleteObject`; omit it.
+`iv` never calls `DeleteObject`; omit it.
 
 ### Credentials
 
 Resolved by the standard AWS SDK chain — environment variables, `~/.aws/config`,
-SSO, or an instance/task role. No `aim`-specific configuration.
+SSO, or an instance/task role. No `iv`-specific configuration.
 
 ```bash
 export AWS_ACCESS_KEY_ID="..."
@@ -147,26 +147,26 @@ export AWS_REGION="us-east-1"          # defaults to us-east-1 if unset
 
 Note that the backend reads `AWS_REGION`, not `AWS_DEFAULT_REGION`.
 
-Check what is visible to `aim`:
+Check what is visible to `iv`:
 
 ```bash
-aim cloud config --provider s3 --show
+iv cloud config --provider s3 --show
 ```
 
 ### Usage
 
 ```bash
 # Push the latest version of gpt-3
-aim cloud push gpt-3 --provider s3 --bucket my-model-bucket
+iv cloud push gpt-3 --provider s3 --bucket my-model-bucket
 
 # Push a specific version
-aim cloud push gpt-3 --version 4 --provider s3 --bucket my-model-bucket
+iv cloud push gpt-3 --version 4 --provider s3 --bucket my-model-bucket
 
 # See what is there
-aim cloud list --provider s3 --bucket my-model-bucket --prefix gpt-3/
+iv cloud list --provider s3 --bucket my-model-bucket --prefix gpt-3/
 
 # Pull it back by full key
-aim cloud pull gpt-3 \
+iv cloud pull gpt-3 \
     --provider s3 \
     --bucket my-model-bucket \
     --remote-path gpt-3/safetensors/v4.vault
@@ -199,7 +199,7 @@ Backed by the Azure SDK for Rust v1 (`azure_storage_blob`).
 ### Credentials
 
 **`AZURE_STORAGE_KEY` is not supported.** The v1 SDK provides no shared-key
-credential. If it is set without a SAS token, `aim` fails with an explicit
+credential. If it is set without a SAS token, `iv` fails with an explicit
 error rather than silently ignoring it.
 
 Two supported paths, both alongside `AZURE_STORAGE_ACCOUNT`:
@@ -226,7 +226,7 @@ Managed identity and developer sign-in are picked up automatically when the
 explicit service-principal triple is absent.
 
 ```bash
-aim cloud config --provider azure --show
+iv cloud config --provider azure --show
 ```
 
 ### Usage
@@ -234,9 +234,9 @@ aim cloud config --provider azure --show
 `--bucket` is the container name.
 
 ```bash
-aim cloud push llama-7b --provider azure --bucket models
-aim cloud list --provider azure --bucket models
-aim cloud pull llama-7b \
+iv cloud push llama-7b --provider azure --bucket models
+iv cloud list --provider azure --bucket models
+iv cloud pull llama-7b \
     --provider azure --bucket models \
     --remote-path llama-7b/gguf/v1.vault
 ```
@@ -249,7 +249,7 @@ aim cloud pull llama-7b \
 feature to enable. The `cloud-storage` crate it depended on carries
 unmaintained transitive dependencies (`ring` 0.16, `dotenv`, `instant`).
 
-`aim cloud <cmd> --provider gcs` is accepted by the argument parser and
+`iv cloud <cmd> --provider gcs` is accepted by the argument parser and
 prints a notice explaining this. Use S3 or Azure.
 
 ---
@@ -260,9 +260,9 @@ The storage backends are usable directly, and unlike the CLI path you control
 what bytes you hand them:
 
 ```rust
-use ai_model_vault::storage::StorageConfig;
+use ironvault::storage::StorageConfig;
 
-# async fn run() -> ai_model_vault::Result<()> {
+# async fn run() -> ironvault::Result<()> {
 let backend = StorageConfig::S3 {
     bucket: "my-model-bucket".to_string(),
     region: "us-east-1".to_string(),
@@ -304,5 +304,5 @@ which appends a new version rather than reconciling with an existing one.
 
 ---
 
-See [src/storage.rs](https://github.com/nervosys/AIModelVault/blob/master/src/storage.rs)
-and [src/cli/handlers/cloud.rs](https://github.com/nervosys/AIModelVault/blob/master/src/cli/handlers/cloud.rs).
+See [src/storage.rs](https://github.com/nervosys/IronVault/blob/master/src/storage.rs)
+and [src/cli/handlers/cloud.rs](https://github.com/nervosys/IronVault/blob/master/src/cli/handlers/cloud.rs).

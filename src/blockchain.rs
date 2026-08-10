@@ -683,7 +683,7 @@ impl BlockchainAudit {
         // Verify block chain to genesis.
         //
         // `windows(2)` rather than `0..len() - 1`: this function parses a proof
-        // file supplied by whoever runs `aim chain verify-proof`, and an empty
+        // file supplied by whoever runs `iv chain verify-proof`, and an empty
         // `block_chain` made that subtraction underflow and panic on untrusted
         // input.
         if proof.block_chain.is_empty() {

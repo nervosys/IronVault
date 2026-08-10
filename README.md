@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/nervosys/AIModelVault/master/media/banner.png" alt="AI Model Vault — Secure Deployment Hub" width="900">
+  <img src="https://raw.githubusercontent.com/nervosys/IronVault/master/media/banner.png" alt="IronVault — Secure Deployment Hub" width="900">
 </p>
 
 > Universal cross-platform encrypted vault for AI/ML model storage, versioning, conversion, and lifecycle management — **agent-first by design**, military-grade security, 23+ formats, 29 production features.
@@ -11,12 +11,12 @@
 [![Tests](https://img.shields.io/badge/tests-2%2C160%2B%20passing-brightgreen.svg)](reports/)
 [![Coverage](https://img.shields.io/badge/coverage-85.4%25-brightgreen.svg)](docs/PERFORMANCE.md)
 [![Version](https://img.shields.io/badge/version-4.3.0-blue.svg)](CHANGELOG.md)
-[![crates.io](https://img.shields.io/crates/v/ai-model-vault.svg)](https://crates.io/crates/ai-model-vault)
-[![PyPI](https://img.shields.io/pypi/v/aimodelvault.svg)](https://pypi.org/project/aimodelvault/)
+[![crates.io](https://img.shields.io/crates/v/ironvault.svg)](https://crates.io/crates/ironvault)
+[![PyPI](https://img.shields.io/pypi/v/ironvault.svg)](https://pypi.org/project/ironvault/)
 [![Clippy](https://img.shields.io/badge/clippy-clean-brightgreen.svg)](validate.ps1)
 [![Agent-ready](https://img.shields.io/badge/agent--ready-AGENTS.md-blueviolet.svg)](AGENTS.md)
 
-A production-ready secure vault, built on FIPS-approved cryptographic algorithms, for storing and managing AI models. Every capability is exposed through **three parallel surfaces — CLI, REST/GraphQL, and MCP** — with a single source of truth (`aim introspect`) and self-describing manifests in [`.well-known/`](.well-known/). Built for autonomous agents, scriptable for CI, friendly for humans.
+A production-ready secure vault, built on FIPS-approved cryptographic algorithms, for storing and managing AI models. Every capability is exposed through **three parallel surfaces — CLI, REST/GraphQL, and MCP** — with a single source of truth (`iv introspect`) and self-describing manifests in [`.well-known/`](.well-known/). Built for autonomous agents, scriptable for CI, friendly for humans.
 
 ---
 
@@ -27,7 +27,7 @@ If you are an LLM agent, IDE assistant, or automation pipeline, **start here** i
 ### One-line bootstrap
 
 ```bash
-aim introspect --format json          # entire CLI schema, machine-readable
+iv introspect --format json          # entire CLI schema, machine-readable
 ```
 
 ### Discovery surface (all in [.well-known/](.well-known/))
@@ -45,10 +45,10 @@ aim introspect --format json          # entire CLI schema, machine-readable
 
 ```bash
 # 1. Discover — get every command, flag, type
-aim introspect --format jsonld > schema.jsonld
+iv introspect --format jsonld > schema.jsonld
 
 # 2. Speak any surface
-aim <subcommand> --format json        # local CLI, JSON out
+iv <subcommand> --format json        # local CLI, JSON out
 curl  http://host:8080/api/v1/...     # REST (see openapi.yaml)
 # or call MCP tools from mcp-manifest.json over your MCP client
 ```
@@ -61,7 +61,7 @@ curl  http://host:8080/api/v1/...     # REST (see openapi.yaml)
 - **Destructive ops gated:** `delete`, `policy apply`, `gc`, `vault-import` accept `--dry-run` (where applicable) or require an explicit name argument.
 - **Self-describing errors:** error JSON includes `code`, `message`, and `hint`; never just a string.
 - **URIs:** Vault resources are addressable via the [`aimv://`](docs/UTILITIES.md) scheme — agents can pass `aimv://vault/model@version` between tools.
-- **No surprise network:** the CLI never phones home except `aim pull` (explicit), `aim cloud` (explicit), and opt-in telemetry — off by default, honors `DO_NOT_TRACK=1`, and when enabled posts to `https://telemetry.nervosys.ai/v1/events` unless you point `telemetry.endpoint` elsewhere. Two events, no model names or paths: see [docs/TELEMETRY.md](docs/TELEMETRY.md).
+- **No surprise network:** the CLI never phones home except `iv pull` (explicit), `iv cloud` (explicit), and opt-in telemetry — off by default, honors `DO_NOT_TRACK=1`, and when enabled posts to `https://telemetry.nervosys.ai/v1/events` unless you point `telemetry.endpoint` elsewhere. Two events, no model names or paths: see [docs/TELEMETRY.md](docs/TELEMETRY.md).
 
 ### Three-surface coverage matrix
 
@@ -75,14 +75,14 @@ Every one of the 29 features in [AGENTS.md](AGENTS.md) is reachable from **all t
 | ---------------------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------- |
 | [AGENTS.md](AGENTS.md) — canonical context                       | [Quick Start](#quick-start)                         | [Security & Compliance](#security--compliance) |
 | [`.well-known/`](.well-known/) — discovery manifests             | [Installation](#installation)                       | [Build & Validate](#build--validate)           |
-| [`aim introspect`](#for-ai-agents--read-this-first) — CLI schema | [CLI Reference](docs/CLI.md)                        | [Architecture](#architecture)                  |
+| [`iv introspect`](#for-ai-agents--read-this-first) — CLI schema | [CLI Reference](docs/CLI.md)                        | [Architecture](#architecture)                  |
 | [MCP tools](docs/MCP_TOOLS.md) — 86 tools                        | [Rust API Quickstart](#rust-library-api-quickstart) | [Performance](docs/PERFORMANCE.md)             |
 | [OpenAPI 3.1](.well-known/openapi.yaml) — 53 endpoints           | [Demos](#interactive-demos)                         | [Deployment](#deployment)                      |
 |                                                                  | [Telemetry](docs/TELEMETRY.md) — opt-in, disclosed  | [Contributing](CONTRIBUTING.md)                |
 
 ---
 
-## Why AI Model Vault?
+## Why IronVault?
 
 - **Agent-first** — three coequal surfaces (CLI / REST+GraphQL / MCP), one schema, self-describing via `introspect` and `.well-known/`
 - **Secure by default** — AES-256-GCM with Argon2id KDF; aligned to CMMC 2.0 L2 and MITRE ATT&CK control families. Not a FIPS-validated module — see [Security & Compliance](#security--compliance)
@@ -100,60 +100,60 @@ Every one of the 29 features in [AGENTS.md](AGENTS.md) is reachable from **all t
 
 ```bash
 # From crates.io
-cargo install ai-model-vault --features full,api
+cargo install ironvault --features full,api
 ```
 
 ```bash
 # Prebuilt binary (Linux / macOS / Windows, no toolchain needed)
-# https://github.com/nervosys/AIModelVault/releases/latest
-curl -sSLO https://github.com/nervosys/AIModelVault/releases/latest/download/aim-linux-amd64
-curl -sSLO https://github.com/nervosys/AIModelVault/releases/latest/download/aim-linux-amd64.sha256
-sha256sum -c aim-linux-amd64.sha256 && chmod +x aim-linux-amd64 && sudo mv aim-linux-amd64 /usr/local/bin/aim
+# https://github.com/nervosys/IronVault/releases/latest
+curl -sSLO https://github.com/nervosys/IronVault/releases/latest/download/iv-linux-amd64
+curl -sSLO https://github.com/nervosys/IronVault/releases/latest/download/iv-linux-amd64.sha256
+sha256sum -c iv-linux-amd64.sha256 && chmod +x iv-linux-amd64 && sudo mv iv-linux-amd64 /usr/local/bin/iv
 ```
 
 ```bash
 # Python bindings
-pip install aimodelvault
+pip install ironvault
 ```
 
 ```bash
 # From source
-git clone https://github.com/nervosys/AIModelVault.git
-cd AIModelVault
+git clone https://github.com/nervosys/IronVault.git
+cd IronVault
 cargo build --release --features full,api
-# Binary at target/release/aim (~17 MB, LTO + stripped)
+# Binary at target/release/iv (~17 MB, LTO + stripped)
 ```
 
 `full` covers the storage backends but not the REST API — add `api` if you
-want `aim serve`. See [Cargo feature flags](#cargo-feature-flags).
+want `iv serve`. See [Cargo feature flags](#cargo-feature-flags).
 
 ### 30-second walkthrough
 
 ```bash
 # 1. Initialize an encrypted vault
-aim init
+iv init
 
 # 2. Store a model (auto-detects format)
-aim store llama-7b ./model.safetensors \
+iv store llama-7b ./model.safetensors \
   --description "Fine-tuned Llama 7B" --framework pytorch --task text-generation
 
 # 3. Pull from HuggingFace, Ollama, or a URL
-aim pull hf:mistralai/Mistral-7B-v0.1 --store --name mistral-7b
-aim pull ollama:llama3 --store --name llama3
+iv pull hf:mistralai/Mistral-7B-v0.1 --store --name mistral-7b
+iv pull ollama:llama3 --store --name llama3
 
 # 4. Convert SafeTensors → GGUF Q4_K_M for edge deployment
-aim convert llama-7b --to-format gguf --quantization q4_k_m --validate
+iv convert llama-7b --to-format gguf --quantization q4_k_m --validate
 
 # 5. Sign, scan, and tag
-aim sign llama-7b --identity "trainer@company.com"
-aim scan llama-7b
-aim tag add llama-7b production fine-tuned
+iv sign llama-7b --identity "trainer@company.com"
+iv scan llama-7b
+iv tag add llama-7b production fine-tuned
 
 # 6. Check security & compliance
-aim compliance --verbose
+iv compliance --verbose
 
 # 7. Browse the vault interactively
-aim browse
+iv browse
 ```
 
 ---
@@ -168,80 +168,80 @@ All features below are fully implemented, tested, and exposed via both CLI and l
 | ----------------------- | ------------- | ---------------------------------------------------------- |
 | AES-256-GCM encryption  | (default)     | Argon2id KDF (64 MB / 3 iterations / 32-byte salt)         |
 | Streaming encryption    | (auto)        | Constant 8 MiB memory for multi-GB models                  |
-| KMS integration         | `$aimodelvault_PASSPHRASE` | `env://`, `file://`, `azure-kv://`, `vault://`, `aws-sm://` (`--features s3`) |
+| KMS integration         | `$IRONVAULT_PASSPHRASE` | `env://`, `file://`, `azure-kv://`, `vault://`, `aws-sm://` (`--features s3`) |
 | 23+ model formats       | (auto-detect) | See [Supported Formats](#supported-model-formats)          |
-| Cloud storage           | `aim cloud`   | AWS S3, Azure Blob. Uploads sealed client-side (AES-256-GCM) |
+| Cloud storage           | `iv cloud`   | AWS S3, Azure Blob. Uploads sealed client-side (AES-256-GCM) |
 
 ### Version Control & Lineage
 
 | Feature                 | CLI                     | Notes                                           |
 | ----------------------- | ----------------------- | ----------------------------------------------- |
-| Sequential versioning   | `aim versions`          | Unique checkpoint IDs per version               |
-| Parent lineage          | `aim lineage`           | Parent-child genealogy with branching           |
-| Cross-model lineage DAG | `aim lineage-graph`     | Ancestors / descendants of derived models       |
-| Instant rollback        | `aim get -v N`          | Time-travel to any historical checkpoint        |
-| Retention policies      | `aim policy`            | Max versions / age / minimum keep, with dry-run |
-| SQLite version backend  | `AIM_SQLITE_VERSIONS=1` | ACID-compliant, auto-migrates from JSON         |
+| Sequential versioning   | `iv versions`          | Unique checkpoint IDs per version               |
+| Parent lineage          | `iv lineage`           | Parent-child genealogy with branching           |
+| Cross-model lineage DAG | `iv lineage-graph`     | Ancestors / descendants of derived models       |
+| Instant rollback        | `iv get -v N`          | Time-travel to any historical checkpoint        |
+| Retention policies      | `iv policy`            | Max versions / age / minimum keep, with dry-run |
+| SQLite version backend  | `IRONVAULT_SQLITE_VERSIONS=1` | ACID-compliant, auto-migrates from JSON         |
 
 ### Conversion & Quantization
 
 | Feature                  | CLI                | Notes                                                 |
 | ------------------------ | ------------------ | ----------------------------------------------------- |
-| Format conversion (10×)  | `aim convert`      | Native: PyTorch ↔ SafeTensors, ↔ raw. Plan-only (needs Python): → ONNX/TensorRT/Core ML/GGUF |
+| Format conversion (10×)  | `iv convert`      | Native: PyTorch ↔ SafeTensors, ↔ raw. Plan-only (needs Python): → ONNX/TensorRT/Core ML/GGUF |
 | GGUF quantization        | `--quantization …` | Q4_0, Q4_K_M, Q5_K_M, Q8_0, F16, F32                  |
-| Quantization profiles    | `aim quantize`     | Per-model method selection, size estimation           |
-| ONNX → TensorRT/OpenVINO | `aim convert`      | Edge & GPU deployment paths                           |
+| Quantization profiles    | `iv quantize`     | Per-model method selection, size estimation           |
+| ONNX → TensorRT/OpenVINO | `iv convert`      | Edge & GPU deployment paths                           |
 
 ### Safety, Signing & Validation
 
 | Feature              | CLI                 | Notes                                                |
 | -------------------- | ------------------- | ---------------------------------------------------- |
-| HMAC-SHA256 signing  | `aim sign / verify` | Detached `.sig` files for provenance                 |
-| Pickle scanner       | `aim scan`          | Detects `REDUCE`, `GLOBAL`, `os.system`, `eval`, …   |
-| License scanner      | `aim license-scan`  | Model cards, `config.json`, GGUF meta, LICENSE; SPDX |
-| Integrity validation | `aim validate`      | SHA-256 integrity probe per version                  |
-| Tensor-level diff    | `aim diff`          | SafeTensors / GGUF / generic binary fallback         |
+| HMAC-SHA256 signing  | `iv sign / verify` | Detached `.sig` files for provenance                 |
+| Pickle scanner       | `iv scan`          | Detects `REDUCE`, `GLOBAL`, `os.system`, `eval`, …   |
+| License scanner      | `iv license-scan`  | Model cards, `config.json`, GGUF meta, LICENSE; SPDX |
+| Integrity validation | `iv validate`      | SHA-256 integrity probe per version                  |
+| Tensor-level diff    | `iv diff`          | SafeTensors / GGUF / generic binary fallback         |
 
 ### Provenance, Audit & Compliance
 
 | Feature            | CLI              | Notes                                             |
 | ------------------ | ---------------- | ------------------------------------------------- |
 | Audit log          | (automatic)      | Every operation; structured, append-only          |
-| Blockchain audit   | `aim chain`      | Merkle-proofed hash chain; opt-in, mirrors the audit log |
+| Blockchain audit   | `iv chain`      | Merkle-proofed hash chain; opt-in, mirrors the audit log |
 | Model cards        | (via API)        | Google / HuggingFace standard, JSON/YAML/Markdown |
-| Compliance check   | `aim compliance` | FIPS 140-3, CMMC 2.0 L2, MITRE ATT&CK             |
-| Benchmark metadata | `aim benchmark`  | MMLU, HellaSwag, etc., per model version          |
-| Evaluation harness | `aim eval`       | Record, compare, query across suites and metrics  |
+| Compliance check   | `iv compliance` | FIPS 140-3, CMMC 2.0 L2, MITRE ATT&CK             |
+| Benchmark metadata | `iv benchmark`  | MMLU, HellaSwag, etc., per model version          |
+| Evaluation harness | `iv eval`       | Record, compare, query across suites and metrics  |
 
 ### Discovery, Operations & Lifecycle
 
 | Feature               | CLI                      | Notes                                    |
 | --------------------- | ------------------------ | ---------------------------------------- |
-| Tags & search         | `aim tag` / `aim search` | Labels + key-value annotations           |
-| Garbage collection    | `aim gc`                 | Orphan blobs, temp files; `--dry-run`    |
-| Vault export / import | `aim vault-export`       | Portable `.tar.gz` bundles               |
-| Multi-vault registry  | `aim vaults`             | Register, switch active vault            |
-| Backup scheduling     | `aim backup`             | Daily / weekly / monthly / custom        |
-| Config profiles       | `aim profile`            | Named overrides, activate / deactivate   |
-| Plugin system         | `aim plugin`             | Discover, install JSON-manifest plugins  |
-| TUI dashboard         | `aim browse`             | Terminal UI vault browser                |
-| Webhooks              | `aim webhook`            | HTTP notifications via `EventSubscriber` |
-| Access control (RBAC) | `aim acl`                | Reader / Writer / Admin per principal    |
+| Tags & search         | `iv tag` / `iv search` | Labels + key-value annotations           |
+| Garbage collection    | `iv gc`                 | Orphan blobs, temp files; `--dry-run`    |
+| Vault export / import | `iv vault-export`       | Portable `.tar.gz` bundles               |
+| Multi-vault registry  | `iv vaults`             | Register, switch active vault            |
+| Backup scheduling     | `iv backup`             | Daily / weekly / monthly / custom        |
+| Config profiles       | `iv profile`            | Named overrides, activate / deactivate   |
+| Plugin system         | `iv plugin`             | Discover, install JSON-manifest plugins  |
+| TUI dashboard         | `iv browse`             | Terminal UI vault browser                |
+| Webhooks              | `iv webhook`            | HTTP notifications via `EventSubscriber` |
+| Access control (RBAC) | `iv acl`                | Reader / Writer / Admin per principal    |
 
 ### Integration & APIs
 
 | Feature              | Surface               | Notes                                              |
 | -------------------- | --------------------- | -------------------------------------------------- |
-| REST API             | `aim serve`           | Axum + JWT + 41 endpoints, OpenAPI 3.1             |
-| GraphQL API          | `aim serve --graphql` | `async-graphql` with playground                    |
+| REST API             | `iv serve`           | Axum + JWT + 41 endpoints, OpenAPI 3.1             |
+| GraphQL API          | `iv serve --graphql` | `async-graphql` with playground                    |
 | MCP tools            | library               | 4 built-in tools + custom registration             |
 | Python bindings      | `pip install` (PyO3)  | `--features python`                                |
-| Engine interop       | `aim register`        | Ollama (`ollama create`) + LM Studio               |
-| Model download       | `aim pull`            | HuggingFace, Ollama, URLs (+ SHA-256 verification) |
-| Federation           | `aim federation`      | Vector-clock peer sync; opt-in, sealed in transit  |
-| RAG / Knowledge base | `aim database`        | SQLite / Sled / Qdrant backends                    |
+| Engine interop       | `iv register`        | Ollama (`ollama create`) + LM Studio               |
+| Model download       | `iv pull`            | HuggingFace, Ollama, URLs (+ SHA-256 verification) |
+| Federation           | `iv federation`      | Vector-clock peer sync; opt-in, sealed in transit  |
+| RAG / Knowledge base | `iv database`        | SQLite / Sled / Qdrant backends                    |
 | `aimv://` URI scheme | library               | Agent-addressable vault resources                  |
-| Agent introspection  | `aim introspect`      | JSON / YAML / JSON-LD CLI schema                   |
+| Agent introspection  | `iv introspect`      | JSON / YAML / JSON-LD CLI schema                   |
 
 > Full machine-readable surface (29 features, all CLI subcommands, ontology, OpenAPI, MCP manifest) is in [`.well-known/`](.well-known/) and [`AGENTS.md`](AGENTS.md).
 
@@ -274,19 +274,19 @@ See [docs/PROVIDERS_FORMATS.md](docs/PROVIDERS_FORMATS.md) and [FORMATS.md](FORM
 ### From a registry
 
 ```bash
-cargo install ai-model-vault --features full,api   # Rust CLI + library
-pip install aimodelvault                           # Python bindings
+cargo install ironvault --features full,api   # Rust CLI + library
+pip install ironvault                           # Python bindings
 ```
 
 Prebuilt binaries for Linux (gnu and musl), macOS (x86-64 and arm64), and
-Windows are attached to every [release](https://github.com/nervosys/AIModelVault/releases/latest),
+Windows are attached to every [release](https://github.com/nervosys/IronVault/releases/latest),
 each with a `.sha256` alongside it.
 
 ### From source
 
 ```bash
-git clone https://github.com/nervosys/AIModelVault.git
-cd AIModelVault
+git clone https://github.com/nervosys/IronVault.git
+cd IronVault
 
 # Default build (Safetensors + ndarray + SQLite)
 cargo build --release
@@ -299,7 +299,7 @@ cargo build --release --features full,graphql
 .\build.ps1 release          # Windows
 ```
 
-The release binary lives at `target/release/aim` (~17 MB, LTO + stripped).
+The release binary lives at `target/release/iv` (~17 MB, LTO + stripped).
 
 ### Cargo feature flags
 
@@ -313,7 +313,7 @@ The release binary lives at `target/release/aim` (~17 MB, LTO + stripped).
 | `s3`        | AWS S3 cloud storage                                       |
 | `azure`     | Azure Blob storage                                         |
 | `cloud`     | All cloud backends                                         |
-| `api`       | REST API (Axum + JWT) — required for `aim serve`           |
+| `api`       | REST API (Axum + JWT) — required for `iv serve`           |
 | `graphql`   | GraphQL API (implies `api`)                                |
 | `python`    | Python bindings (PyO3)                                     |
 | `otel`      | OTLP export for telemetry events                           |
@@ -322,7 +322,7 @@ The release binary lives at `target/release/aim` (~17 MB, LTO + stripped).
 only. To get the server, ask for it explicitly:
 
 ```bash
-cargo build --release --features full,api      # + aim serve
+cargo build --release --features full,api      # + iv serve
 cargo build --release --features full,cloud    # + S3 / Azure
 ```
 
@@ -335,8 +335,8 @@ cargo build --release --features full,cloud    # + S3 / Azure
 ## Rust Library API Quickstart
 
 ```rust
-use ai_model_vault::{Vault, VaultConfig};
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
+use ironvault::{Vault, VaultConfig};
+use ironvault::formats::{ModelFormat, ModelMetadata};
 
 let mut vault = Vault::new(None)?;
 vault.unlock(b"your-secure-passphrase".to_vec())?;
@@ -362,7 +362,7 @@ for v in vault.list_versions("llama-7b") {
 ### Trait-based dependency injection (advanced)
 
 ```rust
-use ai_model_vault::{VaultBuilder, AuditLogSubscriber, MetricsSubscriber};
+use ironvault::{VaultBuilder, AuditLogSubscriber, MetricsSubscriber};
 
 let vault = VaultBuilder::new()
     .config(VaultConfig::default())
@@ -377,7 +377,7 @@ let vault = VaultBuilder::new()
 ### MCP / RAG tools
 
 ```rust
-use ai_model_vault::rag::*;
+use ironvault::rag::*;
 
 let mut server = MCPServer::new();
 server.register_builtin_tools()?;
@@ -397,9 +397,9 @@ Built-in tools: `search_documents`, `add_document`, `chunk_text`, `execute_rule`
 
 ```bash
 # Push, list, pull
-aim cloud push  llama-7b --provider s3 --bucket my-models
-aim cloud list  --provider s3 --bucket my-models
-aim cloud pull  llama-7b --provider s3 --bucket my-models --remote-path llama-7b/safetensors/v1.vault
+iv cloud push  llama-7b --provider s3 --bucket my-models
+iv cloud list  --provider s3 --bucket my-models
+iv cloud pull  llama-7b --provider s3 --bucket my-models --remote-path llama-7b/safetensors/v1.vault
 ```
 
 | Provider             | Status                                                  |
@@ -429,17 +429,17 @@ Full guide: [docs/CLOUD_STORAGE.md](docs/CLOUD_STORAGE.md) · CLI: [docs/CLOUD_C
 
 ## Deployment
 
-Running `aim serve` as a service. Both paths keep configuration **service-scoped** — nothing is written to `/etc/environment` or a profile script, so no other process on the host inherits the API secret or a telemetry token.
+Running `iv serve` as a service. Both paths keep configuration **service-scoped** — nothing is written to `/etc/environment` or a profile script, so no other process on the host inherits the API secret or a telemetry token.
 
 ### systemd
 
 ```bash
 sudo ./deploy/systemd/install.sh --dry-run    # see every change first
 sudo ./deploy/systemd/install.sh
-sudo systemctl enable --now aim-server
+sudo systemctl enable --now ironvault-server
 ```
 
-Creates the `aim` system user and `/var/lib/aim`, writes `/etc/aim/server.env` at `0600` root-owned, generates `AIM_JWT_SECRET` if absent, and installs a hardened unit using `EnvironmentFile=` rather than `Environment=` — the latter is readable by any local user via `systemctl show`.
+Creates the `ironvault` system user and `/var/lib/ironvault`, writes `/etc/ironvault/server.env` at `0600` root-owned, generates `IRONVAULT_JWT_SECRET` if absent, and installs a hardened unit using `EnvironmentFile=` rather than `Environment=` — the latter is readable by any local user via `systemctl show`.
 
 To configure OTLP export at install time, pass the credential as a *file*, never a flag (arguments are world-readable through `/proc/<pid>/cmdline`):
 
@@ -455,7 +455,7 @@ shred -u /tmp/hdr
 Details: [docs/TELEMETRY.md](docs/TELEMETRY.md#service-scoped-configuration) · [docs/SECURITY_HARDENING.md](docs/SECURITY_HARDENING.md).
 
 > **Containers were removed in 4.5.0.** The `Dockerfile`, the image published
-> to `ghcr.io`, and the Helm chart are gone. `aim` ships as a static binary,
+> to `ghcr.io`, and the Helm chart are gone. `iv` ships as a static binary,
 > a crate, and a Python wheel; run it directly or under systemd. Images
 > already published to `ghcr.io` remain pullable but receive no further
 > updates.
@@ -485,7 +485,7 @@ Details: [docs/TELEMETRY.md](docs/TELEMETRY.md#service-scoped-configuration) · 
 | **MITRE ATT&CK** | Design-level mitigations for T1552, T1486, T1078, T1005. Not a penetration test. |
 | **OWASP Top 10** | Reviewed; no known issues in first-party code |
 
-`aim compliance` distinguishes what it actually verified at runtime from what
+`iv compliance` distinguishes what it actually verified at runtime from what
 is asserted by design, and exits non-zero only on a real, verified failure.
 
 ### Dependency security
@@ -574,12 +574,12 @@ Full demo guide: [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md).
 
 | Variable                                                     | Purpose                            |
 | ------------------------------------------------------------ | ---------------------------------- |
-| `aimodelvault_PASSPHRASE`                                    | Vault passphrase (CI / automation) — literal value or KMS URI, see [docs/KMS.md](docs/KMS.md) |
-| `aimodelvault_VAULT`                                         | Default vault name                 |
-| `aimodelvault_CONFIG`                                        | Config directory override          |
-| `aimodelvault_HOME`                                          | Relocates all config/data/cache directories under one root |
-| `AIM_SQLITE_VERSIONS`                                        | Use SQLite version backend         |
-| `AIM_TELEMETRY_DISABLED=1` / `DO_NOT_TRACK=1`                | Disable anonymous telemetry        |
+| `IRONVAULT_PASSPHRASE`                                    | Vault passphrase (CI / automation) — literal value or KMS URI, see [docs/KMS.md](docs/KMS.md) |
+| `IRONVAULT_VAULT`                                         | Default vault name                 |
+| `IRONVAULT_CONFIG`                                        | Config directory override          |
+| `IRONVAULT_HOME`                                          | Relocates all config/data/cache directories under one root |
+| `IRONVAULT_SQLITE_VERSIONS`                                        | Use SQLite version backend         |
+| `IRONVAULT_TELEMETRY_DISABLED=1` / `DO_NOT_TRACK=1`                | Disable anonymous telemetry        |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION` | AWS S3 credentials                 |
 | `AZURE_STORAGE_ACCOUNT` / `AZURE_STORAGE_SAS_TOKEN`          | Azure: account + SAS. Or Entra ID via `AZURE_TENANT_ID` / `AZURE_CLIENT_ID` / `AZURE_CLIENT_SECRET`. Shared keys (`AZURE_STORAGE_KEY`) are not supported |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` / `_PROTOCOL` / `_HEADERS`     | OTLP export (`--features otel`). Setting these does not enable telemetry |
@@ -688,9 +688,9 @@ Dual-licensed:
 
 ## Support
 
-- 📖 [Documentation site](https://aimodelvault.nervosys.ai) · [Local website/](website/)
-- 💬 [GitHub Discussions](https://github.com/nervosys/AIModelVault/discussions)
-- 🐛 [Issue tracker](https://github.com/nervosys/AIModelVault/issues)
+- 📖 [Documentation site](https://ironvault.nervosys.ai) · [Local website/](website/)
+- 💬 [GitHub Discussions](https://github.com/nervosys/IronVault/discussions)
+- 🐛 [Issue tracker](https://github.com/nervosys/IronVault/issues)
 - 📧 General: dev@nervosys.ai · Security: security@nervosys.ai · Licensing: licensing@nervosys.ai
 
 ---

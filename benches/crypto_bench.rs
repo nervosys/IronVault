@@ -1,6 +1,6 @@
 //! Cryptography benchmarks
 
-use ai_model_vault::crypto::{
+use ironvault::crypto::{
     compression::{compress, CompressionAlgorithm, CompressionLevel},
     FipsCrypto,
 };

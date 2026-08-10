@@ -8,9 +8,9 @@ Uses AES-256-GCM with PBKDF2 key derivation.
 
    This Python module uses **PBKDF2-HMAC-SHA256** for key derivation.
    The Rust implementation (``src/crypto/mod.rs``) uses **Argon2id**.
-   Vaults created by the Rust ``aim`` CLI **cannot** be decrypted by this
+   Vaults created by the Rust ``iv`` CLI **cannot** be decrypted by this
    Python module and vice-versa. For interop, use the Rust binary via
-   ``aimodelvault.core.vault.Vault`` (subprocess wrapper) or wait for
+   ``ironvault.core.vault.Vault`` (subprocess wrapper) or wait for
    PyO3 bindings (planned for v0.3.0).
 
 Security Controls:

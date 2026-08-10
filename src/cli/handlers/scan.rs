@@ -1,8 +1,8 @@
-//! CLI handler for pickle safety scanning (aim scan).
+//! CLI handler for pickle safety scanning (iv scan).
 
 use std::path::PathBuf;
 
-use ai_model_vault::{PickleScanner, Result, VaultConfig, VaultError};
+use ironvault::{PickleScanner, Result, VaultConfig, VaultError};
 
 use crate::cli::helpers::{build_vault, prompt_passphrase};
 

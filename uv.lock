@@ -19,7 +19,7 @@ wheels = [
 ]
 
 [[package]]
-name = "aimodelvault"
+name = "ironvault"
 version = "3.0.0"
 source = { editable = "." }
 dependencies = [

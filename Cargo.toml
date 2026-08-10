@@ -1,14 +1,14 @@
 [package]
-name = "ai-model-vault"
-version = "4.6.1"
+name = "ironvault"
+version = "5.0.0"
 edition = "2021"
 rust-version = "1.89"
 authors = ["NERVOSYS AI Team"]
 description = "Universal cross-platform XDG-compliant secure vault for AI model formats (Neural and Neurosymbolic)"
 license = "AGPL-3.0-or-later"
-repository = "https://github.com/nervosys/AIModelVault"
-homepage = "https://github.com/nervosys/AIModelVault"
-documentation = "https://docs.rs/ai-model-vault"
+repository = "https://github.com/nervosys/IronVault"
+homepage = "https://github.com/nervosys/IronVault"
+documentation = "https://docs.rs/ironvault"
 readme = "README.md"
 keywords = ["ai", "ml", "vault", "encryption", "model-management"]
 categories = ["cryptography", "command-line-utilities", "science"]
@@ -152,7 +152,7 @@ tower-http = { version = "0.6", features = [
 # (`aes-gcm`, `argon2`) and keeps the build toolchain-free. `aws_lc_rs` was
 # tried and rejected: aws-lc-sys hard-requires NASM on x86_64-pc-windows-msvc
 # and a C compiler everywhere else, so it fails outright for anyone running
-# `cargo install ai-model-vault --features api` on Windows.
+# `cargo install ironvault --features api` on Windows.
 #
 # The cost of `rust_crypto` is that it pulls in `rsa`, which carries
 # RUSTSEC-2023-0071 with no fixed release. That advisory is suppressed in
@@ -237,7 +237,7 @@ graphql = ["api", "async-graphql"]
 python = ["dep:pyo3"]
 # OTLP export for telemetry events. Off by default: it pulls in prost and the
 # OpenTelemetry SDK, and enabling the feature must never be what turns
-# telemetry on -- that stays opt-in via config or `aim telemetry enable`.
+# telemetry on -- that stays opt-in via config or `iv telemetry enable`.
 otel = ["dep:opentelemetry", "dep:opentelemetry_sdk", "dep:opentelemetry-otlp"]
 
 [lints.rust]
@@ -304,12 +304,12 @@ opt-level = 0
 # before any benchmark runs. The criterion benches below set `harness = false`
 # and are the only intended bench targets.
 [[bin]]
-name = "aim"
+name = "iv"
 path = "src/main.rs"
 bench = false
 
 [lib]
-name = "ai_model_vault"
+name = "ironvault"
 path = "src/lib.rs"
 bench = false
 

@@ -3,8 +3,8 @@
 #![allow(clippy::float_cmp)]
 //! Comprehensive tests for model utilities
 
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-use ai_model_vault::utils::{
+use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::utils::{
     CompressionAnalyzer, ModelAnalyzer, ModelArchive, ModelDeduplicator, ModelExporter,
     PruningInfo, PruningMethod, QuantizationInfo, RetrievalOptimizer,
 };

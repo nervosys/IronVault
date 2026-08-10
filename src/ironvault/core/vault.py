@@ -1,7 +1,7 @@
 """
-AI Model Vault - Python interface to the AI Model Vault.
+IronVault - Python interface to the IronVault.
 
-This module provides a Python-friendly API wrapping the Rust `aim` CLI.
+This module provides a Python-friendly API wrapping the Rust `iv` CLI.
 For production use, this would use PyO3/maturin FFI bindings to the Rust library.
 Currently delegates to the compiled Rust binary for all cryptographic operations.
 """
@@ -12,14 +12,14 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from aimodelvault.core.config import VaultConfig
+from ironvault.core.config import VaultConfig
 
 
 class Vault:
     """
-    Secure AI model vault with FIPS 140-3 encryption.
+    Secure IronVault with FIPS 140-3 encryption.
 
-    Wraps the Rust `aim` CLI binary. All cryptographic operations
+    Wraps the Rust `iv` CLI binary. All cryptographic operations
     (AES-256-GCM, Argon2id KDF) are performed by the Rust implementation.
 
     Example:
@@ -52,27 +52,27 @@ class Vault:
 
     def _run_aim(self, args: List[str], passphrase: Optional[str] = None) -> subprocess.CompletedProcess:
         """
-        Run the `aim` CLI binary with given arguments.
+        Run the `iv` CLI binary with given arguments.
 
         Args:
             args: CLI arguments to pass.
-            passphrase: Optional passphrase (set via AIM_PASSPHRASE env var).
+            passphrase: Optional passphrase (set via IRONVAULT_PASSPHRASE env var).
 
         Returns:
             CompletedProcess result.
 
         Raises:
-            FileNotFoundError: If `aim` binary is not on PATH.
+            FileNotFoundError: If `iv` binary is not on PATH.
             RuntimeError: If command exits with non-zero status.
         """
         env = os.environ.copy()
-        env["AIM_VAULT_PATH"] = str(self._vault_path)
+        env["IRONVAULT_VAULT_PATH"] = str(self._vault_path)
         if passphrase:
-            env["AIM_PASSPHRASE"] = passphrase
+            env["IRONVAULT_PASSPHRASE"] = passphrase
 
         try:
             result = subprocess.run(
-                ["aim"] + args,
+                ["iv"] + args,
                 capture_output=True,
                 text=True,
                 env=env,
@@ -80,11 +80,11 @@ class Vault:
             )
         except FileNotFoundError:
             raise FileNotFoundError(
-                "The 'aim' binary was not found. Build with: cargo build --release"
+                "The 'iv' binary was not found. Build with: cargo build --release"
             )
 
         if result.returncode != 0:
-            raise RuntimeError(f"aim command failed: {result.stderr.strip()}")
+            raise RuntimeError(f"iv command failed: {result.stderr.strip()}")
 
         return result
 

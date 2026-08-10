@@ -5,10 +5,10 @@
 
 #![cfg(feature = "api")]
 
-use ai_model_vault::api::server::{create_router, AppState, RateLimiter};
-use ai_model_vault::api::ApiConfig;
-use ai_model_vault::config::{DirectoryPaths, VaultConfig};
-use ai_model_vault::vault::Vault;
+use ironvault::api::server::{create_router, AppState, RateLimiter};
+use ironvault::api::ApiConfig;
+use ironvault::config::{DirectoryPaths, VaultConfig};
+use ironvault::vault::Vault;
 
 use axum::body::Body;
 use axum::extract::ConnectInfo;
@@ -68,7 +68,7 @@ async fn get_token(state: &Arc<AppState>) -> String {
             .unwrap();
     }
 
-    ai_model_vault::api::auth::create_token(
+    ironvault::api::auth::create_token(
         &state.config.jwt_secret,
         state.config.token_expiry_secs,
     )
@@ -349,7 +349,7 @@ async fn test_openapi_endpoint() {
         .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
     assert_eq!(json["openapi"], "3.1.0");
-    assert_eq!(json["info"]["title"], "AI Model Vault API");
+    assert_eq!(json["info"]["title"], "IronVault API");
 }
 
 // ── Dashboard ────────────────────────────────────────────────────────────────
@@ -370,7 +370,7 @@ async fn test_dashboard_endpoint() {
         .await
         .unwrap();
     let html = String::from_utf8(body.to_vec()).unwrap();
-    assert!(html.contains("AI Model Vault"));
+    assert!(html.contains("IronVault"));
     assert!(html.contains("<!DOCTYPE html>"));
 }
 
@@ -448,9 +448,9 @@ async fn test_get_nonexistent_model() {
 async fn store_test_model(state: &Arc<AppState>, name: &str) {
     let mut vault = state.vault.write().await;
     let data = b"test model data for card tests".to_vec();
-    let mut metadata = ai_model_vault::formats::ModelMetadata::new(
+    let mut metadata = ironvault::formats::ModelMetadata::new(
         name.to_string(),
-        ai_model_vault::formats::ModelFormat::Safetensors,
+        ironvault::formats::ModelFormat::Safetensors,
     );
     metadata = metadata.with_description("A test model".to_string());
     vault.store_model(name, data, metadata, None).unwrap();
@@ -744,7 +744,7 @@ async fn test_audit_rbac_admin_sees_all() {
     std::fs::write(&audit_path, &log_content).unwrap();
 
     // Admin token (default) should see both entries
-    let admin_token = ai_model_vault::api::auth::create_token(
+    let admin_token = ironvault::api::auth::create_token(
         &state.config.jwt_secret,
         state.config.token_expiry_secs,
     )
@@ -810,10 +810,10 @@ async fn test_audit_rbac_operator_filtered() {
     std::fs::write(&audit_path, &log_content).unwrap();
 
     // Operator token should NOT see security events
-    let operator_token = ai_model_vault::api::auth::create_token_with_role(
+    let operator_token = ironvault::api::auth::create_token_with_role(
         &state.config.jwt_secret,
         state.config.token_expiry_secs,
-        ai_model_vault::api::auth::Role::Operator,
+        ironvault::api::auth::Role::Operator,
     )
     .unwrap();
 

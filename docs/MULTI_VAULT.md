@@ -6,26 +6,26 @@ Registry for managing multiple vaults with activate/deactivate switching. Work w
 
 ```bash
 # Register vaults
-aim vaults register production /data/vaults/prod --description "Production models"
-aim vaults register staging /data/vaults/staging --description "Staging models"
+iv vaults register production /data/vaults/prod --description "Production models"
+iv vaults register staging /data/vaults/staging --description "Staging models"
 
 # List registered vaults
-aim vaults list
+iv vaults list
 
 # Switch active vault
-aim vaults activate production
+iv vaults activate production
 
 # Clear active vault
-aim vaults deactivate
+iv vaults deactivate
 
 # Remove a vault from registry
-aim vaults unregister staging
+iv vaults unregister staging
 ```
 
 ## CLI Reference
 
 ```
-aim vaults <COMMAND>
+iv vaults <COMMAND>
 
 Commands:
   register    Register a vault
@@ -35,10 +35,10 @@ Commands:
   list        List registered vaults
 ```
 
-### `aim vaults register`
+### `iv vaults register`
 
 ```
-aim vaults register <NAME> <PATH> [OPTIONS]
+iv vaults register <NAME> <PATH> [OPTIONS]
 
 Arguments:
   <NAME>              Vault name/alias
@@ -48,10 +48,10 @@ Options:
   -d, --description <DESC>    Description
 ```
 
-### `aim vaults activate`
+### `iv vaults activate`
 
 ```
-aim vaults activate <NAME>
+iv vaults activate <NAME>
 
 Arguments:
   <NAME>    Vault name to activate
@@ -66,12 +66,12 @@ The vault registry is stored in the XDG config directory as `vault_registry.json
 - **Description** — Optional human-readable description
 - **Active** — Which vault is currently active
 
-Only one vault can be active at a time. The active vault is used by default for all `aim` commands unless overridden by `aimodelvault_VAULT`.
+Only one vault can be active at a time. The active vault is used by default for all `iv` commands unless overridden by `IRONVAULT_VAULT`.
 
 ## Python API
 
 ```python
-from aimodelvault import VaultRegistry
+from ironvault import VaultRegistry
 
 registry = VaultRegistry("/path/to/config")
 
@@ -125,7 +125,7 @@ curl -X POST http://localhost:8080/api/v1/vaults/production/activate \
 ## Library API
 
 ```rust
-use ai_model_vault::{VaultRegistry, VaultEntry};
+use ironvault::{VaultRegistry, VaultEntry};
 
 let registry = VaultRegistry::new("/path/to/config")?;
 

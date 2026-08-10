@@ -3,24 +3,24 @@
 //! Tests module interactions, edge cases, and cross-module workflows that
 //! inline unit tests don't cover.
 
-use ai_model_vault::access_control::{AclGuard, Role};
-use ai_model_vault::benchmark::{BenchmarkRecord, BenchmarkStore};
-use ai_model_vault::diff::ModelDiffer;
-use ai_model_vault::evaluation::{EvalRun, EvalStore, MetricResult};
-use ai_model_vault::gc;
-use ai_model_vault::license_scan::LicenseScanner;
-use ai_model_vault::lineage_graph::{DerivationKind, LineageEdge, LineageGraph};
-use ai_model_vault::multi_vault::{VaultEntry, VaultRegistry};
-use ai_model_vault::plugins::{PluginManifest, PluginRegistry};
-use ai_model_vault::policies::{PolicyStore, RetentionPolicy};
-use ai_model_vault::profiles::{Profile, ProfileStore};
-use ai_model_vault::quantization::{QuantMethod, QuantProfile, QuantProfileStore};
-use ai_model_vault::scanning::PickleScanner;
-use ai_model_vault::scheduler::{BackupFrequency, BackupManager, BackupSchedule};
-use ai_model_vault::signing::ModelSigner;
-use ai_model_vault::tags::{SearchQuery, TagStore};
-use ai_model_vault::validation::ValidationStore;
-use ai_model_vault::webhooks::{WebhookStore, WebhookTarget};
+use ironvault::access_control::{AclGuard, Role};
+use ironvault::benchmark::{BenchmarkRecord, BenchmarkStore};
+use ironvault::diff::ModelDiffer;
+use ironvault::evaluation::{EvalRun, EvalStore, MetricResult};
+use ironvault::gc;
+use ironvault::license_scan::LicenseScanner;
+use ironvault::lineage_graph::{DerivationKind, LineageEdge, LineageGraph};
+use ironvault::multi_vault::{VaultEntry, VaultRegistry};
+use ironvault::plugins::{PluginManifest, PluginRegistry};
+use ironvault::policies::{PolicyStore, RetentionPolicy};
+use ironvault::profiles::{Profile, ProfileStore};
+use ironvault::quantization::{QuantMethod, QuantProfile, QuantProfileStore};
+use ironvault::scanning::PickleScanner;
+use ironvault::scheduler::{BackupFrequency, BackupManager, BackupSchedule};
+use ironvault::signing::ModelSigner;
+use ironvault::tags::{SearchQuery, TagStore};
+use ironvault::validation::ValidationStore;
+use ironvault::webhooks::{WebhookStore, WebhookTarget};
 use std::collections::{BTreeMap, HashMap};
 use std::path::PathBuf;
 use tempfile::tempdir;
@@ -549,7 +549,7 @@ fn test_webhook_remove() {
 #[test]
 fn test_quant_estimate_sizes() {
     let original = 4_000_000_000u64;
-    let estimated = ai_model_vault::quantization::estimate_quantized_size(
+    let estimated = ironvault::quantization::estimate_quantized_size(
         original,
         QuantMethod::F32,
         QuantMethod::Q4KM,
@@ -862,7 +862,7 @@ fn test_scan_safe_bytes() {
             || report
                 .findings
                 .iter()
-                .all(|f| f.severity != ai_model_vault::Severity::Critical)
+                .all(|f| f.severity != ironvault::Severity::Critical)
     );
 }
 

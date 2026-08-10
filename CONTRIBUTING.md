@@ -1,6 +1,6 @@
-# Contributing to aimodelvault
+# Contributing to ironvault
 
-Thank you for your interest in contributing to aimodelvault! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to ironvault! This document provides guidelines and instructions for contributing.
 
 ## Code of Conduct
 
@@ -68,8 +68,8 @@ cargo install cargo-watch
 
 ```bash
 # Clone repository
-git clone https://github.com/nervosys/AIModelVault.git
-cd AIModelVault
+git clone https://github.com/nervosys/IronVault.git
+cd IronVault
 
 # Build (default features: safetensors, ndarray, sqlite)
 cargo build

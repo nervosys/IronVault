@@ -3,8 +3,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Demos — AI Model Vault",
-  description: "CLI animation demos showing AI Model Vault workflows — vault init, model storage, versioning, format conversion, and security compliance.",
+  title: "Demos — IronVault",
+  description: "CLI animation demos showing IronVault workflows — vault init, model storage, versioning, format conversion, and security compliance.",
 };
 
 const demos = [
@@ -14,7 +14,7 @@ const demos = [
     description:
       "Create a new encrypted vault with AES-256-GCM encryption, unlock it with your passphrase, and inspect vault status — all from the CLI.",
     duration: "0:11",
-    commands: ["aim init --encryption aes-256-gcm", "aim unlock", "aim status"],
+    commands: ["iv init --encryption aes-256-gcm", "iv unlock", "iv status"],
   },
   {
     src: "/videos/CLIStore.mp4",
@@ -22,7 +22,7 @@ const demos = [
     description:
       "Store models in multiple formats with automatic detection — SafeTensors, GGUF, PyTorch, ONNX, and more. List everything in the vault with metadata.",
     duration: "0:14",
-    commands: ["aim store model.safetensors", "aim store llama-7b.gguf", "aim list"],
+    commands: ["iv store model.safetensors", "iv store llama-7b.gguf", "iv list"],
   },
   {
     src: "/videos/CLIVersions.mp4",
@@ -31,10 +31,10 @@ const demos = [
       "Track model version history, roll back to any previous version, and view the full lineage tree. Git-like semantics for model management.",
     duration: "0:16",
     commands: [
-      "aim store model-v2.safetensors",
-      "aim versions model.safetensors",
-      "aim get model.safetensors --version 1",
-      "aim lineage model.safetensors",
+      "iv store model-v2.safetensors",
+      "iv versions model.safetensors",
+      "iv get model.safetensors --version 1",
+      "iv lineage model.safetensors",
     ],
   },
   {
@@ -44,9 +44,9 @@ const demos = [
       "Convert models between any of the 23+ supported formats. Apply quantization (Q4_K_M, Q8_0, etc.) during conversion for optimized deployment.",
     duration: "0:13",
     commands: [
-      "aim convert model.safetensors --to gguf --quantize q4_k_m",
-      "aim convert model.safetensors --to onnx",
-      "aim list --format",
+      "iv convert model.safetensors --to gguf --quantize q4_k_m",
+      "iv convert model.safetensors --to onnx",
+      "iv list --format",
     ],
   },
   {
@@ -55,7 +55,7 @@ const demos = [
     description:
       "Run a comprehensive security audit covering encryption, KDF, code safety, and threat models. 12 automated checks with a compliance score and audit log.",
     duration: "0:11",
-    commands: ["aim compliance --verbose", "aim audit-log --last 3"],
+    commands: ["iv compliance --verbose", "iv audit-log --last 3"],
   },
 ];
 
@@ -69,7 +69,7 @@ export default function DemosPage() {
             CLI Demos
           </h1>
           <p className="text-xl text-blue-200 max-w-2xl mx-auto">
-            Animated walkthroughs of real AI Model Vault workflows.
+            Animated walkthroughs of real IronVault workflows.
             Click any video to play.
           </p>
         </div>
@@ -123,7 +123,7 @@ export default function DemosPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to try it?</h2>
           <p className="text-lg text-[var(--color-text-secondary)] mb-6 max-w-xl mx-auto">
-            Install AI Model Vault and start managing your models in minutes.
+            Install IronVault and start managing your models in minutes.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

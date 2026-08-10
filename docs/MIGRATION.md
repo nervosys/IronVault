@@ -1,4 +1,185 @@
+# Migration Guide
+
+- [v4.x → v5.0.0 — the IronVault rename](#v4x--v500--the-ironvault-rename) *(current)*
+- [v0.x → v1.0.0](#migration-guide--v0x--v100) *(historical; describes the project under its former name)*
+
+---
+
+# v4.x → v5.0.0 — the IronVault rename
+
+v5.0.0 renames the project from AI Model Vault to IronVault. Nothing about the
+vault format, the cryptography, or the on-disk layout changed. What changed is
+every name you type.
+
+## What you have to do
+
+### 1. Install under the new name
+
+```bash
+# Rust
+cargo uninstall ai-model-vault
+cargo install ironvault          # binary is now `iv`, not `aim`
+
+# Python
+pip uninstall aimodelvault
+pip install ironvault
+```
+
+`ai-model-vault` and `aimodelvault` remain on crates.io and PyPI at 4.6.x and
+still install. They will not receive further releases. There is deliberately no
+forwarding meta-package: a package that installs something other than its own
+name is worse than one that stops moving.
+
+### 2. Update your code
+
+```rust
+// before
+use ai_model_vault::{Vault, VaultConfig};
+// after
+use ironvault::{Vault, VaultConfig};
+```
+
+```python
+# before
+import aimodelvault
+# after
+import ironvault
+```
+
+### 3. Rename your commands
+
+`aim` is now `iv`. Every subcommand, flag, and exit code is unchanged, so this
+is a pure substitution:
+
+```bash
+aim list --format json     # before
+iv list --format json      # after
+```
+
+### 4. Rename your environment variables (not urgent)
+
+4.x had two unrelated prefixes; 5.0 has one.
+
+| 4.x | 5.0 |
+| --- | --- |
+| `aimodelvault_HOME` | `IRONVAULT_HOME` |
+| `aimodelvault_CONFIG` | `IRONVAULT_CONFIG` |
+| `aimodelvault_VAULT` | `IRONVAULT_VAULT` |
+| `aimodelvault_PASSPHRASE` | `IRONVAULT_PASSPHRASE` |
+| `aimodelvault_FEDERATION_PASSPHRASE` | `IRONVAULT_FEDERATION_PASSPHRASE` |
+| `AIM_JWT_SECRET` | `IRONVAULT_JWT_SECRET` |
+| `AIM_HOST`, `AIM_PORT` | `IRONVAULT_HOST`, `IRONVAULT_PORT` |
+| `AIM_REVOCATION_STORE` | `IRONVAULT_REVOCATION_STORE` |
+| `AIM_TELEMETRY_ENABLED` / `_DISABLED` | `IRONVAULT_TELEMETRY_ENABLED` / `_DISABLED` |
+
+**The old names still work in 5.0.** Each one warns once to stderr the first
+time it is read. The warning prints the variable name only, never its value —
+several of these carry passphrases. Support for the old names is removed in
+6.0, so treat this as a deprecation rather than a break.
+
+`DO_NOT_TRACK`, `AWS_*`, `AZURE_*`, and `OTEL_*` are third-party or cross-vendor
+conventions and are unaffected.
+
+## What you do *not* have to do
+
+### Your vault does not move
+
+The Rust XDG layout was already name-neutral and is unchanged:
+
+```
+~/.config/ai/models/          # config
+~/.local/share/ai/models/     # data, vaults, logs
+~/.cache/ai/models/           # cache
+```
+
+Existing vaults, versions, audit logs, and blockchain audit chains are found
+exactly where they were. No export/import step, no re-encryption.
+
+### Your encrypted files still open
+
+The on-disk and on-wire format identifiers are deliberately **not** renamed:
+
+- `AIMVSEAL` — the 8-byte magic on every sealed cloud object and federation transfer
+- `AIMV` — the 4-byte magic on every chunked-encrypted model
+- `aimv://` — the URI scheme, and `aimv:` the JSON-LD term prefix
+
+Renaming these would not rename the bytes already written to your bucket and
+your disk; it would just stop 5.0 from recognising them. Sealed objects would
+read as plaintext and encrypted models would be rejected as corrupt. Any
+`aimv://` URI you have stored remains valid.
+
+## systemd deployments
+
+The unit, user, and paths are renamed. `install.sh` does **not** migrate an
+existing 4.x install — it provisions the new one alongside it, so nothing is
+destroyed while you verify.
+
+| 4.x | 5.0 |
+| --- | --- |
+| `aim-server.service` | `ironvault-server.service` |
+| user/group `aim` | user/group `ironvault` |
+| `/etc/aim/server.env` | `/etc/ironvault/server.env` |
+| `/var/lib/aim` | `/var/lib/ironvault` |
+| `/usr/local/bin/aim` | `/usr/local/bin/iv` |
+
+```bash
+sudo systemctl disable --now aim-server
+
+sudo ./deploy/systemd/install.sh --dry-run    # inspect first
+sudo ./deploy/systemd/install.sh
+
+# carry over the secrets you already generated, rather than rotating
+# them unnecessarily; the file stays 0600 root-owned
+sudo cp /etc/aim/server.env /etc/ironvault/server.env
+sudo chown root:root /etc/ironvault/server.env
+sudo chmod 0600 /etc/ironvault/server.env
+
+sudo mv /var/lib/aim/revocations.json /var/lib/ironvault/
+sudo chown -R ironvault:ironvault /var/lib/ironvault
+
+sudo systemctl enable --now ironvault-server
+```
+
+Once the new unit is healthy, remove `/etc/aim`, `/var/lib/aim`, and the `aim`
+user. Verify first — the JWT secret in the old `server.env` is the only copy,
+and deleting it invalidates every issued token.
+
+## Python-only users: your directories do move
+
+Unlike the Rust side, the Python package derived its directories from the
+package name:
+
+| 4.x | 5.0 |
+| --- | --- |
+| `~/.config/aimodelvault/` | `~/.config/ironvault/` |
+| `~/.local/share/aimodelvault/` | `~/.local/share/ironvault/` |
+| `~/.cache/aimodelvault/` | `~/.cache/ironvault/` |
+
+If you used the Python API's own config rather than the CLI, move them:
+
+```bash
+mv ~/.config/aimodelvault  ~/.config/ironvault
+mv ~/.local/share/aimodelvault ~/.local/share/ironvault
+rm -rf ~/.cache/aimodelvault   # cache only; safe to discard
+```
+
+## Repository and links
+
+`github.com/nervosys/AIModelVault` is now `github.com/nervosys/IronVault`.
+GitHub redirects the old URL, including `git remote` operations, so existing
+clones keep working. To update a clone explicitly:
+
+```bash
+git remote set-url origin https://github.com/nervosys/IronVault.git
+```
+
+---
+
 # Migration Guide — v0.x → v1.0.0
+
+> Historical. This section describes the project under its former name, AI
+> Model Vault, and its former binary `aim`. It is preserved as an accurate
+> record of what v1.0.0 shipped; see the section above for current names.
 
 This document covers upgrading from any v0.x release of AI Model Vault to v1.0.0.
 

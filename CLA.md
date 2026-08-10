@@ -1,8 +1,8 @@
 # Contributor License Agreement (CLA)
 
-## AI Model Vault — Individual Contributor License Agreement
+## IronVault — Individual Contributor License Agreement
 
-Thank you for your interest in contributing to AI Model Vault ("the Project"),
+Thank you for your interest in contributing to IronVault ("the Project"),
 maintained by NERVOSYS AI ("the Maintainer"). This Contributor License Agreement
 ("Agreement") documents the rights granted by contributors to the Maintainer.
 

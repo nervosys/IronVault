@@ -1,4 +1,4 @@
-//! Axum HTTP server for AI Model Vault.
+//! Axum HTTP server for IronVault.
 //!
 //! Start with [`serve`] or build a router with [`create_router`].
 //!
@@ -289,7 +289,7 @@ pub const MIN_JWT_SECRET_BYTES: usize = 32;
 pub fn validate_jwt_secret(secret: &str) -> Result<()> {
     if secret.is_empty() {
         return Err(VaultError::ConfigError(
-            "JWT secret must not be empty. Set --jwt-secret or AIM_JWT_SECRET.".into(),
+            "JWT secret must not be empty. Set --jwt-secret or IRONVAULT_JWT_SECRET.".into(),
         ));
     }
 
@@ -353,7 +353,7 @@ pub async fn serve(vault_config: VaultConfig, api_config: ApiConfig) -> Result<(
     //
     // Peers authenticate with the shared federation key and never hold the
     // vault passphrase, so without this every peer request 500s until a human
-    // POSTs to /auth/token. Scoped to federation deliberately: a plain `aim
+    // POSTs to /auth/token. Scoped to federation deliberately: a plain `iv
     // serve` keeps the existing behaviour of starting locked.
     if state_config.federation.enabled {
         match crate::federation_transport::startup_passphrase()? {
@@ -391,7 +391,7 @@ pub async fn serve(vault_config: VaultConfig, api_config: ApiConfig) -> Result<(
         .parse()
         .map_err(|e| VaultError::ConfigError(format!("Invalid bind address: {e}")))?;
 
-    println!("AI Model Vault API v{}", env!("CARGO_PKG_VERSION"));
+    println!("IronVault API v{}", env!("CARGO_PKG_VERSION"));
     println!("  Listening on http://{}", addr);
     println!("  Dashboard:   http://{}/", addr);
     println!("  OpenAPI:     http://{}/api/v1/openapi.json", addr);

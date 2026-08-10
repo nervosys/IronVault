@@ -11,13 +11,13 @@ export default function ScanningPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="quick-start">Quick Start</h2>
       <CodeBlock language="bash">{`# Scan a vault model
-aim scan my-model
+iv scan my-model
 
 # Scan a file on disk
-aim scan --file ./model.pt
+iv scan --file ./model.pt
 
 # JSON output for CI/CD
-aim scan --file ./model.pt --format json`}</CodeBlock>
+iv scan --file ./model.pt --format json`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="opcodes">Dangerous Opcodes</h2>
       <p className="text-[var(--color-text-secondary)] mb-4">
@@ -66,7 +66,7 @@ aim scan --file ./model.pt --format json`}</CodeBlock>
       </ul>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="options">CLI Options</h2>
-      <CodeBlock language="bash">{`aim scan [<NAME>] [OPTIONS]
+      <CodeBlock language="bash">{`iv scan [<NAME>] [OPTIONS]
 
 Options:
   --file <PATH>       Scan a file on disk
@@ -75,7 +75,7 @@ Options:
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="ci-cd">CI/CD Integration</h2>
       <CodeBlock language="bash">{`# Fail pipeline if model is unsafe
-aim scan --file model.pt --format json | jq -e '.safe == true'`}</CodeBlock>
+iv scan --file model.pt --format json | jq -e '.safe == true'`}</CodeBlock>
     </>
   );
 }

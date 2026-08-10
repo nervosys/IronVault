@@ -6,13 +6,13 @@ Multi-peer vault synchronization with vector clocks for conflict detection.
 >
 > Before 4.4.0 `FederationManager` was a complete HTTP *client* pointed at
 > three endpoints nothing served, so a node could only sync against a peer
-> that did not exist. The server half, the `aim federation` commands, and
+> that did not exist. The server half, the `iv federation` commands, and
 > transit encryption all landed in 4.4.0. An earlier revision of this page
 > claimed REST exposure that was not there.
 
 ## Concepts
 
-- **Peer** — another `aim` node identified by a stable ID and reachable endpoint.
+- **Peer** — another `iv` node identified by a stable ID and reachable endpoint.
 - **Vector clock** — per-peer monotonic counter attached to every mutation.
 - **Conflict** — concurrent writes to the same model from different peers.
 
@@ -32,14 +32,14 @@ federation:
       enabled: true
 ```
 
-Enabling federation exposes `/api/v1/federation/*` on `aim serve`. Those
+Enabling federation exposes `/api/v1/federation/*` on `iv serve`. Those
 endpoints hand out model bytes, so this is deliberately opt-in and the routes
 are not registered at all when it is off — an unauthenticated caller gets a
 404 rather than a 401 confirming the endpoint exists.
 
 **Set `node_id` to a stable value.** Vector clocks are keyed by it, so a
 generated id makes the node look brand new after every restart and clock
-comparison stops meaning anything. `aim` warns on stderr when it is unset.
+comparison stops meaning anything. `iv` warns on stderr when it is unset.
 
 ## Authentication
 
@@ -63,7 +63,7 @@ reference aborts the server rather than failing the first sync at 3am.
 envelope used for cloud uploads, keyed by a passphrase both nodes share:
 
 ```bash
-export aimodelvault_FEDERATION_PASSPHRASE='…'   # same value on both peers
+export IRONVAULT_FEDERATION_PASSPHRASE='…'   # same value on both peers
 ```
 
 TLS protects the hop; this protects the object, so a peer's reverse proxy,
@@ -73,24 +73,24 @@ the environment and never from the config file.
 An **unsealed** model arriving while `seal_transfers` is on is refused, not
 stored: otherwise a peer could downgrade the transfer simply by sending
 plaintext. Turning sealing off is only defensible on a network you fully
-control, and `aim serve` warns at startup when it is off.
+control, and `iv serve` warns at startup when it is off.
 
 ## Serving requires an unlocked vault
 
 Peers hold the federation key, never the vault passphrase. When federation is
-enabled, `aim serve` unlocks the vault at startup from
-`$aimodelvault_PASSPHRASE` (a literal or KMS URI); without it the vault stays
+enabled, `iv serve` unlocks the vault at startup from
+`$IRONVAULT_PASSPHRASE` (a literal or KMS URI); without it the vault stays
 locked and every peer request fails until someone POSTs to `/auth/token` by
-hand. A plain `aim serve` with federation off still starts locked, as before.
+hand. A plain `iv serve` with federation off still starts locked, as before.
 
 ## Commands
 
 | Command | Purpose |
 | --- | --- |
-| `aim federation status` | Node identity, peers, sealing mode, recent syncs |
-| `aim federation manifest` | This node's manifest — what peers would see |
-| `aim federation plan <peer>` | What a sync would transfer, transferring nothing |
-| `aim federation sync <peer>` | Sync: download what is missing here, upload what is missing there |
+| `iv federation status` | Node identity, peers, sealing mode, recent syncs |
+| `iv federation manifest` | This node's manifest — what peers would see |
+| `iv federation plan <peer>` | What a sync would transfer, transferring nothing |
+| `iv federation sync <peer>` | Sync: download what is missing here, upload what is missing there |
 
 `plan` is worth running first against an unfamiliar peer; it fetches the
 remote manifest and prints the delta without moving any bytes.
@@ -133,6 +133,6 @@ Use federation when multiple workstations or CI runners need to share a single
 logical vault without a central server. For centralized storage, prefer the
 cloud backends (S3, Azure Blob) — see [CLOUD_STORAGE.md](CLOUD_STORAGE.md).
 
-See [src/federation.rs](https://github.com/nervosys/AIModelVault/blob/master/src/federation.rs),
-[src/federation_transport.rs](https://github.com/nervosys/AIModelVault/blob/master/src/federation_transport.rs),
-and [src/api/federation_routes.rs](https://github.com/nervosys/AIModelVault/blob/master/src/api/federation_routes.rs).
+See [src/federation.rs](https://github.com/nervosys/IronVault/blob/master/src/federation.rs),
+[src/federation_transport.rs](https://github.com/nervosys/IronVault/blob/master/src/federation_transport.rs),
+and [src/api/federation_routes.rs](https://github.com/nervosys/IronVault/blob/master/src/api/federation_routes.rs).

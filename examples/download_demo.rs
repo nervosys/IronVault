@@ -2,10 +2,10 @@
 //!
 //! Run with: cargo run --example download_demo
 
-use ai_model_vault::download::{ModelDownloader, ModelSource};
+use ironvault::download::{ModelDownloader, ModelSource};
 
-fn main() -> ai_model_vault::Result<()> {
-    println!("=== AI Model Vault Download Example ===\n");
+fn main() -> ironvault::Result<()> {
+    println!("=== IronVault Download Example ===\n");
 
     // 1. Parse different source formats
     println!("1. Parsing model source URIs...");
@@ -32,7 +32,7 @@ fn main() -> ai_model_vault::Result<()> {
 
     // 4. Demonstrate download (dry run - would need network)
     println!("4. Download workflow (demonstration):");
-    println!("   aim pull hf://user/repo/model.safetensors --store --name my-model");
+    println!("   iv pull hf://user/repo/model.safetensors --store --name my-model");
     println!("   → Downloads file with SHA-256 verification");
     println!("   → Auto-stores in vault with name 'my-model'");
     println!("   → Only HTTPS URLs accepted (security)\n");

@@ -1,13 +1,13 @@
 # Model Cards - Quick Reference
 
-⚡ Fast guide to creating model cards in AI Model Vault (AIMV)
+⚡ Fast guide to creating model cards in IronVault (AIMV)
 
 ---
 
 ## Quick Start
 
 ```rust
-use ai_model_vault::model_card::*;
+use ironvault::model_card::*;
 
 // 1. Create details
 let details = ModelDetails {
@@ -329,7 +329,7 @@ let ethical = EthicalConsiderations {
 ## Vault Integration
 
 ```rust
-use ai_model_vault::VaultConfig;
+use ironvault::VaultConfig;
 
 // Store card with model
 let config = VaultConfig::new()?;
@@ -423,4 +423,4 @@ Demos include:
 
 ---
 
-**AI Model Vault (AIMV)** - Responsible AI documentation made simple.
+**IronVault (AIMV)** - Responsible AI documentation made simple.

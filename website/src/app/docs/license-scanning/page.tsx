@@ -11,16 +11,16 @@ export default function LicenseScanningPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="quick-start">Quick Start</h2>
       <CodeBlock language="bash">{`# Scan a directory
-aim license-scan ./my-model/
+iv license-scan ./my-model/
 
 # Scan a single file
-aim license-scan model.gguf
+iv license-scan model.gguf
 
 # JSON output
-aim license-scan ./my-model/ --format json`}</CodeBlock>
+iv license-scan ./my-model/ --format json`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="options">CLI Options</h2>
-      <CodeBlock language="bash">{`aim license-scan <PATH> [OPTIONS]
+      <CodeBlock language="bash">{`iv license-scan <PATH> [OPTIONS]
 
 Arguments:
   <PATH>              File or directory to scan

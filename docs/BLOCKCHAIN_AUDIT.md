@@ -5,12 +5,12 @@ A Merkle-chained, append-only block store for audit entries.
 > **Status: wired as of 4.4.0, opt-in.**
 >
 > Set `security.blockchain_audit = true` and every audit entry is mirrored
-> into a hash-linked chain. Inspect it with `aim chain`. Off by default: the
+> into a hash-linked chain. Inspect it with `iv chain`. Off by default: the
 > chain is append-only and never pruned, so it grows without bound, while
 > `audit_log` alone rotates at a size cap.
 >
 > Before 4.4.0 this was a library primitive that nothing called. An earlier
-> revision of this page documented an `aim audit` command that did not exist
+> revision of this page documented an `iv audit` command that did not exist
 > and claimed "every mutating operation is recorded as a block"; neither was
 > true then.
 
@@ -36,18 +36,18 @@ block immediately.
 
 Raising it trades that durability for fewer, denser block files. The logger
 finalizes on drop, which narrows the window on a clean exit, but a crash or
-`SIGKILL` still loses whatever is pending. `aim chain status` reports the
+`SIGKILL` still loses whatever is pending. `iv chain status` reports the
 pending count — a non-zero value is exactly what a crash would cost you.
 
 ## Commands
 
 | Command | Purpose |
 | --- | --- |
-| `aim chain status` | Height, latest block hash, pending count |
-| `aim chain verify` | Re-verify hash links, Merkle roots, and block hashes |
-| `aim chain proof --block N --entry M` | Emit an inclusion proof as JSON |
-| `aim chain verify-proof <file>` | Check a proof |
-| `aim chain search --model X --event MODEL_STORED` | Find entries |
+| `iv chain status` | Height, latest block hash, pending count |
+| `iv chain verify` | Re-verify hash links, Merkle roots, and block hashes |
+| `iv chain proof --block N --entry M` | Emit an inclusion proof as JSON |
+| `iv chain verify-proof <file>` | Check a proof |
+| `iv chain search --model X --event MODEL_STORED` | Find entries |
 
 These read the chain directly rather than through the vault, so they need no
 passphrase — and, more importantly, **inspecting the trail does not append to
@@ -63,7 +63,7 @@ fails, so they work as CI or cron gates.
 `verify-proof` confirms the entry hashes to a leaf that reaches the stated
 Merkle root, and that the block chain in the proof runs to genesis. It does
 **not** confirm that genesis belongs to your vault — compare it against
-`aim chain status` on a vault you trust.
+`iv chain status` on a vault you trust.
 
 Until 4.4.0 it did not confirm the first part either: the Merkle walk started
 from a `leaf_hash` carried inside the proof and never checked that hash came
@@ -104,8 +104,8 @@ an earlier revision of this table listed those, and they do not exist.
 ## Usage
 
 ```rust
-use ai_model_vault::audit::AuditEntry;
-use ai_model_vault::{BlockchainAudit, Result};
+use ironvault::audit::AuditEntry;
+use ironvault::{BlockchainAudit, Result};
 
 fn record(chain_dir: &std::path::Path, entry: AuditEntry) -> Result<()> {
     // Blocks are sealed automatically every `block_size` entries.
@@ -140,4 +140,4 @@ through `merkle_root`, not through the block hash directly.
 
 ---
 
-See [src/blockchain.rs](https://github.com/nervosys/AIModelVault/blob/master/src/blockchain.rs).
+See [src/blockchain.rs](https://github.com/nervosys/IronVault/blob/master/src/blockchain.rs).

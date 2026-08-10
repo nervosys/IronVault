@@ -838,7 +838,7 @@ impl Vault {
 /// # Example
 ///
 /// ```rust,no_run
-/// use ai_model_vault::VaultBuilder;
+/// use ironvault::VaultBuilder;
 ///
 /// let vault = VaultBuilder::new()
 ///     .build()

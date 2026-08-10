@@ -1,4 +1,4 @@
-//! Core trait definitions for AI Model Vault architecture v2.
+//! Core trait definitions for IronVault architecture v2.
 //!
 //! These traits define the boundaries between subsystems, enabling:
 //! - Dependency injection (concrete types injected, never hard-coded)
@@ -90,13 +90,20 @@ pub struct AimvUri {
 
 impl AimvUri {
     /// URI scheme prefix.
+    ///
+    /// Deliberately **not** renamed for IronVault. The scheme is a published
+    /// interface: it appears in `.well-known/ontology.jsonld`, in the JSON-LD
+    /// `aimv:` term prefix, and in URIs that callers have stored. Renaming it
+    /// would silently invalidate every `aimv://` reference in the wild for
+    /// cosmetic gain. A new scheme, if it is ever wanted, belongs alongside
+    /// this one rather than in place of it.
     pub const SCHEME: &'static str = "aimv://";
 
     /// Parse an AIMV URI string.
     ///
     /// # Examples
     /// ```
-    /// use ai_model_vault::traits::AimvUri;
+    /// use ironvault::traits::AimvUri;
     ///
     /// let uri = AimvUri::parse("aimv://default/llama-3@3/card").unwrap();
     /// assert_eq!(uri.vault, Some("default".into()));

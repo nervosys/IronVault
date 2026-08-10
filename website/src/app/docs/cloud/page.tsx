@@ -46,7 +46,7 @@ export AWS_SECRET_ACCESS_KEY=your-secret
 export AWS_REGION=us-east-1
 
 # Or configure through CLI
-aim cloud config --provider s3 --show`}</CodeBlock>
+iv cloud config --provider s3 --show`}</CodeBlock>
 
       <h3 className="text-lg font-semibold mt-6 mb-2">Azure Blob Storage</h3>
       <CodeBlock language="bash">{`export AZURE_STORAGE_ACCOUNT=your-account
@@ -54,16 +54,16 @@ export AZURE_STORAGE_KEY=your-key`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="usage">CLI Usage</h2>
       <CodeBlock language="bash">{`# Push a model to S3
-aim cloud push my-model --provider s3 --bucket my-models
+iv cloud push my-model --provider s3 --bucket my-models
 
 # List models in cloud
-aim cloud list --provider s3 --bucket my-models
+iv cloud list --provider s3 --bucket my-models
 
 # Pull a model from cloud
-aim cloud pull my-model --provider s3 --bucket my-models
+iv cloud pull my-model --provider s3 --bucket my-models
 
 # Push to Azure
-aim cloud push my-model --provider azure --bucket my-container`}</CodeBlock>
+iv cloud push my-model --provider azure --bucket my-container`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="encryption">End-to-End Encryption</h2>
       <p className="text-[var(--color-text-secondary)]">
@@ -73,7 +73,7 @@ aim cloud push my-model --provider azure --bucket my-container`}</CodeBlock>
       </p>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="rust">Rust API</h2>
-      <CodeBlock language="rust">{`use ai_model_vault::storage::{StorageConfig, StorageBackend};
+      <CodeBlock language="rust">{`use ironvault::storage::{StorageConfig, StorageBackend};
 
 #[tokio::main]
 async fn main() -> Result<()> {

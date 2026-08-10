@@ -27,7 +27,7 @@ export default function SecurityHardeningPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="api-hardening">API Server Hardening</h2>
       <ul className="space-y-2 text-[var(--color-text-secondary)]">
-        <li>• Always set <code className="text-xs px-1 bg-[var(--color-bg-secondary)] rounded">AIM_JWT_SECRET</code> to a strong random value</li>
+        <li>• Always set <code className="text-xs px-1 bg-[var(--color-bg-secondary)] rounded">IRONVAULT_JWT_SECRET</code> to a strong random value</li>
         <li>• Use TLS termination (nginx, Traefik, or cloud load balancer) — the built-in server is HTTP only</li>
         <li>• Do <strong>not</strong> use <code className="text-xs px-1 bg-[var(--color-bg-secondary)] rounded">--cors-permissive</code> in production</li>
         <li>• Set appropriate <code className="text-xs px-1 bg-[var(--color-bg-secondary)] rounded">--token-expiry</code> (default 3600s = 1 hour)</li>

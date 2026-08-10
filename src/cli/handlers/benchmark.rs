@@ -1,6 +1,6 @@
-//! CLI handler for benchmark metadata (aim benchmark).
+//! CLI handler for benchmark metadata (iv benchmark).
 
-use ai_model_vault::{BenchmarkStore, Result, VaultConfig, VaultError};
+use ironvault::{BenchmarkStore, Result, VaultConfig, VaultError};
 
 use crate::cli::args::BenchmarkCommands;
 

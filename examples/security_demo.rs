@@ -1,10 +1,10 @@
 //! Example: Security and compliance features
 
-use ai_model_vault::compliance::ComplianceChecker;
-use ai_model_vault::{Vault, VaultConfig};
+use ironvault::compliance::ComplianceChecker;
+use ironvault::{Vault, VaultConfig};
 
-fn main() -> ai_model_vault::Result<()> {
-    println!("=== AI Model Vault Security & Compliance Example ===\n");
+fn main() -> ironvault::Result<()> {
+    println!("=== IronVault Security & Compliance Example ===\n");
 
     // 1. Run compliance checks
     println!("1. Running compliance checks...\n");

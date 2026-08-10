@@ -7,12 +7,12 @@
 // 4. Integration with vault storage
 // 5. Real-world examples for different model types
 
-use ai_model_vault::model_card::*;
-use ai_model_vault::Result;
+use ironvault::model_card::*;
+use ironvault::Result;
 use std::collections::HashMap;
 
 fn main() -> Result<()> {
-    println!("=== AI Model Vault - Model Card Demo ===\n");
+    println!("=== IronVault - Model Card Demo ===\n");
 
     // Demo 1: LLM Model Card
     println!("📝 Demo 1: Large Language Model Card");

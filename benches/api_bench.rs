@@ -1,9 +1,9 @@
 //! API endpoint benchmarks — measures request/response latency for key endpoints.
 
-use ai_model_vault::api::server::{create_router, AppState, RateLimiter};
-use ai_model_vault::api::ApiConfig;
-use ai_model_vault::config::{DirectoryPaths, VaultConfig};
-use ai_model_vault::vault::Vault;
+use ironvault::api::server::{create_router, AppState, RateLimiter};
+use ironvault::api::ApiConfig;
+use ironvault::config::{DirectoryPaths, VaultConfig};
+use ironvault::vault::Vault;
 
 use axum::body::Body;
 use axum::extract::ConnectInfo;
@@ -129,7 +129,7 @@ fn bench_list_models(c: &mut Criterion) {
                     .unwrap();
                 drop(vault);
 
-                let token = ai_model_vault::api::auth::create_token(
+                let token = ironvault::api::auth::create_token(
                     &state.config.jwt_secret,
                     state.config.token_expiry_secs,
                 )
@@ -168,7 +168,7 @@ fn bench_compliance(c: &mut Criterion) {
                     .unwrap();
                 drop(vault);
 
-                let token = ai_model_vault::api::auth::create_token(
+                let token = ironvault::api::auth::create_token(
                     &state.config.jwt_secret,
                     state.config.token_expiry_secs,
                 )
@@ -207,7 +207,7 @@ fn bench_store_model(c: &mut Criterion) {
                     .unwrap();
                 drop(vault);
 
-                let token = ai_model_vault::api::auth::create_token(
+                let token = ironvault::api::auth::create_token(
                     &state.config.jwt_secret,
                     state.config.token_expiry_secs,
                 )
@@ -263,7 +263,7 @@ fn bench_stats(c: &mut Criterion) {
                     .unwrap();
                 drop(vault);
 
-                let token = ai_model_vault::api::auth::create_token(
+                let token = ironvault::api::auth::create_token(
                     &state.config.jwt_secret,
                     state.config.token_expiry_secs,
                 )
@@ -354,7 +354,7 @@ fn bench_metrics(c: &mut Criterion) {
                     .unwrap();
                 drop(vault);
 
-                let token = ai_model_vault::api::auth::create_token(
+                let token = ironvault::api::auth::create_token(
                     &state.config.jwt_secret,
                     state.config.token_expiry_secs,
                 )

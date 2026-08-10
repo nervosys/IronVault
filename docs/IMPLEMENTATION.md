@@ -1,8 +1,8 @@
-# aimodelvault Implementation Summary
+# ironvault Implementation Summary
 
 ## Project Overview
 
-**aimodelvault** is a universal, cross-platform, XDG-compliant secure vault for storing and managing AI model formats, implemented in Rust for maximum performance, security, and memory safety.
+**ironvault** is a universal, cross-platform, XDG-compliant secure vault for storing and managing AI model formats, implemented in Rust for maximum performance, security, and memory safety.
 
 ## Implementation Status
 
@@ -108,7 +108,7 @@ Metadata → Hash (SHA-256) → Version Control
 ## Project Structure
 
 ```
-aimodelvault/
+ironvault/
 ├── src/
 │   ├── lib.rs              # Library entry point
 │   ├── main.rs             # CLI application
@@ -229,31 +229,31 @@ cargo clippy -- -D warnings
 ### CLI Usage
 ```bash
 # Initialize vault
-aim init --name production
+iv init --name production
 
 # Store model
-aim store my-gpt2 ./model.pt \
+iv store my-gpt2 ./model.pt \
   --format pytorch \
   --description "Fine-tuned GPT-2" \
   --task "text-generation"
 
 # List models
-aim list
+iv list
 
 # Get model
-aim get my-gpt2 ./output.pt
+iv get my-gpt2 ./output.pt
 
 # View versions
-aim versions my-gpt2
+iv versions my-gpt2
 
 # Check compliance
-aim compliance
+iv compliance
 ```
 
 ### Rust API Usage
 ```rust
-use aimodelvault::{Vault, VaultConfig};
-use aimodelvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::{Vault, VaultConfig};
+use ironvault::formats::{ModelFormat, ModelMetadata};
 
 // Create vault
 let mut vault = Vault::new(None)?;
@@ -270,10 +270,10 @@ let data = vault.get_model("model", None)?;
 ## XDG Directory Structure
 
 ```
-~/.config/aimodelvault/          # Configuration
+~/.config/ironvault/          # Configuration
 ├── config.yaml                 # Main config
 
-~/.local/share/aimodelvault/     # Data
+~/.local/share/ironvault/     # Data
 ├── vaults/
 │   └── default/
 │       ├── models/
@@ -284,7 +284,7 @@ let data = vault.get_model("model", None)?;
 └── logs/
     └── audit.log               # Audit log
 
-~/.cache/aimodelvault/           # Cache (future use)
+~/.cache/ironvault/           # Cache (future use)
 ```
 
 ## Performance Characteristics
@@ -324,6 +324,6 @@ MIT License - See LICENSE file
 
 ## Contact
 
-- **Project**: https://github.com/nervosys/AIModelVault
+- **Project**: https://github.com/nervosys/IronVault
 - **Security**: security@nervosys.ai
 - **Support**: dev@nervosys.ai

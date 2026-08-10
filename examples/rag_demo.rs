@@ -7,11 +7,11 @@
 //! - In-memory databases
 //! - Retrieval caching
 
-use ai_model_vault::rag::*;
+use ironvault::rag::*;
 use std::collections::HashMap;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("=== AI Model Vault RAG and Rule-Based Systems Demo ===\n");
+    println!("=== IronVault RAG and Rule-Based Systems Demo ===\n");
 
     // PART 1: Document Store for RAG
     println!("📚 PART 1: Document Store for RAG");

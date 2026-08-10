@@ -1,8 +1,8 @@
 //! Analyze, deduplicate, and export command handlers.
 
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-use ai_model_vault::utils::{CompressionAnalyzer, ModelAnalyzer, ModelDeduplicator, ModelExporter};
-use ai_model_vault::{Result, VaultConfig, VaultError};
+use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::utils::{CompressionAnalyzer, ModelAnalyzer, ModelDeduplicator, ModelExporter};
+use ironvault::{Result, VaultConfig, VaultError};
 
 use crate::cli::helpers::{build_vault, prompt_passphrase};
 

@@ -21,7 +21,7 @@ mod comprehensive_coverage_tests {
     // FEDERATION — VectorClock::compare all branches, config structs
     // ============================================================================
     mod federation_coverage {
-        use ai_model_vault::federation::*;
+        use ironvault::federation::*;
 
         #[test]
         fn test_vector_clock_default() {
@@ -353,7 +353,7 @@ mod comprehensive_coverage_tests {
     // TELEMETRY — global functions, TrackingTimer, size buckets
     // ============================================================================
     mod telemetry_coverage {
-        use ai_model_vault::telemetry;
+        use ironvault::telemetry;
         use std::time::Duration;
 
         #[test]
@@ -448,9 +448,9 @@ mod comprehensive_coverage_tests {
     // VERSION — VersionRepo trait impl on VersionControl, all methods
     // ============================================================================
     mod version_coverage {
-        use ai_model_vault::crypto::FipsCrypto;
-        use ai_model_vault::traits::{CryptoProvider, VersionRepo};
-        use ai_model_vault::version::VersionControl;
+        use ironvault::crypto::FipsCrypto;
+        use ironvault::traits::{CryptoProvider, VersionRepo};
+        use ironvault::version::VersionControl;
         use std::collections::HashMap;
 
         #[test]
@@ -645,8 +645,8 @@ mod comprehensive_coverage_tests {
     // CRYPTO — edge cases in encrypt/decrypt, key derivation
     // ============================================================================
     mod crypto_coverage {
-        use ai_model_vault::crypto::{FipsCrypto, SecureKey, KEY_SIZE};
-        use ai_model_vault::traits::CryptoProvider;
+        use ironvault::crypto::{FipsCrypto, SecureKey, KEY_SIZE};
+        use ironvault::traits::CryptoProvider;
 
         #[test]
         fn test_secure_key_from_bytes_wrong_size() {
@@ -771,9 +771,9 @@ mod coverage_boost_tests {
     // VERSION_SQLITE — SqliteVersionRepo via VersionRepo trait (in-memory)
     // ============================================================================
     mod version_sqlite_coverage {
-        use ai_model_vault::crypto::FipsCrypto;
-        use ai_model_vault::traits::VersionRepo;
-        use ai_model_vault::version_sqlite::SqliteVersionRepo;
+        use ironvault::crypto::FipsCrypto;
+        use ironvault::traits::VersionRepo;
+        use ironvault::version_sqlite::SqliteVersionRepo;
         use std::collections::HashMap;
 
         fn make_repo() -> SqliteVersionRepo {
@@ -1045,7 +1045,7 @@ mod coverage_boost_tests {
     // DATABASE (RAG) — SQLiteDatabase CRUD + Database trait
     // ============================================================================
     mod database_coverage {
-        use ai_model_vault::rag::{Database, Document, SQLiteDatabase};
+        use ironvault::rag::{Database, Document, SQLiteDatabase};
         use std::collections::HashMap;
 
         fn make_db() -> SQLiteDatabase {
@@ -1113,7 +1113,7 @@ mod coverage_boost_tests {
                 content: "Chunk test".to_string(),
                 metadata: HashMap::new(),
                 embedding: None,
-                chunk_info: Some(ai_model_vault::rag::ChunkInfo {
+                chunk_info: Some(ironvault::rag::ChunkInfo {
                     parent_id: Some("parent-1".to_string()),
                     chunk_index: 0,
                     total_chunks: 3,
@@ -1262,8 +1262,8 @@ mod coverage_boost_tests {
     // BLOCKCHAIN — BlockchainAudit verify_chain, verify_proof, search
     // ============================================================================
     mod blockchain_coverage {
-        use ai_model_vault::audit::{AuditEntry, AuditEventType};
-        use ai_model_vault::BlockchainAudit;
+        use ironvault::audit::{AuditEntry, AuditEventType};
+        use ironvault::BlockchainAudit;
         use chrono::Utc;
 
         fn make_audit() -> (BlockchainAudit, tempfile::TempDir) {
@@ -1412,7 +1412,7 @@ mod coverage_boost_tests {
     // TRAITS — AimvUri with query params, Display
     // ============================================================================
     mod aimv_uri_coverage {
-        use ai_model_vault::traits::AimvUri;
+        use ironvault::traits::AimvUri;
 
         #[test]
         fn uri_with_query_params() {
@@ -1469,7 +1469,7 @@ mod coverage_boost_tests {
     // CONFIG — save, load, custom dirs
     // ============================================================================
     mod config_coverage {
-        use ai_model_vault::config::{DirectoryPaths, VaultConfig};
+        use ironvault::config::{DirectoryPaths, VaultConfig};
 
         #[test]
         fn config_with_custom_dirs() {
@@ -1559,7 +1559,7 @@ mod coverage_boost_tests {
     // COMPLIANCE — check_cve, run_all_checks
     // ============================================================================
     mod compliance_coverage {
-        use ai_model_vault::compliance::ComplianceChecker;
+        use ironvault::compliance::ComplianceChecker;
 
         #[test]
         fn check_cve_runs() {
@@ -1606,7 +1606,7 @@ mod coverage_boost_tests {
     // FORMATS — remaining extension/name branches
     // ============================================================================
     mod formats_extra_coverage {
-        use ai_model_vault::formats::ModelFormat;
+        use ironvault::formats::ModelFormat;
 
         #[test]
         fn torchscript_extension_and_name() {
@@ -1647,7 +1647,7 @@ mod coverage_boost_tests {
     // COMPRESSION — None algorithm path, levels
     // ============================================================================
     mod compression_extra_coverage {
-        use ai_model_vault::crypto::compression::{
+        use ironvault::crypto::compression::{
             compress, decompress, CompressionAlgorithm, CompressionLevel,
         };
 
@@ -1685,9 +1685,9 @@ mod coverage_boost_tests {
     // VAULT — store_model_streamed, auto_cleanup, VaultBuilder
     // ============================================================================
     mod vault_extra_coverage {
-        use ai_model_vault::config::{DirectoryPaths, VaultConfig};
-        use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-        use ai_model_vault::{Vault, VaultBuilder};
+        use ironvault::config::{DirectoryPaths, VaultConfig};
+        use ironvault::formats::{ModelFormat, ModelMetadata};
+        use ironvault::{Vault, VaultBuilder};
 
         fn make_dirs(tmp: &tempfile::TempDir) -> DirectoryPaths {
             DirectoryPaths {
@@ -1771,8 +1771,8 @@ mod coverage_boost_tests {
         fn vault_builder_with_subscriber() {
             let tmp = tempfile::tempdir().unwrap();
             let config = VaultConfig::with_dirs(make_dirs(&tmp)).unwrap();
-            let metrics = std::sync::Arc::new(ai_model_vault::traits::VaultMetrics::new());
-            let sub = ai_model_vault::traits::MetricsSubscriber::new(metrics);
+            let metrics = std::sync::Arc::new(ironvault::traits::VaultMetrics::new());
+            let sub = ironvault::traits::MetricsSubscriber::new(metrics);
 
             let vault = VaultBuilder::new()
                 .config(config)
@@ -1824,8 +1824,8 @@ mod coverage_boost_tests {
     // CONVERSION — converter source/target/name + validate
     // ============================================================================
     mod conversion_extra_coverage {
-        use ai_model_vault::conversion::*;
-        use ai_model_vault::formats::ModelFormat;
+        use ironvault::conversion::*;
+        use ironvault::formats::ModelFormat;
 
         #[test]
         fn safetensors_to_pytorch_source_target() {
@@ -1932,7 +1932,7 @@ mod coverage_boost_tests {
     mod error_display_coverage {
         #[test]
         fn vault_error_display_all_variants() {
-            use ai_model_vault::error::VaultError;
+            use ironvault::error::VaultError;
 
             let variants: Vec<VaultError> = vec![
                 VaultError::CryptoError("test".into()),
@@ -1967,8 +1967,8 @@ mod coverage_boost_tests {
     // CRYPTO MOD — FipsCrypto trait impl, hash_sha256_hex
     // ============================================================================
     mod crypto_trait_coverage {
-        use ai_model_vault::crypto::FipsCrypto;
-        use ai_model_vault::traits::CryptoProvider;
+        use ironvault::crypto::FipsCrypto;
+        use ironvault::traits::CryptoProvider;
 
         #[test]
         fn crypto_provider_hash_hex() {
@@ -1997,8 +1997,8 @@ mod coverage_boost_tests {
     // STORAGE LOCAL — via StorageBackend trait
     // ============================================================================
     mod storage_local_coverage {
-        use ai_model_vault::storage::local::LocalBackend;
-        use ai_model_vault::storage::StorageBackend;
+        use ironvault::storage::local::LocalBackend;
+        use ironvault::storage::StorageBackend;
 
         #[tokio::test]
         async fn local_backend_exists_nonexistent() {
@@ -2042,7 +2042,7 @@ mod coverage_boost_tests {
     // AUDIT — remaining lines
     // ============================================================================
     mod audit_extra_coverage {
-        use ai_model_vault::audit::{AuditEntry, AuditEventType, AuditLogger};
+        use ironvault::audit::{AuditEntry, AuditEventType, AuditLogger};
         use chrono::Utc;
 
         #[test]
@@ -2073,7 +2073,7 @@ mod coverage_boost_tests {
     // MODEL CARD — remaining lines
     // ============================================================================
     mod model_card_extra_coverage {
-        use ai_model_vault::model_card::{IntendedUse, ModelCard, ModelDetails};
+        use ironvault::model_card::{IntendedUse, ModelCard, ModelDetails};
 
         fn make_card() -> ModelCard {
             let details = ModelDetails {
@@ -2121,7 +2121,7 @@ mod coverage_boost_tests {
     // UTILS — format_size via ModelAnalyzer
     // ============================================================================
     mod utils_extra_coverage {
-        use ai_model_vault::ModelAnalyzer;
+        use ironvault::ModelAnalyzer;
 
         #[test]
         fn format_size_zero() {
@@ -2146,7 +2146,7 @@ mod coverage_boost_tests {
     // RAG KNOWLEDGE — edge cases
     // ============================================================================
     mod knowledge_coverage {
-        use ai_model_vault::rag::{Document, KnowledgeBase, KnowledgeBaseConfig};
+        use ironvault::rag::{Document, KnowledgeBase, KnowledgeBaseConfig};
         use std::collections::HashMap;
 
         #[test]
@@ -2192,7 +2192,7 @@ mod coverage_boost_tests {
     // RAG MCP — tool registration and execution
     // ============================================================================
     mod mcp_extra_coverage {
-        use ai_model_vault::rag::{MCPServer, MCPTool, ToolContext, ToolResult};
+        use ironvault::rag::{MCPServer, MCPTool, ToolContext, ToolResult};
 
         #[test]
         fn mcp_server_register_builtin_tools() {
@@ -2301,7 +2301,7 @@ mod coverage_boost_tests {
     // RAG RULES — RuleEngine with Rule struct
     // ============================================================================
     mod rules_extra_coverage {
-        use ai_model_vault::rag::{Rule, RuleAction, RuleCondition, RuleEngine};
+        use ironvault::rag::{Rule, RuleAction, RuleCondition, RuleEngine};
         use std::collections::HashMap;
 
         #[test]
@@ -2522,7 +2522,7 @@ mod coverage_boost_tests {
     // INMEMORY DATABASE — Database trait
     // ============================================================================
     mod inmemory_database_coverage {
-        use ai_model_vault::rag::{Database, InMemoryDatabase};
+        use ironvault::rag::{Database, InMemoryDatabase};
         use std::collections::HashMap;
 
         #[test]
@@ -2578,8 +2578,8 @@ mod coverage_final_push_tests {
     // VERSION_SQLITE — SqliteVersionRepo::new() with filesystem
     // ============================================================================
     mod version_sqlite_filesystem {
-        use ai_model_vault::traits::VersionRepo;
-        use ai_model_vault::version_sqlite::SqliteVersionRepo;
+        use ironvault::traits::VersionRepo;
+        use ironvault::version_sqlite::SqliteVersionRepo;
         use std::collections::HashMap;
 
         #[test]
@@ -2715,7 +2715,7 @@ mod coverage_final_push_tests {
             let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
 
             let data = b"model data bytes";
-            let checksum = hex::encode(ai_model_vault::crypto::FipsCrypto::hash_sha256(data));
+            let checksum = hex::encode(ironvault::crypto::FipsCrypto::hash_sha256(data));
             repo.add_version(
                 "m",
                 "/p",
@@ -2788,8 +2788,8 @@ mod coverage_final_push_tests {
     // CONVERSION — ValidationCheck, pipeline BFS, shim converters
     // ============================================================================
     mod conversion_deep_coverage {
-        use ai_model_vault::conversion::*;
-        use ai_model_vault::formats::ModelFormat;
+        use ironvault::conversion::*;
+        use ironvault::formats::ModelFormat;
 
         #[test]
         fn validation_check_pass_and_fail() {
@@ -3028,7 +3028,7 @@ mod coverage_final_push_tests {
     // VAULT — ModelStream iterator
     // ============================================================================
     mod model_stream_coverage {
-        use ai_model_vault::vault::ModelStream;
+        use ironvault::vault::ModelStream;
 
         #[test]
         fn model_stream_basic() {
@@ -3091,7 +3091,7 @@ mod coverage_final_push_tests {
     // TRAITS — MetricsSubscriber on_event for all event types
     // ============================================================================
     mod metrics_subscriber_coverage {
-        use ai_model_vault::traits::{
+        use ironvault::traits::{
             EventSubscriber, MetricsSubscriber, VaultEvent, VaultMetrics,
         };
         use chrono::Utc;
@@ -3208,7 +3208,7 @@ mod coverage_final_push_tests {
     // DATABASE — SQL validation, edge cases
     // ============================================================================
     mod database_validation_coverage {
-        use ai_model_vault::rag::{Database, SQLiteDatabase};
+        use ironvault::rag::{Database, SQLiteDatabase};
         use std::collections::HashMap;
 
         #[test]
@@ -3325,8 +3325,8 @@ mod coverage_final_push_tests {
     // BLOCKCHAIN — deeper verify_chain and proof paths
     // ============================================================================
     mod blockchain_deep_coverage {
-        use ai_model_vault::audit::{AuditEntry, AuditEventType};
-        use ai_model_vault::BlockchainAudit;
+        use ironvault::audit::{AuditEntry, AuditEventType};
+        use ironvault::BlockchainAudit;
         use chrono::Utc;
 
         fn make_entry(event_type: AuditEventType) -> AuditEntry {
@@ -3438,7 +3438,7 @@ mod coverage_final_push_tests {
     // COMPLIANCE — deeper checks
     // ============================================================================
     mod compliance_deep_coverage {
-        use ai_model_vault::compliance::ComplianceChecker;
+        use ironvault::compliance::ComplianceChecker;
 
         #[test]
         fn run_all_checks_with_verbose_output() {
@@ -3466,7 +3466,7 @@ mod coverage_final_push_tests {
     // FORMATS — remaining edge cases
     // ============================================================================
     mod formats_deep_coverage {
-        use ai_model_vault::formats::ModelFormat;
+        use ironvault::formats::ModelFormat;
 
         #[test]
         fn from_extension_all_formats() {
@@ -3550,7 +3550,7 @@ mod coverage_final_push_tests {
     // TRAITS — AimvUri to_string with query params
     // ============================================================================
     mod aimv_uri_deep_coverage {
-        use ai_model_vault::traits::AimvUri;
+        use ironvault::traits::AimvUri;
 
         #[test]
         fn uri_to_string_with_multiple_query_params() {
@@ -3587,7 +3587,7 @@ mod coverage_final_push_tests {
     // COMPRESSION — LZMA, Bzip2 edge cases
     // ============================================================================
     mod compression_deep_coverage {
-        use ai_model_vault::crypto::compression::{
+        use ironvault::crypto::compression::{
             compress, decompress, CompressionAlgorithm, CompressionLevel,
         };
 
@@ -3634,7 +3634,7 @@ mod coverage_final_push_tests {
     // ERROR — from impls
     // ============================================================================
     mod error_from_coverage {
-        use ai_model_vault::error::VaultError;
+        use ironvault::error::VaultError;
 
         #[test]
         fn vault_error_from_io_error() {
@@ -3662,10 +3662,10 @@ mod coverage_final_tests {
     /// - conversion.rs: ValidationCheck::pass/fail, ConversionPipeline BFS, identity, progress
     /// - blockchain.rs: verify_chain, verify_proof chain linkage
     /// - compliance.rs: run_all_checks
-    use ai_model_vault::audit::{AuditEntry, AuditEventType};
-    use ai_model_vault::compliance::ComplianceChecker;
-    use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-    use ai_model_vault::{
+    use ironvault::audit::{AuditEntry, AuditEventType};
+    use ironvault::compliance::ComplianceChecker;
+    use ironvault::formats::{ModelFormat, ModelMetadata};
+    use ironvault::{
         BlockchainAudit, ConversionOptions, ConversionPipeline, EventSubscriber, ValidationCheck,
         ValidationReport, Vault, VaultBuilder, VaultConfig, VaultEvent,
     };
@@ -3784,7 +3784,7 @@ mod coverage_final_tests {
         let pipeline = ConversionPipeline::with_builtins();
         let progress_calls = Arc::new(Mutex::new(Vec::new()));
         let calls_clone = progress_calls.clone();
-        let callback: ai_model_vault::conversion::ProgressCallback = Box::new(move |progress| {
+        let callback: ironvault::conversion::ProgressCallback = Box::new(move |progress| {
             calls_clone.lock().unwrap().push(progress.message.clone());
         });
 
@@ -3850,7 +3850,7 @@ mod coverage_final_tests {
     fn test_vault_builder_with_custom_subscriber() {
         struct TestSub;
         impl EventSubscriber for TestSub {
-            fn on_event(&self, _event: &VaultEvent) -> ai_model_vault::Result<()> {
+            fn on_event(&self, _event: &VaultEvent) -> ironvault::Result<()> {
                 Ok(())
             }
             fn name(&self) -> &str {
@@ -4227,7 +4227,7 @@ mod coverage_final_tests {
 
     #[test]
     fn test_format_converter_register_and_convert() {
-        use ai_model_vault::formats::FormatConverter;
+        use ironvault::formats::FormatConverter;
         let mut converter = FormatConverter::new();
         converter.register(ModelFormat::Safetensors, ModelFormat::ONNX, |data| {
             Ok(data.to_vec())
@@ -4341,12 +4341,12 @@ mod coverage_gap_tests {
     //! - VersionControl cleanup_old_versions, verify_checksum
     //! - ComplianceChecker set_check_enabled / is_check_enabled
 
-    use ai_model_vault::audit::{AuditEventType, AuditLogger};
-    use ai_model_vault::compliance::ComplianceChecker;
-    use ai_model_vault::crypto::FipsCrypto;
-    use ai_model_vault::formats::{FormatConverter, ModelFormat, ModelMetadata};
-    use ai_model_vault::version::VersionControl;
-    use ai_model_vault::{Vault, VaultConfig};
+    use ironvault::audit::{AuditEventType, AuditLogger};
+    use ironvault::compliance::ComplianceChecker;
+    use ironvault::crypto::FipsCrypto;
+    use ironvault::formats::{FormatConverter, ModelFormat, ModelMetadata};
+    use ironvault::version::VersionControl;
+    use ironvault::{Vault, VaultConfig};
     use tempfile::tempdir;
 
     // ========================= AuditLogger Tests =========================
@@ -4448,7 +4448,7 @@ mod coverage_gap_tests {
     fn test_format_converter_register_and_convert() {
         let mut converter = FormatConverter::new();
 
-        fn mock_convert(data: &[u8]) -> ai_model_vault::Result<Vec<u8>> {
+        fn mock_convert(data: &[u8]) -> ironvault::Result<Vec<u8>> {
             let mut out = b"converted:".to_vec();
             out.extend_from_slice(data);
             Ok(out)
@@ -4615,7 +4615,7 @@ mod coverage_gap_tests {
 
     fn create_test_vault() -> (tempfile::TempDir, Vault) {
         let tmp = tempdir().unwrap();
-        let dirs = ai_model_vault::config::DirectoryPaths {
+        let dirs = ironvault::config::DirectoryPaths {
             config_dir: tmp.path().join("config"),
             data_dir: tmp.path().join("data"),
             cache_dir: tmp.path().join("cache"),
@@ -4686,7 +4686,7 @@ mod coverage_maximizer_tests {
     // Covers: version_sqlite, blockchain, conversion, compliance, database, formats,
     // compression, error, config, traits, utils, crypto
 
-    use ai_model_vault::{
+    use ironvault::{
         // Audit
         audit::{AuditEntry, AuditEventType},
         // Compliance
@@ -5546,7 +5546,7 @@ mod coverage_maximizer_tests {
         fn vault_config_save_to_tempdir() {
             let tmp = TempDir::new().unwrap();
             // VaultConfig::with_dirs to set custom dir
-            let dirs = ai_model_vault::config::DirectoryPaths {
+            let dirs = ironvault::config::DirectoryPaths {
                 config_dir: tmp.path().to_path_buf(),
                 data_dir: tmp.path().to_path_buf(),
                 cache_dir: tmp.path().to_path_buf(),
@@ -5673,7 +5673,7 @@ mod coverage_maximizer_tests {
     // UTILS — ModelAnalyzer format_size and other coverage
     // ============================================================================
     mod utils_extra {
-        use ai_model_vault::ModelAnalyzer;
+        use ironvault::ModelAnalyzer;
 
         #[test]
         fn format_size_various() {
@@ -5716,15 +5716,15 @@ mod coverage_ultimate_tests {
     //! - storage/local.rs: download nonexistent, list after upload
     //! - error.rs: From<serde_yaml_ng::Error>
 
-    use ai_model_vault::audit::{AuditEntry, AuditEventType, AuditLogger};
-    use ai_model_vault::config::DirectoryPaths;
-    use ai_model_vault::crypto::compression::{
+    use ironvault::audit::{AuditEntry, AuditEventType, AuditLogger};
+    use ironvault::config::DirectoryPaths;
+    use ironvault::crypto::compression::{
         compress, decompress, CompressionAlgorithm, CompressionLevel,
     };
-    use ai_model_vault::crypto::{FipsCrypto, SecureKey};
-    use ai_model_vault::formats::ModelFormat;
-    use ai_model_vault::rag::{ChunkInfo, Document, SQLiteDatabase};
-    use ai_model_vault::*;
+    use ironvault::crypto::{FipsCrypto, SecureKey};
+    use ironvault::formats::ModelFormat;
+    use ironvault::rag::{ChunkInfo, Document, SQLiteDatabase};
+    use ironvault::*;
     use chrono::Utc;
     use std::collections::HashMap;
     use tempfile::tempdir;
@@ -6130,7 +6130,7 @@ mod coverage_ultimate_tests {
     // ── MCP builtin tools ────────────────────────────────────────
 
     mod mcp_builtin_tools {
-        use ai_model_vault::rag::mcp::{MCPServer, MCPTool, ToolContext, ToolResult};
+        use ironvault::rag::mcp::{MCPServer, MCPTool, ToolContext, ToolResult};
 
         #[test]
         fn test_tool_result_failure() {
@@ -6347,7 +6347,7 @@ mod coverage_ultimate_tests {
             let metrics = std::sync::Arc::new(VaultMetrics::new());
             let subscriber = MetricsSubscriber::new(metrics.clone());
 
-            use ai_model_vault::traits::EventSubscriber;
+            use ironvault::traits::EventSubscriber;
             let event = VaultEvent::VaultCreated {
                 vault: "test".to_string(),
                 timestamp: Utc::now(),
@@ -6374,7 +6374,7 @@ mod coverage_ultimate_tests {
         #[test]
         fn test_crypto_provider_hash_hex() {
             let crypto = FipsCrypto::new().unwrap();
-            use ai_model_vault::traits::CryptoProvider;
+            use ironvault::traits::CryptoProvider;
             let hex = crypto.hash_hex(b"test data");
             assert_eq!(hex.len(), 64); // SHA-256 hex is 64 chars
         }
@@ -6384,7 +6384,7 @@ mod coverage_ultimate_tests {
 
     mod audit_sink_tests {
         use super::*;
-        use ai_model_vault::traits::AuditSink;
+        use ironvault::traits::AuditSink;
 
         #[test]
         fn test_audit_sink_emit_and_query() {
@@ -6493,7 +6493,7 @@ mod coverage_ultimate_tests {
 
     mod streaming_crypto_tests {
         use super::*;
-        use ai_model_vault::crypto::streaming::{
+        use ironvault::crypto::streaming::{
             decrypt_chunked, encrypt_chunked, is_chunked_format,
         };
 
@@ -6576,7 +6576,7 @@ mod coverage_ultimate_tests {
 
     mod key_manager_tests {
         use super::*;
-        use ai_model_vault::crypto::KeyManager;
+        use ironvault::crypto::KeyManager;
 
         #[test]
         fn test_key_manager_store_and_load() {
@@ -6682,7 +6682,7 @@ mod coverage_ultimate_tests {
 
         #[test]
         fn test_pruning_info_size_reduction() {
-            use ai_model_vault::utils::{PruningInfo, PruningMethod};
+            use ironvault::utils::{PruningInfo, PruningMethod};
 
             let info = PruningInfo::new(PruningMethod::Magnitude, 0.5, 1000, 500);
             let reduction = info.size_reduction();
@@ -6755,7 +6755,7 @@ mod coverage_ultimate_tests {
 
     mod rules_set_value_tests {
         use super::*;
-        use ai_model_vault::rag::rules::{Rule, RuleAction, RuleCondition, RuleEngine};
+        use ironvault::rag::rules::{Rule, RuleAction, RuleCondition, RuleEngine};
 
         #[test]
         fn test_rule_engine_new_and_set_value_action() {
@@ -6800,8 +6800,8 @@ mod coverage_ultimate_tests {
 
     mod knowledge_chunk_text_tests {
 
-        use ai_model_vault::rag::knowledge::{KnowledgeBase, KnowledgeBaseConfig};
-        use ai_model_vault::rag::DocumentStore;
+        use ironvault::rag::knowledge::{KnowledgeBase, KnowledgeBaseConfig};
+        use ironvault::rag::DocumentStore;
 
         #[test]
         fn test_knowledge_base_chunk_text() {
@@ -6856,8 +6856,8 @@ mod coverage_ultimate_tests {
 
     mod storage_local_tests {
         use super::*;
-        use ai_model_vault::storage::local::LocalBackend;
-        use ai_model_vault::storage::StorageBackend;
+        use ironvault::storage::local::LocalBackend;
+        use ironvault::storage::StorageBackend;
 
         #[tokio::test]
         async fn test_local_backend_download_nonexistent() {
@@ -6909,8 +6909,8 @@ mod coverage_ultimate_tests {
 
     mod async_blob_store_adapter_tests {
         use super::*;
-        use ai_model_vault::storage::local::LocalBackend;
-        use ai_model_vault::traits::AsyncBlobStoreAdapter;
+        use ironvault::storage::local::LocalBackend;
+        use ironvault::traits::AsyncBlobStoreAdapter;
 
         #[tokio::test]
         async fn test_async_blob_store_put_get_list_stat() {
@@ -6918,7 +6918,7 @@ mod coverage_ultimate_tests {
             let backend = LocalBackend::new(dir.path().to_path_buf()).unwrap();
             let adapter = AsyncBlobStoreAdapter::new(backend);
 
-            use ai_model_vault::traits::AsyncBlobStore;
+            use ironvault::traits::AsyncBlobStore;
 
             // Put
             let receipt = adapter.put("key1", b"hello world").await.unwrap();
@@ -6966,8 +6966,8 @@ mod deep_coverage_tests {
     // FEDERATION MANAGER — new, accessors, add/remove peer, manifest, delta, status
     // ============================================================================
     mod federation_manager_coverage {
-        use ai_model_vault::federation::*;
-        use ai_model_vault::version::ModelVersion;
+        use ironvault::federation::*;
+        use ironvault::version::ModelVersion;
         use chrono::Utc;
         use std::collections::HashMap;
 
@@ -7308,7 +7308,7 @@ mod deep_coverage_tests {
     // TELEMETRY — TelemetryClient methods, global convenience functions
     // ============================================================================
     mod telemetry_client_coverage {
-        use ai_model_vault::telemetry::*;
+        use ironvault::telemetry::*;
         use std::time::Duration;
 
         #[test]
@@ -7559,7 +7559,7 @@ mod deep_coverage_tests {
     // TRAITS — VaultState Display, VaultEvent accessors/Display, AuditLogSubscriber, NullAuditSink
     // ============================================================================
     mod traits_deep_coverage {
-        use ai_model_vault::traits::*;
+        use ironvault::traits::*;
         use chrono::Utc;
 
         // --- VaultState Display ---
@@ -7760,7 +7760,7 @@ mod deep_coverage_tests {
         // --- NullAuditSink ---
         #[test]
         fn null_audit_sink_emit() {
-            use ai_model_vault::audit::{AuditEntry, AuditEventType};
+            use ironvault::audit::{AuditEntry, AuditEventType};
             let sink = NullAuditSink;
             let entry = AuditEntry {
                 timestamp: Utc::now(),
@@ -7784,18 +7784,18 @@ mod deep_coverage_tests {
         // --- AuditLogSubscriber for all 9 event types ---
         #[test]
         fn audit_log_subscriber_all_events() {
-            use ai_model_vault::audit::AuditEntry;
+            use ironvault::audit::AuditEntry;
             use std::sync::{Arc, Mutex};
 
             struct CollectingSink {
                 entries: Arc<Mutex<Vec<AuditEntry>>>,
             }
             impl AuditSink for CollectingSink {
-                fn emit(&self, entry: AuditEntry) -> ai_model_vault::Result<()> {
+                fn emit(&self, entry: AuditEntry) -> ironvault::Result<()> {
                     self.entries.lock().unwrap().push(entry);
                     Ok(())
                 }
-                fn query(&self, _limit: Option<usize>) -> ai_model_vault::Result<Vec<AuditEntry>> {
+                fn query(&self, _limit: Option<usize>) -> ironvault::Result<Vec<AuditEntry>> {
                     Ok(self.entries.lock().unwrap().clone())
                 }
             }
@@ -7844,18 +7844,18 @@ mod deep_coverage_tests {
 
         #[test]
         fn audit_log_subscriber_compliance_failed() {
-            use ai_model_vault::audit::AuditEntry;
+            use ironvault::audit::AuditEntry;
             use std::sync::{Arc, Mutex};
 
             struct CollectingSink {
                 entries: Arc<Mutex<Vec<AuditEntry>>>,
             }
             impl AuditSink for CollectingSink {
-                fn emit(&self, entry: AuditEntry) -> ai_model_vault::Result<()> {
+                fn emit(&self, entry: AuditEntry) -> ironvault::Result<()> {
                     self.entries.lock().unwrap().push(entry);
                     Ok(())
                 }
-                fn query(&self, _limit: Option<usize>) -> ai_model_vault::Result<Vec<AuditEntry>> {
+                fn query(&self, _limit: Option<usize>) -> ironvault::Result<Vec<AuditEntry>> {
                     Ok(Vec::new())
                 }
             }
@@ -7933,8 +7933,8 @@ mod deep_coverage_tests {
         fn event_bus_subscriber_error_does_not_propagate() {
             struct FailingSubscriber;
             impl EventSubscriber for FailingSubscriber {
-                fn on_event(&self, _event: &VaultEvent) -> ai_model_vault::Result<()> {
-                    Err(ai_model_vault::error::VaultError::IoError(
+                fn on_event(&self, _event: &VaultEvent) -> ironvault::Result<()> {
+                    Err(ironvault::error::VaultError::IoError(
                         std::io::Error::other("subscriber error"),
                     ))
                 }
@@ -7958,7 +7958,7 @@ mod deep_coverage_tests {
                 fn accepts(&self, event: &VaultEvent) -> bool {
                     matches!(event, VaultEvent::ModelStored { .. })
                 }
-                fn on_event(&self, _event: &VaultEvent) -> ai_model_vault::Result<()> {
+                fn on_event(&self, _event: &VaultEvent) -> ironvault::Result<()> {
                     self.count
                         .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                     Ok(())
@@ -8012,8 +8012,8 @@ mod deep_coverage_tests {
     // CONVERSION — Pipeline convert (multi-step, validation), validate_magic_bytes
     // ============================================================================
     mod conversion_deep_coverage {
-        use ai_model_vault::conversion::*;
-        use ai_model_vault::formats::ModelFormat;
+        use ironvault::conversion::*;
+        use ironvault::formats::ModelFormat;
 
         // --- Pipeline convert same format ---
         #[test]
@@ -8282,10 +8282,10 @@ mod deep_coverage_tests {
     // ADDITIONAL VAULT EDGE CASES
     // ============================================================================
     mod vault_edge_cases {
-        use ai_model_vault::config::{DirectoryPaths, VaultConfig};
-        use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-        use ai_model_vault::traits::VaultState;
-        use ai_model_vault::{Vault, VaultBuilder};
+        use ironvault::config::{DirectoryPaths, VaultConfig};
+        use ironvault::formats::{ModelFormat, ModelMetadata};
+        use ironvault::traits::VaultState;
+        use ironvault::{Vault, VaultBuilder};
 
         fn make_dirs(tmp: &tempfile::TempDir) -> DirectoryPaths {
             DirectoryPaths {
@@ -8412,8 +8412,8 @@ mod deep_coverage_tests {
     // ADDITIONAL CRYPTO EDGE CASES — streaming chunk sizes
     // ============================================================================
     mod crypto_streaming_edge_cases {
-        use ai_model_vault::crypto::{FipsCrypto, SecureKey};
-        use ai_model_vault::{decrypt_chunked, encrypt_chunked};
+        use ironvault::crypto::{FipsCrypto, SecureKey};
+        use ironvault::{decrypt_chunked, encrypt_chunked};
 
         #[test]
         fn streaming_small_data() {
@@ -8462,8 +8462,8 @@ mod deep_coverage_tests {
     // ============================================================================
     #[cfg(feature = "sqlite")]
     mod version_sqlite_edge_cases {
-        use ai_model_vault::traits::VersionRepo;
-        use ai_model_vault::SqliteVersionRepo;
+        use ironvault::traits::VersionRepo;
+        use ironvault::SqliteVersionRepo;
 
         #[test]
         fn sqlite_version_multiple_models() {
@@ -8550,7 +8550,7 @@ mod deep_coverage_tests {
     // ERROR MODULE — From impls
     // ============================================================================
     mod error_extra_coverage {
-        use ai_model_vault::error::VaultError;
+        use ironvault::error::VaultError;
 
         #[test]
         fn vault_error_display() {
@@ -8582,7 +8582,7 @@ mod deep_coverage_tests {
     // COMPLIANCE — additional branches
     // ============================================================================
     mod compliance_extra_coverage {
-        use ai_model_vault::compliance::ComplianceChecker;
+        use ironvault::compliance::ComplianceChecker;
 
         #[test]
         fn compliance_check_default() {
@@ -8617,8 +8617,8 @@ mod edge_coverage_tests {
     //! - version_sqlite.rs: edge cases
 
     mod converter_validate_magic_bytes {
-        use ai_model_vault::conversion::*;
-        use ai_model_vault::formats::ModelFormat;
+        use ironvault::conversion::*;
+        use ironvault::formats::ModelFormat;
 
         // --- Test validate_magic_bytes through the Converter::validate trait method ---
 
@@ -9190,7 +9190,7 @@ mod edge_coverage_tests {
     // TELEMETRY — init_default, track that triggers batch
     // ============================================================================
     mod telemetry_edge_coverage {
-        use ai_model_vault::telemetry::*;
+        use ironvault::telemetry::*;
 
         #[test]
         fn init_default_with_temp_dir() {
@@ -9291,7 +9291,7 @@ mod edge_coverage_tests {
     // FEDERATION — SyncResult, SyncConflict, ConflictResolution
     // ============================================================================
     mod federation_edge_coverage {
-        use ai_model_vault::federation::*;
+        use ironvault::federation::*;
 
         #[test]
         fn vector_clock_increment_merge_comparison() {
@@ -9415,9 +9415,9 @@ mod edge_coverage_tests {
     // VAULT — streaming threshold, auto-cleanup
     // ============================================================================
     mod vault_streaming_coverage {
-        use ai_model_vault::config::{DirectoryPaths, VaultConfig};
-        use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-        use ai_model_vault::{Vault, VaultBuilder};
+        use ironvault::config::{DirectoryPaths, VaultConfig};
+        use ironvault::formats::{ModelFormat, ModelMetadata};
+        use ironvault::{Vault, VaultBuilder};
 
         fn make_dirs(tmp: &tempfile::TempDir) -> DirectoryPaths {
             DirectoryPaths {
@@ -9562,7 +9562,7 @@ mod edge_coverage_tests {
     // FORMATS — additional format detection
     // ============================================================================
     mod formats_edge_coverage {
-        use ai_model_vault::formats::ModelFormat;
+        use ironvault::formats::ModelFormat;
 
         #[test]
         fn detect_format_by_extension() {
@@ -9631,8 +9631,8 @@ mod final_coverage_tests {
     // CONVERSION — OnnxMetadataExtractor protobuf parsing
     // ============================================================================
     mod onnx_protobuf_tests {
-        use ai_model_vault::conversion::*;
-        use ai_model_vault::formats::ModelFormat;
+        use ironvault::conversion::*;
+        use ironvault::formats::ModelFormat;
 
         /// Helper: build a protobuf varint
         fn encode_varint(mut val: u64) -> Vec<u8> {
@@ -9973,10 +9973,10 @@ mod final_coverage_tests {
     // VAULT — lock, state, version error, streaming threshold, ModelStream, metadata
     // ============================================================================
     mod vault_advanced_tests {
-        use ai_model_vault::config::{DirectoryPaths, VaultConfig};
-        use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-        use ai_model_vault::traits::VaultState;
-        use ai_model_vault::Vault;
+        use ironvault::config::{DirectoryPaths, VaultConfig};
+        use ironvault::formats::{ModelFormat, ModelMetadata};
+        use ironvault::traits::VaultState;
+        use ironvault::Vault;
 
         fn make_dirs(tmp: &tempfile::TempDir) -> DirectoryPaths {
             DirectoryPaths {
@@ -10189,7 +10189,7 @@ mod final_coverage_tests {
 
         #[test]
         fn model_stream_new_zero_defaults_to_1mb() {
-            use ai_model_vault::vault::ModelStream;
+            use ironvault::vault::ModelStream;
             let stream = ModelStream::new(vec![1, 2, 3], 0);
             assert_eq!(stream.total_size(), 3);
             assert_eq!(stream.remaining(), 3);
@@ -10201,7 +10201,7 @@ mod final_coverage_tests {
 
         #[test]
         fn model_stream_remaining_decreases() {
-            use ai_model_vault::vault::ModelStream;
+            use ironvault::vault::ModelStream;
             let mut stream = ModelStream::new(vec![1, 2, 3, 4, 5], 2);
             assert_eq!(stream.remaining(), 5);
 
@@ -10219,7 +10219,7 @@ mod final_coverage_tests {
 
         #[test]
         fn model_stream_empty() {
-            use ai_model_vault::vault::ModelStream;
+            use ironvault::vault::ModelStream;
             let mut stream = ModelStream::new(Vec::new(), 100);
             assert_eq!(stream.total_size(), 0);
             assert_eq!(stream.remaining(), 0);
@@ -10329,8 +10329,8 @@ mod final_coverage_tests {
             let count1 = vault.event_bus().subscriber_count();
             // After adding a subscriber, count should increase
             vault.event_bus_mut().subscribe(Box::new(
-                ai_model_vault::traits::MetricsSubscriber::new(std::sync::Arc::new(
-                    ai_model_vault::traits::VaultMetrics::new(),
+                ironvault::traits::MetricsSubscriber::new(std::sync::Arc::new(
+                    ironvault::traits::VaultMetrics::new(),
                 )),
             ));
             let count2 = vault.event_bus().subscriber_count();
@@ -10342,8 +10342,8 @@ mod final_coverage_tests {
     // TRAITS — AsyncBlobStoreAdapter, EventBus error branch
     // ============================================================================
     mod traits_adapter_tests {
-        use ai_model_vault::storage::local::LocalBackend;
-        use ai_model_vault::traits::{AsyncBlobStore, AsyncBlobStoreAdapter};
+        use ironvault::storage::local::LocalBackend;
+        use ironvault::traits::{AsyncBlobStore, AsyncBlobStoreAdapter};
 
         #[tokio::test]
         async fn async_blob_store_adapter_put_get() {
@@ -10418,8 +10418,8 @@ mod final_coverage_tests {
     }
 
     mod eventbus_error_tests {
-        use ai_model_vault::error::{Result, VaultError};
-        use ai_model_vault::traits::{EventBus, EventSubscriber, VaultEvent};
+        use ironvault::error::{Result, VaultError};
+        use ironvault::traits::{EventBus, EventSubscriber, VaultEvent};
 
         /// A subscriber that always returns an error
         struct FailingSubscriber;
@@ -10453,12 +10453,12 @@ mod final_coverage_tests {
 
         #[test]
         fn eventbus_error_with_multiple_subscribers() {
-            use ai_model_vault::traits::MetricsSubscriber;
+            use ironvault::traits::MetricsSubscriber;
 
             let mut bus = EventBus::new();
             bus.subscribe(Box::new(FailingSubscriber));
             bus.subscribe(Box::new(MetricsSubscriber::new(std::sync::Arc::new(
-                ai_model_vault::traits::VaultMetrics::new(),
+                ironvault::traits::VaultMetrics::new(),
             ))));
             bus.subscribe(Box::new(FailingSubscriber));
 
@@ -10480,8 +10480,8 @@ mod final_coverage_tests {
     // VERSION — cleanup_old_versions, verify_checksum edges
     // ============================================================================
     mod version_cleanup_tests {
-        use ai_model_vault::crypto::FipsCrypto;
-        use ai_model_vault::version::VersionControl;
+        use ironvault::crypto::FipsCrypto;
+        use ironvault::version::VersionControl;
 
         fn checksum(data: &[u8]) -> String {
             hex::encode(FipsCrypto::hash_sha256(data))
@@ -10659,7 +10659,7 @@ mod final_coverage_tests {
     // FORMATS — extension() and name() for ALL format variants
     // ============================================================================
     mod formats_comprehensive_tests {
-        use ai_model_vault::formats::ModelFormat;
+        use ironvault::formats::ModelFormat;
 
         #[test]
         fn all_format_extensions() {
@@ -10807,8 +10807,8 @@ mod final_coverage_tests {
     // GGUF HEADER PARSER — exercise the valid-parse path with real GGUF-like data
     // ============================================================================
     mod gguf_parser_tests {
-        use ai_model_vault::conversion::*;
-        use ai_model_vault::formats::ModelFormat;
+        use ironvault::conversion::*;
+        use ironvault::formats::ModelFormat;
 
         #[test]
         fn gguf_parser_valid_data() {
@@ -10865,7 +10865,7 @@ mod final_coverage_tests {
     // FEDERATION — compute_delta thorough test
     // ============================================================================
     mod federation_compute_delta_tests {
-        use ai_model_vault::federation::*;
+        use ironvault::federation::*;
 
         fn make_version(ver: u32, ckpt: &str, size: u64) -> VersionManifestEntry {
             VersionManifestEntry {
@@ -11042,7 +11042,7 @@ mod final_coverage_tests {
     // FEDERATION — status, history, peer management
     // ============================================================================
     mod federation_manager_extra_tests {
-        use ai_model_vault::federation::*;
+        use ironvault::federation::*;
 
         #[tokio::test]
         async fn federation_status() {
@@ -11094,7 +11094,7 @@ mod final_coverage_tests {
     // SHIM CONVERTERS — exercise convert() paths for uncovered shims
     // ============================================================================
     mod shim_converter_extra_tests {
-        use ai_model_vault::conversion::*;
+        use ironvault::conversion::*;
 
         #[test]
         fn safetensors_to_pytorch_valid_header() {
@@ -11221,7 +11221,7 @@ mod full_coverage_tests {
     // ERROR MODULE — From impls for serde_json, serde_yaml_ng, zip::ZipError
     // ============================================================================
     mod error_from_impls {
-        use ai_model_vault::VaultError;
+        use ironvault::VaultError;
 
         #[test]
         fn from_serde_json_error() {
@@ -11286,7 +11286,7 @@ mod full_coverage_tests {
     // COMPLIANCE — check_cve, check_mitre_attack, check_cmmc, run_all_checks
     // ============================================================================
     mod compliance_coverage {
-        use ai_model_vault::compliance::ComplianceChecker;
+        use ironvault::compliance::ComplianceChecker;
 
         #[test]
         fn check_fips_enabled() {
@@ -11386,8 +11386,8 @@ mod full_coverage_tests {
     //          MetricsSubscriber, NullAuditSink, AsyncBlobStoreAdapter
     // ============================================================================
     mod traits_coverage {
-        use ai_model_vault::audit::{AuditEntry, AuditEventType};
-        use ai_model_vault::traits::*;
+        use ironvault::audit::{AuditEntry, AuditEventType};
+        use ironvault::traits::*;
         use chrono::Utc;
         use std::sync::{Arc, Mutex};
 
@@ -11599,11 +11599,11 @@ mod full_coverage_tests {
 
             struct TestSink(Arc<Mutex<Vec<String>>>);
             impl AuditSink for TestSink {
-                fn emit(&self, entry: AuditEntry) -> ai_model_vault::Result<()> {
+                fn emit(&self, entry: AuditEntry) -> ironvault::Result<()> {
                     self.0.lock().unwrap().push(entry.description);
                     Ok(())
                 }
-                fn query(&self, _limit: Option<usize>) -> ai_model_vault::Result<Vec<AuditEntry>> {
+                fn query(&self, _limit: Option<usize>) -> ironvault::Result<Vec<AuditEntry>> {
                     Ok(vec![])
                 }
             }
@@ -11779,13 +11779,13 @@ mod full_coverage_tests {
     // STORAGE — Storage struct methods, BlobStore trait impl
     // ============================================================================
     mod storage_coverage {
-        use ai_model_vault::crypto::compression::{CompressionAlgorithm, CompressionLevel};
-        use ai_model_vault::crypto::FipsCrypto;
-        use ai_model_vault::storage::Storage;
-        use ai_model_vault::traits::BlobStore;
+        use ironvault::crypto::compression::{CompressionAlgorithm, CompressionLevel};
+        use ironvault::crypto::FipsCrypto;
+        use ironvault::storage::Storage;
+        use ironvault::traits::BlobStore;
         use tempfile::TempDir;
 
-        fn setup() -> (Storage, ai_model_vault::crypto::SecureKey, TempDir) {
+        fn setup() -> (Storage, ironvault::crypto::SecureKey, TempDir) {
             let tmp = TempDir::new().unwrap();
             let storage = Storage::new(tmp.path()).unwrap();
             let crypto = FipsCrypto::new().unwrap();
@@ -11953,8 +11953,8 @@ mod full_coverage_tests {
     // RAG VECTOR — SimpleVectorStore all methods
     // ============================================================================
     mod vector_coverage {
-        use ai_model_vault::rag::vector::VectorStore;
-        use ai_model_vault::rag::{Document, SimpleVectorStore};
+        use ironvault::rag::vector::VectorStore;
+        use ironvault::rag::{Document, SimpleVectorStore};
         use std::collections::HashMap;
 
         fn doc(id: &str, emb: Vec<f32>) -> Document {
@@ -12056,8 +12056,8 @@ mod full_coverage_tests {
     // BLOCKCHAIN — search, proof generation/verification, edge cases
     // ============================================================================
     mod blockchain_coverage {
-        use ai_model_vault::audit::{AuditEntry, AuditEventType};
-        use ai_model_vault::blockchain::*;
+        use ironvault::audit::{AuditEntry, AuditEventType};
+        use ironvault::blockchain::*;
         use chrono::Utc;
         use tempfile::tempdir;
 
@@ -12260,8 +12260,8 @@ mod full_coverage_tests {
     // CONVERSION — ConversionPipeline, built-in converters, validation
     // ============================================================================
     mod conversion_coverage {
-        use ai_model_vault::conversion::*;
-        use ai_model_vault::formats::ModelFormat;
+        use ironvault::conversion::*;
+        use ironvault::formats::ModelFormat;
         use std::sync::atomic::{AtomicUsize, Ordering};
         use std::sync::Arc;
 
@@ -12550,7 +12550,7 @@ mod full_coverage_tests {
     // RAG DATABASE — InMemoryDatabase CRUD, WHERE clause
     // ============================================================================
     mod inmemory_db_coverage {
-        use ai_model_vault::rag::database::{Database, InMemoryDatabase};
+        use ironvault::rag::database::{Database, InMemoryDatabase};
         use std::collections::HashMap;
 
         #[test]
@@ -12664,8 +12664,8 @@ mod full_coverage_tests {
     // ============================================================================
     #[cfg(feature = "sqlite")]
     mod sqlite_db_coverage {
-        use ai_model_vault::rag::database::{Database, SQLiteDatabase};
-        use ai_model_vault::rag::{documents::ChunkInfo, Document};
+        use ironvault::rag::database::{Database, SQLiteDatabase};
+        use ironvault::rag::{documents::ChunkInfo, Document};
         use std::collections::HashMap;
 
         #[test]
@@ -12776,8 +12776,8 @@ mod full_coverage_tests {
     // ============================================================================
     #[cfg(feature = "kv-store")]
     mod sled_db_coverage {
-        use ai_model_vault::rag::database::{Database, SledDatabase};
-        use ai_model_vault::rag::Document;
+        use ironvault::rag::database::{Database, SledDatabase};
+        use ironvault::rag::Document;
         use std::collections::HashMap;
 
         #[test]
@@ -12840,7 +12840,7 @@ mod full_coverage_tests {
     // MODEL CARD — serialization roundtrips, markdown, all sections
     // ============================================================================
     mod model_card_coverage {
-        use ai_model_vault::model_card::*;
+        use ironvault::model_card::*;
         use std::collections::HashMap;
 
         fn basic_card() -> ModelCard {
@@ -12997,7 +12997,7 @@ mod full_coverage_tests {
     // FORMATS — extension, name, from_extension for all variants
     // ============================================================================
     mod formats_coverage {
-        use ai_model_vault::formats::{ModelFormat, ModelMetadata};
+        use ironvault::formats::{ModelFormat, ModelMetadata};
 
         #[test]
         fn all_extensions() {
@@ -13108,7 +13108,7 @@ mod remaining_coverage_tests {
     // RAG RULES ENGINE — 100% untested, all conditions and actions
     // ============================================================================
     mod rule_engine_coverage {
-        use ai_model_vault::rag::{Rule, RuleAction, RuleCondition, RuleEngine};
+        use ironvault::rag::{Rule, RuleAction, RuleCondition, RuleEngine};
         use std::collections::HashMap;
 
         fn make_rule(
@@ -13672,11 +13672,11 @@ mod remaining_coverage_tests {
     // CONFIG — save, path getters, compression getters
     // ============================================================================
     mod config_coverage {
-        use ai_model_vault::config::VaultConfig;
+        use ironvault::config::VaultConfig;
 
         fn make_config() -> (VaultConfig, tempfile::TempDir) {
             let tmp = tempfile::tempdir().unwrap();
-            let dirs = ai_model_vault::config::DirectoryPaths {
+            let dirs = ironvault::config::DirectoryPaths {
                 config_dir: tmp.path().join("config"),
                 data_dir: tmp.path().join("data"),
                 cache_dir: tmp.path().join("cache"),
@@ -13728,7 +13728,7 @@ mod remaining_coverage_tests {
                 format!("{:?}", algo),
                 format!(
                     "{:?}",
-                    ai_model_vault::crypto::compression::CompressionAlgorithm::Gzip
+                    ironvault::crypto::compression::CompressionAlgorithm::Gzip
                 )
             );
         }
@@ -13742,7 +13742,7 @@ mod remaining_coverage_tests {
                 format!("{:?}", algo),
                 format!(
                     "{:?}",
-                    ai_model_vault::crypto::compression::CompressionAlgorithm::Lzma
+                    ironvault::crypto::compression::CompressionAlgorithm::Lzma
                 )
             );
         }
@@ -13756,7 +13756,7 @@ mod remaining_coverage_tests {
                 format!("{:?}", algo),
                 format!(
                     "{:?}",
-                    ai_model_vault::crypto::compression::CompressionAlgorithm::None
+                    ironvault::crypto::compression::CompressionAlgorithm::None
                 )
             );
         }
@@ -13770,7 +13770,7 @@ mod remaining_coverage_tests {
                 format!("{:?}", algo),
                 format!(
                     "{:?}",
-                    ai_model_vault::crypto::compression::CompressionAlgorithm::Gzip
+                    ironvault::crypto::compression::CompressionAlgorithm::Gzip
                 )
             );
         }
@@ -13784,7 +13784,7 @@ mod remaining_coverage_tests {
                 format!("{:?}", level),
                 format!(
                     "{:?}",
-                    ai_model_vault::crypto::compression::CompressionLevel::None
+                    ironvault::crypto::compression::CompressionLevel::None
                 )
             );
         }
@@ -13798,7 +13798,7 @@ mod remaining_coverage_tests {
                 format!("{:?}", level),
                 format!(
                     "{:?}",
-                    ai_model_vault::crypto::compression::CompressionLevel::Fast
+                    ironvault::crypto::compression::CompressionLevel::Fast
                 )
             );
         }
@@ -13812,7 +13812,7 @@ mod remaining_coverage_tests {
                 format!("{:?}", level),
                 format!(
                     "{:?}",
-                    ai_model_vault::crypto::compression::CompressionLevel::Maximum
+                    ironvault::crypto::compression::CompressionLevel::Maximum
                 )
             );
         }
@@ -13826,7 +13826,7 @@ mod remaining_coverage_tests {
                 format!("{:?}", level),
                 format!(
                     "{:?}",
-                    ai_model_vault::crypto::compression::CompressionLevel::Balanced
+                    ironvault::crypto::compression::CompressionLevel::Balanced
                 )
             );
         }
@@ -13836,11 +13836,11 @@ mod remaining_coverage_tests {
     // VAULT — lock/unlock, delete, stats, change passphrase, ModelStream, VaultBuilder
     // ============================================================================
     mod vault_coverage {
-        use ai_model_vault::config::{DirectoryPaths, VaultConfig};
-        use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-        use ai_model_vault::traits::VaultState;
-        use ai_model_vault::vault::ModelStream;
-        use ai_model_vault::{Vault, VaultBuilder};
+        use ironvault::config::{DirectoryPaths, VaultConfig};
+        use ironvault::formats::{ModelFormat, ModelMetadata};
+        use ironvault::traits::VaultState;
+        use ironvault::vault::ModelStream;
+        use ironvault::{Vault, VaultBuilder};
 
         fn make_dirs(tmp: &tempfile::TempDir) -> DirectoryPaths {
             DirectoryPaths {
@@ -14148,11 +14148,11 @@ mod remaining_coverage_tests {
 
         #[test]
         fn vault_builder_custom_subscriber() {
-            use ai_model_vault::traits::{EventSubscriber, VaultEvent};
+            use ironvault::traits::{EventSubscriber, VaultEvent};
 
             struct TestSubscriber;
             impl EventSubscriber for TestSubscriber {
-                fn on_event(&self, _event: &VaultEvent) -> ai_model_vault::Result<()> {
+                fn on_event(&self, _event: &VaultEvent) -> ironvault::Result<()> {
                     Ok(())
                 }
                 fn name(&self) -> &str {
@@ -14220,8 +14220,8 @@ mod remaining_coverage_tests {
     // CONVERSION — Shim converters, OnnxMetadataExtractor
     // ============================================================================
     mod conversion_shim_coverage {
-        use ai_model_vault::conversion::*;
-        use ai_model_vault::formats::ModelFormat;
+        use ironvault::conversion::*;
+        use ironvault::formats::ModelFormat;
 
         // --- SafeTensorsToPyTorchConverter ---
         #[test]
@@ -14432,7 +14432,7 @@ mod remaining_coverage_tests {
     // FORMATS — FormatConverter, Display, extension, name
     // ============================================================================
     mod format_converter_coverage {
-        use ai_model_vault::formats::{FormatConverter, ModelFormat, ModelMetadata};
+        use ironvault::formats::{FormatConverter, ModelFormat, ModelMetadata};
 
         #[test]
         fn format_converter_new_default() {
@@ -14554,8 +14554,8 @@ mod remaining_coverage_tests {
     // UTILS — ModelArchive tar/zip, ModelExporter, cache eviction, dedup
     // ============================================================================
     mod utils_coverage {
-        use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-        use ai_model_vault::utils::*;
+        use ironvault::formats::{ModelFormat, ModelMetadata};
+        use ironvault::utils::*;
 
         // --- ModelArchive TAR ---
         #[test]
@@ -14809,7 +14809,7 @@ mod remaining_coverage_tests {
     // TELEMETRY — additional coverage
     // ============================================================================
     mod telemetry_extra_coverage {
-        use ai_model_vault::telemetry;
+        use ironvault::telemetry;
 
         #[test]
         fn disable_then_is_enabled() {
@@ -14828,7 +14828,7 @@ mod remaining_coverage_tests {
     // CRYPTO — additional edge cases
     // ============================================================================
     mod crypto_extra_coverage {
-        use ai_model_vault::crypto::{FipsCrypto, KeyManager};
+        use ironvault::crypto::{FipsCrypto, KeyManager};
 
         #[test]
         fn key_manager_new() {
@@ -14867,8 +14867,8 @@ mod remaining_coverage_tests {
     // STREAMING ENCRYPTION — additional roundtrip coverage
     // ============================================================================
     mod streaming_crypto_coverage {
-        use ai_model_vault::crypto::{FipsCrypto, SecureKey};
-        use ai_model_vault::{
+        use ironvault::crypto::{FipsCrypto, SecureKey};
+        use ironvault::{
             decrypt_chunked, encrypt_chunked, is_chunked_format, DEFAULT_CHUNK_SIZE, STREAM_MAGIC,
             STREAM_VERSION,
         };
@@ -14903,8 +14903,8 @@ mod remaining_coverage_tests {
     // ============================================================================
     #[cfg(feature = "sqlite")]
     mod version_sqlite_coverage {
-        use ai_model_vault::traits::VersionRepo;
-        use ai_model_vault::SqliteVersionRepo;
+        use ironvault::traits::VersionRepo;
+        use ironvault::SqliteVersionRepo;
 
         #[test]
         fn sqlite_version_repo_basic() {

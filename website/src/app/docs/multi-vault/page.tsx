@@ -11,23 +11,23 @@ export default function MultiVaultPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="quick-start">Quick Start</h2>
       <CodeBlock language="bash">{`# Register vaults
-aim vaults register production /data/vaults/prod --description "Production models"
-aim vaults register staging /data/vaults/staging --description "Staging models"
+iv vaults register production /data/vaults/prod --description "Production models"
+iv vaults register staging /data/vaults/staging --description "Staging models"
 
 # List registered vaults
-aim vaults list
+iv vaults list
 
 # Switch active vault
-aim vaults activate production
+iv vaults activate production
 
 # Clear active vault
-aim vaults deactivate
+iv vaults deactivate
 
 # Remove from registry
-aim vaults unregister staging`}</CodeBlock>
+iv vaults unregister staging`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="cli">CLI Reference</h2>
-      <CodeBlock language="bash">{`aim vaults <COMMAND>
+      <CodeBlock language="bash">{`iv vaults <COMMAND>
 
 Commands:
   register    Register a vault
@@ -37,7 +37,7 @@ Commands:
   list        List registered vaults`}</CodeBlock>
 
       <h3 className="text-xl font-bold mt-8 mb-3">Register Vault</h3>
-      <CodeBlock language="bash">{`aim vaults register <NAME> <PATH> [--description <DESC>]
+      <CodeBlock language="bash">{`iv vaults register <NAME> <PATH> [--description <DESC>]
 
 Arguments:
   <NAME>    Vault name/alias
@@ -51,14 +51,14 @@ Arguments:
       </p>
       <p className="text-[var(--color-text-secondary)] mb-4">
         Only one vault can be active at a time. The active vault is used by default for all{" "}
-        <code className="px-1.5 py-0.5 bg-[var(--color-bg-secondary)] rounded text-xs">aim</code>{" "}
+        <code className="px-1.5 py-0.5 bg-[var(--color-bg-secondary)] rounded text-xs">iv</code>{" "}
         commands unless overridden by the{" "}
-        <code className="px-1.5 py-0.5 bg-[var(--color-bg-secondary)] rounded text-xs">aimodelvault_VAULT</code>{" "}
+        <code className="px-1.5 py-0.5 bg-[var(--color-bg-secondary)] rounded text-xs">IRONVAULT_VAULT</code>{" "}
         environment variable.
       </p>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="python">Python API</h2>
-      <CodeBlock language="python">{`from aimodelvault import VaultRegistry
+      <CodeBlock language="python">{`from ironvault import VaultRegistry
 
 registry = VaultRegistry("/path/to/config")
 

@@ -1,4 +1,4 @@
-//! Comprehensive demonstration of AI Model Vault using a HuggingFace model
+//! Comprehensive demonstration of IronVault using a HuggingFace model
 //!
 //! This example showcases:
 //! 1. Simulating a HuggingFace model download
@@ -9,15 +9,15 @@
 //! 6. Multiple versions (original, fine-tuned, quantized)
 //! 7. Integrity verification and statistics
 
-use ai_model_vault::{
+use ironvault::{
     formats::{ModelFormat, ModelMetadata},
     Vault, VaultConfig,
 };
 use std::fs;
 use std::path::PathBuf;
 
-fn main() -> ai_model_vault::Result<()> {
-    println!("=== AI Model Vault: HuggingFace Model Demo ===\n");
+fn main() -> ironvault::Result<()> {
+    println!("=== IronVault: HuggingFace Model Demo ===\n");
     println!("Simulating download of 'distilgpt2' model from HuggingFace");
     println!("Real model: https://huggingface.co/distilgpt2\n");
 
@@ -211,7 +211,7 @@ fn main() -> ai_model_vault::Result<()> {
     fs::remove_file(&model_path).ok();
 
     println!("\n✨ === Demo Complete! ===\n");
-    println!("AI Model Vault successfully demonstrated:");
+    println!("IronVault successfully demonstrated:");
     println!("   ✓ Secure storage with FIPS 140-3 encryption (AES-256-GCM)");
     println!("   ✓ Automatic compression (~30-50% size reduction)");
     println!("   ✓ Version control with lineage tracking");
@@ -232,7 +232,7 @@ fn main() -> ai_model_vault::Result<()> {
 }
 
 /// Create synthetic model data (simulating HuggingFace download)
-fn create_synthetic_model() -> ai_model_vault::Result<PathBuf> {
+fn create_synthetic_model() -> ironvault::Result<PathBuf> {
     // In production, you would use: hf_hub_download("distilgpt2", "model.safetensors")
     // For this demo, we create a synthetic safetensors file
 

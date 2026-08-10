@@ -5,8 +5,8 @@ Reclaims disk by pruning orphaned encrypted blobs and stale temp files left behi
 ## CLI
 
 ```bash
-aim gc            # delete orphans
-aim gc --dry-run  # preview only
+iv gc            # delete orphans
+iv gc --dry-run  # preview only
 ```
 
 ## MCP tool
@@ -22,4 +22,4 @@ aim gc --dry-run  # preview only
 - Blobs in `vault/blobs/` that no version manifest references.
 - Files in `vault/tmp/` older than the safety window.
 
-Encrypted user content is never touched without a confirmed missing reference. See [src/gc.rs](https://github.com/nervosys/AIModelVault/blob/master/src/gc.rs).
+Encrypted user content is never touched without a confirmed missing reference. See [src/gc.rs](https://github.com/nervosys/IronVault/blob/master/src/gc.rs).

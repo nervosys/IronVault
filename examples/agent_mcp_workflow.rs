@@ -10,13 +10,13 @@
 //!
 //! Run with:  `cargo run --example agent_mcp_workflow`
 
-use ai_model_vault::rag::{MCPServer, MCPTool, ToolContext, ToolResult};
+use ironvault::rag::{MCPServer, MCPTool, ToolContext, ToolResult};
 use serde_json::{json, Value};
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("=== AI Model Vault — Agent MCP Workflow ===\n");
+    println!("=== IronVault — Agent MCP Workflow ===\n");
 
     // ── 1. Build an MCP server with vault-flavored tools ──────────────────
     // For the demo the "vault" is a thread-local in-memory map keyed by
@@ -192,9 +192,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn require_str<'a>(v: &'a Value, key: &str) -> Result<&'a str, ai_model_vault::VaultError> {
+fn require_str<'a>(v: &'a Value, key: &str) -> Result<&'a str, ironvault::VaultError> {
     v.get(key).and_then(|x| x.as_str()).ok_or_else(|| {
-        ai_model_vault::VaultError::InvalidInput(format!("missing or non-string param: {}", key))
+        ironvault::VaultError::InvalidInput(format!("missing or non-string param: {}", key))
     })
 }
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
-# AI Model Vault - PowerShell Demonstration Script
-# This script showcases the key features of AI Model Vault
+# IronVault - PowerShell Demonstration Script
+# This script showcases the key features of IronVault
 
 param(
     [switch]$Quick,      # Run quick demo (basic_usage only)
@@ -57,7 +57,7 @@ function Test-CargoInstalled {
 }
 
 function Build-Project {
-    Write-Header "Building AI Model Vault"
+    Write-Header "Building IronVault"
     Write-Info "Building release version (optimized)..."
     
     $buildOutput = cargo build --release 2>&1
@@ -132,7 +132,7 @@ function Run-Example {
 Write-Host ""
 Write-Host "$ColorBold$ColorCyan"
 Write-Host "╔═══════════════════════════════════════════════════════════════╗"
-Write-Host "║          AI Model Vault - Demonstration Script               ║"
+Write-Host "║          IronVault - Demonstration Script               ║"
 Write-Host "║                                                               ║"
 Write-Host "║  Secure, encrypted storage for AI models with version        ║"
 Write-Host "║  control, compression, and FIPS 140-3 compliance             ║"
@@ -225,5 +225,5 @@ Write-Host "  • View security status: SECURITY_STATUS.md"
 Write-Host "  • Check feature demo: FEATURES_DEMO.md"
 Write-Host "  • Explore examples: examples/"
 Write-Host ""
-Write-Host "For more information: https://github.com/yourusername/ai-model-vault"
+Write-Host "For more information: https://github.com/yourusername/ironvault"
 Write-Host ""

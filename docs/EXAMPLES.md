@@ -1,6 +1,6 @@
 # Examples Guide
 
-AI Model Vault ships with 11 runnable examples covering every major feature.
+IronVault ships with 11 runnable examples covering every major feature.
 
 ## Running Examples
 

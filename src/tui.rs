@@ -23,7 +23,7 @@ pub fn browse(vault_path: &Path) -> Result<String> {
     // Header
     out.push('\n');
     out.push_str("  ╔══════════════════════════════════════════════════════════╗\n");
-    out.push_str("  ║              AI Model Vault — Dashboard                 ║\n");
+    out.push_str("  ║              IronVault — Dashboard                 ║\n");
     out.push_str("  ╚══════════════════════════════════════════════════════════╝\n");
     out.push('\n');
 

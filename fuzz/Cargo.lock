@@ -65,7 +65,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ai-model-vault"
+name = "ironvault"
 version = "3.0.0"
 dependencies = [
  "aes-gcm",
@@ -103,10 +103,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ai-model-vault-fuzz"
+name = "ironvault-fuzz"
 version = "0.0.0"
 dependencies = [
- "ai-model-vault",
+ "ironvault",
  "libfuzzer-sys",
  "serde_json",
 ]

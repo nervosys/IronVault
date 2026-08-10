@@ -1,6 +1,6 @@
 # AI Model Utilities
 
-Comprehensive utilities for working with AI models in AI Model Vault. This module provides popular operations for model management, optimization, and analysis.
+Comprehensive utilities for working with AI models in IronVault. This module provides popular operations for model management, optimization, and analysis.
 
 ## Features
 
@@ -9,7 +9,7 @@ Comprehensive utilities for working with AI models in AI Model Vault. This modul
 Create and extract TAR/ZIP archives of multiple models:
 
 ```rust
-use ai_model_vault::ModelArchive;
+use ironvault::ModelArchive;
 
 // Create TAR archive
 let models = vec![
@@ -30,7 +30,7 @@ ModelArchive::create_zip(models, Path::new("models.zip"))?;
 Analyze compression effectiveness and estimate ratios:
 
 ```rust
-use ai_model_vault::CompressionAnalyzer;
+use ironvault::CompressionAnalyzer;
 
 // Calculate compression ratio
 let ratio = CompressionAnalyzer::compression_ratio(10000, 7500);
@@ -53,7 +53,7 @@ println!("Saved {}% space", report.space_saved_percent);
 LRU cache for fast model retrieval:
 
 ```rust
-use ai_model_vault::RetrievalOptimizer;
+use ironvault::RetrievalOptimizer;
 
 // Create cache with 100MB limit
 let mut optimizer = RetrievalOptimizer::new(100 * 1024 * 1024);
@@ -76,7 +76,7 @@ println!("Cache utilization: {:.2}%", stats.utilization);
 Work with quantization information:
 
 ```rust
-use ai_model_vault::QuantizationInfo;
+use ironvault::QuantizationInfo;
 
 // Get supported quantization schemes
 let schemes = QuantizationInfo::schemes();
@@ -100,7 +100,7 @@ println!("Saved {:.1}%", savings.saved_percent);  // 75%
 Track model pruning metadata:
 
 ```rust
-use ai_model_vault::{PruningInfo, PruningMethod};
+use ironvault::{PruningInfo, PruningMethod};
 
 let pruning = PruningInfo::new(
     PruningMethod::Magnitude,
@@ -118,7 +118,7 @@ let reduction = pruning.size_reduction();            // 50.0%
 Analyze model files and metadata:
 
 ```rust
-use ai_model_vault::ModelAnalyzer;
+use ironvault::ModelAnalyzer;
 
 let analysis = ModelAnalyzer::analyze(&model_data, &metadata);
 
@@ -141,7 +141,7 @@ println!("Parameters: {}",
 Export models with metadata:
 
 ```rust
-use ai_model_vault::ModelExporter;
+use ironvault::ModelExporter;
 
 // Export single model with metadata
 ModelExporter::export_with_metadata(
@@ -163,7 +163,7 @@ let paths = ModelExporter::export_to_directory(models, Path::new("exports/"))?;
 Find and remove duplicate models:
 
 ```rust
-use ai_model_vault::ModelDeduplicator;
+use ironvault::ModelDeduplicator;
 
 let models = vec![
     ("model1".to_string(), data1),
@@ -316,5 +316,5 @@ for model_name in vault.list_models() {
 
 ## See Also
 
-- [Formats Guide](https://github.com/nervosys/AIModelVault/blob/master/FORMATS.md) - Supported model formats
+- [Formats Guide](https://github.com/nervosys/IronVault/blob/master/FORMATS.md) - Supported model formats
 - [CLI Documentation](CLI.md) - Command-line usage

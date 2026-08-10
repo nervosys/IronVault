@@ -1,6 +1,6 @@
 //! Comprehensive format detection and handling tests
 
-use ai_model_vault::formats::{FormatConverter, ModelFormat, ModelMetadata};
+use ironvault::formats::{FormatConverter, ModelFormat, ModelMetadata};
 
 #[test]
 fn test_format_detection_from_extension() {

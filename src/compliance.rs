@@ -14,7 +14,7 @@ use crate::error::Result;
 /// What a compliance check actually established.
 ///
 /// Most of these checks cannot be *verified* by a program inspecting itself.
-/// Reporting all of them as "PASS" made `aim compliance` look like an
+/// Reporting all of them as "PASS" made `iv compliance` look like an
 /// assessment when it was mostly a set of constants — an organisation putting
 /// it in a CI gate for CMMC evidence would collect a green result no matter
 /// what state the system was in. This distinguishes the three cases.
@@ -402,7 +402,7 @@ mod tests {
     ///
     /// They return constants — that is defensible, because no program can
     /// verify its own certification status — but reporting them as "PASS" made
-    /// `aim compliance` usable as CMMC evidence it cannot support.
+    /// `iv compliance` usable as CMMC evidence it cannot support.
     #[test]
     fn test_design_level_checks_are_not_reported_as_verified() {
         let status = ComplianceChecker::new().run_all_checks().unwrap();

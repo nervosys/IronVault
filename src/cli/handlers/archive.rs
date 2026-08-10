@@ -1,7 +1,7 @@
 //! Archive and extract command handlers.
 
-use ai_model_vault::utils::ModelArchive;
-use ai_model_vault::{Result, VaultConfig, VaultError};
+use ironvault::utils::ModelArchive;
+use ironvault::{Result, VaultConfig, VaultError};
 
 use crate::cli::helpers::{build_vault, prompt_passphrase};
 

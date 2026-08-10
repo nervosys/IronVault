@@ -2,10 +2,10 @@
 //!
 //! Run with: cargo run --example license_scan_demo
 
-use ai_model_vault::license_scan::LicenseScanner;
+use ironvault::license_scan::LicenseScanner;
 
-fn main() -> ai_model_vault::Result<()> {
-    println!("=== AI Model Vault License Scanning Example ===\n");
+fn main() -> ironvault::Result<()> {
+    println!("=== IronVault License Scanning Example ===\n");
 
     // 1. Scan a directory
     println!("1. Scanning a directory...");
@@ -59,8 +59,8 @@ fn main() -> ai_model_vault::Result<()> {
 
     // 5. CLI usage
     println!("5. CLI commands:");
-    println!("   aim license-scan ./my-model/");
-    println!("   aim license-scan model.gguf --format json\n");
+    println!("   iv license-scan ./my-model/");
+    println!("   iv license-scan model.gguf --format json\n");
 
     // Cleanup
     let _ = std::fs::remove_dir_all(&test_dir);

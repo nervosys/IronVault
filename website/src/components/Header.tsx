@@ -45,7 +45,7 @@ export default function Header() {
               { href: "/demos", label: "Demos", internal: true },
               { href: "/docs/api", label: "API", internal: true },
               { href: "/docs/quickstart", label: "Quick Start", internal: true },
-              { href: "https://github.com/nervosys/AIModelVault", label: "GitHub", internal: false, external: true },
+              { href: "https://github.com/nervosys/IronVault", label: "GitHub", internal: false, external: true },
             ].map((link) => {
               const isActive = pathname === link.href;
               const cls = `px-3 py-1.5 rounded transition-colors text-sm uppercase tracking-wider ${
@@ -73,7 +73,7 @@ export default function Header() {
               v1.3.0
             </span>
             <a
-              href="https://crates.io/crates/ai-model-vault"
+              href="https://crates.io/crates/ironvault"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:inline-flex px-3 py-1.5 rounded text-sm font-mono font-bold uppercase tracking-wider bg-[var(--color-primary)] text-black hover:opacity-90 transition-all"

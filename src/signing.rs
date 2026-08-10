@@ -437,7 +437,7 @@ mod tests {
     /// The signature file carries both the tag *and* the file hash it was made
     /// over. Verifying without a key compared the file against that stored
     /// hash and reported `valid: true` — so anyone could ship a tampered model
-    /// with a regenerated `.sig` and have `aim verify` call it good. The whole
+    /// with a regenerated `.sig` and have `iv verify` call it good. The whole
     /// point of the command is to detect exactly this.
     #[test]
     fn test_forged_signature_without_key_is_not_reported_valid() {

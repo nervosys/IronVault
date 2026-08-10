@@ -7,7 +7,7 @@
 //! - Format conversion paths and use cases
 //! - Best practices for different deployment targets
 
-use ai_model_vault::formats::{FormatConverter, ModelFormat, ModelMetadata};
+use ironvault::formats::{FormatConverter, ModelFormat, ModelMetadata};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     print_header();
@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 fn print_header() {
     println!("\n{}", "=".repeat(70));
-    println!("  AI Model Vault (AIMV) - Model Providers & Formats Demo");
+    println!("  IronVault (AIMV) - Model Providers & Formats Demo");
     println!("{}\n", "=".repeat(70));
 }
 
@@ -643,7 +643,7 @@ fn demonstrate_converter_registry() {
     ];
 
     // Dummy converter function for demonstration
-    fn dummy_converter(_data: &[u8]) -> ai_model_vault::error::Result<Vec<u8>> {
+    fn dummy_converter(_data: &[u8]) -> ironvault::error::Result<Vec<u8>> {
         Ok(vec![])
     }
 

@@ -11,16 +11,16 @@ export default function BackupSchedulingPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="quick-start">Quick Start</h2>
       <CodeBlock language="bash">{`# Create a daily backup schedule
-aim backup set nightly --frequency daily --max-backups 7 --output-dir /backups/vault
+iv backup set nightly --frequency daily --max-backups 7 --output-dir /backups/vault
 
 # List schedules
-aim backup list
+iv backup list
 
 # View backup history
-aim backup history
+iv backup history
 
 # Remove a schedule
-aim backup remove nightly`}</CodeBlock>
+iv backup remove nightly`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="frequencies">Backup Frequencies</h2>
       <div className="overflow-x-auto">
@@ -50,7 +50,7 @@ aim backup remove nightly`}</CodeBlock>
       </div>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="cli">CLI Reference</h2>
-      <CodeBlock language="bash">{`aim backup <COMMAND>
+      <CodeBlock language="bash">{`iv backup <COMMAND>
 
 Commands:
   set      Create or update a backup schedule
@@ -59,7 +59,7 @@ Commands:
   history  Show backup history`}</CodeBlock>
 
       <h3 className="text-xl font-bold mt-8 mb-3">Set Schedule</h3>
-      <CodeBlock language="bash">{`aim backup set <NAME> --frequency <FREQ> --output-dir <PATH> [--max-backups <N>]
+      <CodeBlock language="bash">{`iv backup set <NAME> --frequency <FREQ> --output-dir <PATH> [--max-backups <N>]
 
 Options:
   -f, --frequency <FREQ>       Frequency: hourly, daily, weekly, monthly
@@ -74,7 +74,7 @@ Options:
       </p>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="python">Python API</h2>
-      <CodeBlock language="python">{`from aimodelvault import BackupManager
+      <CodeBlock language="python">{`from ironvault import BackupManager
 
 manager = BackupManager("/path/to/vault")
 

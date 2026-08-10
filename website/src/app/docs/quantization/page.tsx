@@ -11,16 +11,16 @@ export default function QuantizationPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="quick-start">Quick Start</h2>
       <CodeBlock language="bash">{`# Create a quantization profile
-aim quantize set fast-q4 --method q4_k_m --description "Fast 4-bit quantization"
+iv quantize set fast-q4 --method q4_k_m --description "Fast 4-bit quantization"
 
 # List profiles
-aim quantize list
+iv quantize list
 
 # Estimate output size (1GB model → Q4_K_M)
-aim quantize estimate --size 1000000000 --to q4_k_m
+iv quantize estimate --size 1000000000 --to q4_k_m
 
 # Remove a profile
-aim quantize remove fast-q4`}</CodeBlock>
+iv quantize remove fast-q4`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="methods">Quantization Methods</h2>
       <div className="overflow-x-auto">
@@ -52,7 +52,7 @@ aim quantize remove fast-q4`}</CodeBlock>
       </div>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="cli">CLI Reference</h2>
-      <CodeBlock language="bash">{`aim quantize <COMMAND>
+      <CodeBlock language="bash">{`iv quantize <COMMAND>
 
 Commands:
   set       Create or update a quantization profile
@@ -61,13 +61,13 @@ Commands:
   estimate  Estimate output size for a quantization method`}</CodeBlock>
 
       <h3 className="text-xl font-bold mt-8 mb-3">Set Profile</h3>
-      <CodeBlock language="bash">{`aim quantize set <NAME> --method <METHOD> [--description <DESC>]`}</CodeBlock>
+      <CodeBlock language="bash">{`iv quantize set <NAME> --method <METHOD> [--description <DESC>]`}</CodeBlock>
 
       <h3 className="text-xl font-bold mt-8 mb-3">Estimate Size</h3>
-      <CodeBlock language="bash">{`aim quantize estimate --size <BYTES> --to <METHOD> [--from <METHOD>]`}</CodeBlock>
+      <CodeBlock language="bash">{`iv quantize estimate --size <BYTES> --to <METHOD> [--from <METHOD>]`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="python">Python API</h2>
-      <CodeBlock language="python">{`from aimodelvault import QuantProfileStore
+      <CodeBlock language="python">{`from ironvault import QuantProfileStore
 
 store = QuantProfileStore("/path/to/vault")
 store.set("fast-q4", "q4_k_m", "Fast 4-bit quantization")

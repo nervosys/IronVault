@@ -1,7 +1,7 @@
 //! Integration tests for the format conversion pipeline.
 
-use ai_model_vault::conversion::*;
-use ai_model_vault::formats::ModelFormat;
+use ironvault::conversion::*;
+use ironvault::formats::ModelFormat;
 
 // ── Pipeline construction ────────────────────────────────────────────────────
 
@@ -34,7 +34,7 @@ fn test_pipeline_register_custom_converter() {
             data: &[u8],
             _options: &ConversionOptions,
             _progress: Option<&ProgressCallback>,
-        ) -> ai_model_vault::Result<Vec<u8>> {
+        ) -> ironvault::Result<Vec<u8>> {
             Ok(data.to_vec())
         }
     }

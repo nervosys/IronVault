@@ -1,4 +1,4 @@
-# Top 10 Features Analysis - AI Model Vault
+# Top 10 Features Analysis - IronVault
 
 **Date**: October 29, 2025  
 **Purpose**: Feature prioritization based on user value and current implementation
@@ -109,7 +109,7 @@
 **Why #6**: Flexibility - use it your way (CLI or code)
 
 **What's Included**:
-- 15+ CLI commands (`aim store`, `aim archive`, etc.)
+- 15+ CLI commands (`iv store`, `iv archive`, etc.)
 - Full Rust library API
 - Scriptable workflows
 - Both interfaces have feature parity
@@ -263,23 +263,23 @@
 
 #### Journey 1: Secure Model Storage
 ```bash
-aim init                    # 5 seconds
-aim store llama-7b model.pt # 30 seconds for 14GB
-aim list                    # Instant
+iv init                    # 5 seconds
+iv store llama-7b model.pt # 30 seconds for 14GB
+iv list                    # Instant
 ```
 **Result**: "Model secured in 35 seconds"
 
 #### Journey 2: Backup & Recovery
 ```bash
-aim archive model1 model2 backup.tar  # 2 minutes for 50GB
+iv archive model1 model2 backup.tar  # 2 minutes for 50GB
 # Disaster strikes...
-aim extract backup.tar --output ./restore  # 2 minutes
+iv extract backup.tar --output ./restore  # 2 minutes
 ```
 **Result**: "Full recovery in 4 minutes"
 
 #### Journey 3: Find Duplicates
 ```bash
-aim deduplicate --detailed
+iv deduplicate --detailed
 # Found 15 duplicates consuming 237GB
 ```
 **Result**: "Freed 237GB of storage"
@@ -351,7 +351,7 @@ Based on user feedback and demand:
 
 ## 🏆 Summary
 
-AI Model Vault delivers **10 production-ready features** that solve real user problems:
+IronVault delivers **10 production-ready features** that solve real user problems:
 
 1. **Security**: Protect valuable AI models
 2. **Formats**: Universal compatibility

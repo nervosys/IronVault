@@ -74,7 +74,7 @@ export default function SecurityPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="passphrase">Passphrase Management</h2>
       <CodeBlock language="bash">{`# Change vault passphrase (re-encrypts all models)
-aim change-passphrase
+iv change-passphrase
 
 # Recommended: Use a strong, random passphrase
 # Minimum: 8 characters (12+ recommended)

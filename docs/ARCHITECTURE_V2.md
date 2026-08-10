@@ -1,4 +1,4 @@
-# AI Model Vault — Architecture v2
+# IronVault — Architecture v2
 
 _A first-principles redesign for efficiency, capability, and agent observability._
 
@@ -706,4 +706,4 @@ This separation allows:
 
 ## Appendix B: Ontology Reference
 
-See [`.well-known/ontology.jsonld`](https://github.com/nervosys/AIModelVault/blob/master/.well-known/ontology.jsonld) for the full machine-readable ontology that makes this architecture observable by agents.
+See [`.well-known/ontology.jsonld`](https://github.com/nervosys/IronVault/blob/master/.well-known/ontology.jsonld) for the full machine-readable ontology that makes this architecture observable by agents.

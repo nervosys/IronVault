@@ -1,7 +1,7 @@
-//! CLI handler for cross-model lineage graph (aim lineage-graph).
+//! CLI handler for cross-model lineage graph (iv lineage-graph).
 
-use ai_model_vault::lineage_graph::{DerivationKind, LineageEdge};
-use ai_model_vault::{LineageGraph, Result, VaultConfig};
+use ironvault::lineage_graph::{DerivationKind, LineageEdge};
+use ironvault::{LineageGraph, Result, VaultConfig};
 
 use crate::cli::args::LineageGraphCommands;
 

@@ -1,6 +1,6 @@
 # RAG and Rule-Based Systems
 
-AI Model Vault provides comprehensive support for **Retrieval-Augmented Generation (RAG)** and **rule-based AI systems**, including document stores, knowledge bases, rule engines, caching, and database abstractions.
+IronVault provides comprehensive support for **Retrieval-Augmented Generation (RAG)** and **rule-based AI systems**, including document stores, knowledge bases, rule engines, caching, and database abstractions.
 
 ## Table of Contents
 
@@ -30,7 +30,7 @@ The `DocumentStore` manages documents with vector embeddings for semantic search
 ### Creating a Document Store
 
 ```rust
-use ai_model_vault::rag::{DocumentStore, Document};
+use ironvault::rag::{DocumentStore, Document};
 use std::collections::HashMap;
 
 let mut store = DocumentStore::new();
@@ -97,7 +97,7 @@ The `KnowledgeBase` provides high-level RAG functionality with text chunking and
 ### Configuration
 
 ```rust
-use ai_model_vault::rag::KnowledgeBaseConfig;
+use ironvault::rag::KnowledgeBaseConfig;
 
 let config = KnowledgeBaseConfig {
     embedding_dim: 384,         // Embedding vector dimension
@@ -111,7 +111,7 @@ let config = KnowledgeBaseConfig {
 ### Creating a Knowledge Base
 
 ```rust
-use ai_model_vault::rag::KnowledgeBase;
+use ironvault::rag::KnowledgeBase;
 
 let mut kb = KnowledgeBase::new("my_knowledge_base".to_string(), config);
 ```
@@ -163,7 +163,7 @@ The `RuleEngine` provides a flexible rule-based decision system.
 ### Creating Rules
 
 ```rust
-use ai_model_vault::rag::{Rule, RuleCondition, RuleAction};
+use ironvault::rag::{Rule, RuleCondition, RuleAction};
 
 let rule = Rule {
     id: "high_confidence_rule".to_string(),
@@ -248,7 +248,7 @@ RuleAction::Stop
 ### Using the Rule Engine
 
 ```rust
-use ai_model_vault::rag::RuleEngine;
+use ironvault::rag::RuleEngine;
 
 let mut engine = RuleEngine::new();
 
@@ -276,7 +276,7 @@ The `RetrievalCache` optimizes repeated queries with LRU eviction.
 ### Creating a Cache
 
 ```rust
-use ai_model_vault::rag::RetrievalCache;
+use ironvault::rag::RetrievalCache;
 
 // 10MB cache
 let mut cache = RetrievalCache::new(10 * 1024 * 1024);
@@ -324,7 +324,7 @@ Generic database interface with in-memory implementation.
 ### In-Memory Database
 
 ```rust
-use ai_model_vault::rag::{InMemoryDatabase, Database};
+use ironvault::rag::{InMemoryDatabase, Database};
 
 let mut db = InMemoryDatabase::new();
 
@@ -371,7 +371,7 @@ db.delete("users", "1")?;
 ### RAG Pipeline
 
 ```rust
-use ai_model_vault::rag::*;
+use ironvault::rag::*;
 
 fn rag_pipeline(query: &str) -> Result<Vec<String>, Box<dyn std::error::Error>> {
     // 1. Initialize components
@@ -589,5 +589,5 @@ let doc = Document {
 ## See Also
 
 - [Utilities Guide](UTILITIES.md)
-- [Security Features](https://github.com/nervosys/AIModelVault/blob/master/SECURITY.md)
-- [API Documentation](https://docs.rs/ai-model-vault)
+- [Security Features](https://github.com/nervosys/IronVault/blob/master/SECURITY.md)
+- [API Documentation](https://docs.rs/ironvault)

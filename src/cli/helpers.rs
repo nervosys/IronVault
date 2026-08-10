@@ -1,6 +1,6 @@
 //! CLI helper utilities.
 
-use ai_model_vault::{kms, Result, Vault, VaultBuilder, VaultConfig};
+use ironvault::{kms, Result, Vault, VaultBuilder, VaultConfig};
 use std::io::{self, BufRead, IsTerminal, Write};
 use zeroize::Zeroize;
 
@@ -8,12 +8,12 @@ use zeroize::Zeroize;
 ///
 /// The value is either the passphrase itself or a KMS URI
 /// (`env://`, `file://`, `aws-sm://`, `azure-kv://`, `vault://`) — see
-/// [`ai_model_vault::kms`].
-pub const PASSPHRASE_ENV: &str = "aimodelvault_PASSPHRASE";
+/// [`ironvault::kms`].
+pub const PASSPHRASE_ENV: &str = "IRONVAULT_PASSPHRASE";
 
 /// Obtain the vault passphrase, in descending order of precedence:
 ///
-/// 1. `$aimodelvault_PASSPHRASE` — a literal value or a KMS URI to resolve.
+/// 1. `$IRONVAULT_PASSPHRASE` — a literal value or a KMS URI to resolve.
 /// 2. A line piped on stdin, when stdin is not a terminal.
 /// 3. An interactive masked prompt.
 ///
@@ -28,15 +28,13 @@ pub const PASSPHRASE_ENV: &str = "aimodelvault_PASSPHRASE";
 /// T1552, credentials in process memory). The returned buffer is the caller's
 /// responsibility; it is consumed by `derive_key`, which zeroizes it.
 pub fn prompt_passphrase(prompt: &str) -> Result<Vec<u8>> {
-    if let Ok(mut value) = std::env::var(PASSPHRASE_ENV) {
-        if !value.is_empty() {
-            let resolved = kms::resolve(&value);
-            value.zeroize();
-            let mut resolved = resolved?;
-            let bytes = resolved.as_bytes().to_vec();
-            resolved.zeroize();
-            return Ok(bytes);
-        }
+    // `var_secret` already trims, rejects an empty value, and zeroizes its own
+    // intermediate, so the plaintext lives only in the `Zeroizing` binding.
+    if let Some(value) = ironvault::env::var_secret(PASSPHRASE_ENV) {
+        let mut resolved = kms::resolve(&value)?;
+        let bytes = resolved.as_bytes().to_vec();
+        resolved.zeroize();
+        return Ok(bytes);
     }
 
     let stdin = io::stdin();
@@ -71,7 +69,7 @@ pub fn prompt_passphrase(prompt: &str) -> Result<Vec<u8>> {
         // A closed or non-interactive stdin reads as "" here. Deriving a key
         // from an empty passphrase would silently unlock the vault with no
         // secret at all, so refuse it.
-        return Err(ai_model_vault::VaultError::InvalidInput(format!(
+        return Err(ironvault::VaultError::InvalidInput(format!(
             "No passphrase provided. Set ${PASSPHRASE_ENV} (a literal value or a \
              KMS URI), pipe it on stdin, or run interactively."
         )));
@@ -95,7 +93,7 @@ pub fn build_vault(config: VaultConfig, use_sqlite: bool) -> Result<Vault> {
         }
         #[cfg(not(feature = "sqlite"))]
         {
-            return Err(ai_model_vault::VaultError::ConfigError(
+            return Err(ironvault::VaultError::ConfigError(
                 "SQLite version backend requires the `sqlite` feature".to_string(),
             ));
         }

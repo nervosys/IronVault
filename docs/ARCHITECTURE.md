@@ -1,4 +1,4 @@
-# aimodelvault Architecture
+# ironvault Architecture
 
 ## System Architecture Diagram
 
@@ -88,7 +88,7 @@ sequenceDiagram
     participant Storage
     participant FS as File System
     
-    User->>CLI: aim store model.pt
+    User->>CLI: iv store model.pt
     CLI->>Vault: store_model()
     
     Note over Vault: Validate input
@@ -126,7 +126,7 @@ sequenceDiagram
     participant Storage
     participant FS as File System
     
-    User->>CLI: aim get model
+    User->>CLI: iv get model
     CLI->>Vault: get_model()
     
     Note over Vault: Verify authentication
@@ -203,7 +203,7 @@ flowchart LR
 
 ```mermaid
 mindmap
-  root((aimodelvault<br/>Compliance))
+  root((ironvault<br/>Compliance))
     FIPS_140_3
       AES-256-GCM
       Argon2id
@@ -249,9 +249,9 @@ gitGraph
 graph TD
     Home[~/ Home Directory]
     
-    Home --> Config[.config/aimodelvault/]
-    Home --> Data[.local/share/aimodelvault/]
-    Home --> Cache[.cache/aimodelvault/]
+    Home --> Config[.config/ironvault/]
+    Home --> Data[.local/share/ironvault/]
+    Home --> Cache[.cache/ironvault/]
     
     Config --> ConfigYAML[config.yaml]
     

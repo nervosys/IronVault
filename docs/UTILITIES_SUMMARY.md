@@ -1,7 +1,7 @@
 # Model Utilities Feature Summary
 
 ## Overview
-Added comprehensive AI model utilities to AI Model Vault providing popular operations for model management, optimization, and analysis.
+Added comprehensive AI model utilities to IronVault providing popular operations for model management, optimization, and analysis.
 
 ## What Was Added
 

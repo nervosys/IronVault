@@ -1,4 +1,4 @@
-# AI Model Vault — Roadmap
+# IronVault — Roadmap
 
 > Last updated: 2026-07-29
 > Current version: **3.0.0** (one honest exit-code contract, enforced)
@@ -12,7 +12,7 @@ The project published four mutually contradictory exit-code tables and
 implemented none of them, while telling agents to branch on them.
 
 - [x] **One contract, implemented** — `VaultError::exit_code` maps every variant to `0`–`8`; `README.md`, `AGENTS.md`, `docs/CLI.md`, `.well-known/agents.json` and `.well-known/ontology.jsonld` were all rewritten to match, and a test fails if they drift again
-- [x] **Twelve commands no longer exit 0 for work that did not happen** — including `aim validate` (an integrity gate that printed "Some checks failed." and succeeded) and `aim eval compare` (a regression gate that compared nothing and succeeded)
+- [x] **Twelve commands no longer exit 0 for work that did not happen** — including `iv validate` (an integrity gate that printed "Some checks failed." and succeeded) and `iv eval compare` (a regression gate that compared nothing and succeeded)
 - [x] **A mistyped subcommand no longer exits 2**, which the table defines as "authentication failed"
 - [x] **`VaultError` is `#[non_exhaustive]`** — future variants are non-breaking downstream, but still force an exit-code decision inside the crate
 
@@ -21,11 +21,11 @@ implemented none of them, while telling agents to branch on them.
 Five defects sharing one shape: code that emitted a confident, plausible answer
 where it should have said it could not tell.
 
-- [x] **`aim verify` refuses to verify without a key** — it previously reported forged models as valid, comparing the file hash against a value the attacker-supplied `.sig` file itself contains, and then exited 0 when it printed FAILED
+- [x] **`iv verify` refuses to verify without a key** — it previously reported forged models as valid, comparing the file hash against a value the attacker-supplied `.sig` file itself contains, and then exited 0 when it printed FAILED
 - [x] **Signatures are real HMAC-SHA256** (RFC 2104, tested against RFC 4231), compared in constant time; the old `SHA-256(seed ‖ hash)` construction still verifies as version 1
 - [x] **The pickle scanner reads compressed ZIP members** — a DEFLATE-compressed malicious checkpoint previously scanned as `safe: true`
-- [x] **`aim vault-import` validates blob paths and verifies the bundle checksum** — the manifest's `file_path` was attacker-controlled and passed straight to `Path::join` (CWE-22), and the checksum was written but never read
-- [x] **GGUF metadata is parsed, not guessed at** — one shared bounds-checked reader fixes both `aim diff` (which saw F32 and Q4_K as identical) and license detection (which reported non-commercial models as MIT)
+- [x] **`iv vault-import` validates blob paths and verifies the bundle checksum** — the manifest's `file_path` was attacker-controlled and passed straight to `Path::join` (CWE-22), and the checksum was written but never read
+- [x] **GGUF metadata is parsed, not guessed at** — one shared bounds-checked reader fixes both `iv diff` (which saw F32 and Q4_K as identical) and license detection (which reported non-commercial models as MIT)
 - [x] **Every feature flag the crate declares is built by CI** — the two that no job compiled, `gpu` and `hdf5-support`, were both broken or inert and have been removed
 
 ## v1.7.0 — Unattended Operation, KMS & Security (complete)
@@ -37,7 +37,7 @@ since the last release.
 
 ### Unattended operation
 
-- [x] **Non-interactive passphrase** — `$aimodelvault_PASSPHRASE` (literal or KMS URI) → piped stdin → interactive prompt. `AGENTS.md` documented the env var; no code read it, so every passphrase-gated command required a TTY.
+- [x] **Non-interactive passphrase** — `$IRONVAULT_PASSPHRASE` (literal or KMS URI) → piped stdin → interactive prompt. `AGENTS.md` documented the env var; no code read it, so every passphrase-gated command required a TTY.
 - [x] **CLI integration coverage** — 7 tests covering store → list → get round-trip, wrong-passphrase rejection, KMS URIs, and stdin. Previously no CLI test could unlock a vault.
 
 ### KMS
@@ -68,7 +68,7 @@ since the last release.
 
 ### Conversion correctness
 
-- [x] **`aim convert` works on vaulted models at all** — it parsed the stored format name (`"PyTorch"`) with `from_extension`, so every conversion failed with "No conversion path"; `aim diff` silently degraded to a byte diff for the same reason
+- [x] **`iv convert` works on vaulted models at all** — it parsed the stored format name (`"PyTorch"`) with `from_extension`, so every conversion failed with "No conversion path"; `iv diff` silently degraded to a byte diff for the same reason
 - [x] **`ModelFormat::from_name` / `from_stored`** with a round-trip test across all 22 variants
 
 ### Conversion honesty
@@ -82,7 +82,7 @@ since the last release.
 ### Release consistency
 
 - [x] **Python package version synced to the crate** — package was 1.3.0, its test asserted 1.2.1, crate was 1.6.0; all now 1.7.0 and the test compares against `Cargo.toml`
-- [x] **`--key` accepts KMS URIs** for `aim sign` / `aim verify` — the last documented-but-missing claim
+- [x] **`--key` accepts KMS URIs** for `iv sign` / `iv verify` — the last documented-but-missing claim
 - [x] **15 orphaned docs added to mkdocs nav**
 - [x] **`mkdocs build --strict` actually passes** — it failed with 51 warnings; 52 out-of-`docs/` links now use absolute GitHub URLs, and CI installs the `minify` plugin the config requires
 
@@ -126,7 +126,7 @@ Strengthen the project's quality foundation: expand integration test coverage fo
 - [x] 23+ model format detection (PyTorch, ONNX, SafeTensors, GGUF, etc.)
 - [x] Compression (gzip, LZMA, zlib) with analysis
 - [x] Cloud storage backends (AWS S3, Azure Blob) via async StorageBackend trait
-- [x] CLI with 18+ commands (clap 4.4, `aim` binary)
+- [x] CLI with 18+ commands (clap 4.4, `iv` binary)
 - [x] Cloud CLI wired to real push/pull/list operations
 - [x] Model card generation (JSON, YAML, Markdown)
 - [x] RAG system: DocumentStore, KnowledgeBase, RuleEngine, RetrievalCache
@@ -167,12 +167,12 @@ All fixes identified by audit. No new features.
 - [x] **Fix deprecated GitHub Actions in CI**
   - Replaced `actions-rs/toolchain@v1` → `dtolnay/rust-toolchain@stable`
   - Replaced `actions/create-release@v1` → `softprops/action-gh-release@v2`
-  - Fixed binary name `aimv` → `aim` in release.yml
+  - Fixed binary name `aimv` → `iv` in release.yml
   - Updated all 3 workflows: ci.yml, security.yml, release.yml
 
 - [x] **Document Rust/Python crypto mismatch**
   - Added warning docstring to `fips.py` explaining PBKDF2 vs Argon2id incompatibility
-  - `vault.py` already documents that it delegates to `aim` CLI
+  - `vault.py` already documents that it delegates to `iv` CLI
 
 - [x] **Sync Python `ModelFormat` enum with Rust**
   - Rewrote registry.py to be 1:1 mirror of Rust's 23-variant enum
@@ -322,8 +322,8 @@ Real model format conversion (not just export + guidance).
   - `--validate` CLI flag
 
 - [x] **CLI integration**
-  - `aim convert` with `--opset`, `--validate`, `--plan-only` flags
-  - `aim list-conversions` command
+  - `iv convert` with `--opset`, `--validate`, `--plan-only` flags
+  - `iv list-conversions` command
   - 31 integration tests + 22 unit tests
 
 ---
@@ -348,8 +348,8 @@ Network-accessible vault management.
   - Passphrase-based login with JWT session
 
 - [x] **CLI integration**
-  - `aim serve` with `--host`, `--port`, `--jwt-secret`, `--token-expiry`, `--cors-permissive`, `--no-dashboard`
-  - Environment variable support: `AIM_HOST`, `AIM_PORT`, `AIM_JWT_SECRET`
+  - `iv serve` with `--host`, `--port`, `--jwt-secret`, `--token-expiry`, `--cors-permissive`, `--no-dashboard`
+  - Environment variable support: `IRONVAULT_HOST`, `IRONVAULT_PORT`, `IRONVAULT_JWT_SECRET`
 
 - [x] **GraphQL API** (`graphql` feature flag)
   - `async-graphql` 7.0 integration with axum
@@ -523,7 +523,7 @@ Wired v2 components (VersionBackend, VaultBuilder, streaming) into the live vaul
 
 Surfaced VaultBuilder and backend selection to CLI users and Python consumers.
 
-- [x] **`--sqlite-versions` CLI flag** — global arg on `Cli` struct (env: `AIM_SQLITE_VERSIONS`)
+- [x] **`--sqlite-versions` CLI flag** — global arg on `Cli` struct (env: `IRONVAULT_SQLITE_VERSIONS`)
 - [x] **`build_vault()` helper** — replaces all 20 `Vault::new()` call sites in CLI handlers
 - [x] **Handler updates** — vault, analyze, archive, cloud, convert, card handlers accept `use_sqlite`
 - [x] **main.rs dispatch** — extracts `use_sqlite` flag (feature-gated) and passes to all handlers
@@ -593,10 +593,10 @@ Fixed critical wiring bugs and added comprehensive test coverage for v2 componen
 
 4 new modules for model optimization, evaluation, backup scheduling, and multi-vault management.
 
-- [x] **Quantization Pipeline** (`src/quantization.rs`, ~250 lines) — Profile-based quantization management with method selection (Q4_0, Q4_K_M, Q5_K_M, Q8_0, F16, F32), size estimation, and batch reporting. `QuantProfileStore` with `set`/`remove`/`get`/`list`. CLI: `aim quantize set/remove/list/estimate`
-- [x] **Evaluation Harness** (`src/evaluation.rs`, ~250 lines) — Record, compare, and query model evaluation results across suites and metrics. `EvalStore` with `record`/`get_runs`/`compare`/`suites`/`count`. CLI: `aim eval record/list/compare/suites`
-- [x] **Backup Scheduling** (`src/scheduler.rs`, ~200 lines) — Configurable vault backup schedules with cron-style intervals (daily, weekly, monthly, custom hours). `BackupScheduler` with `set_schedule`/`list_schedules`/`run_backup`/`history`. CLI: `aim backup schedule/list/run/history`
-- [x] **Multi-Vault Registry** (`src/multi_vault.rs`, ~200 lines) — Manage multiple named vaults from a single installation. `MultiVaultRegistry` with `register`/`unregister`/`list`/`activate`/`active`. CLI: `aim vaults register/unregister/list/activate/active`
+- [x] **Quantization Pipeline** (`src/quantization.rs`, ~250 lines) — Profile-based quantization management with method selection (Q4_0, Q4_K_M, Q5_K_M, Q8_0, F16, F32), size estimation, and batch reporting. `QuantProfileStore` with `set`/`remove`/`get`/`list`. CLI: `iv quantize set/remove/list/estimate`
+- [x] **Evaluation Harness** (`src/evaluation.rs`, ~250 lines) — Record, compare, and query model evaluation results across suites and metrics. `EvalStore` with `record`/`get_runs`/`compare`/`suites`/`count`. CLI: `iv eval record/list/compare/suites`
+- [x] **Backup Scheduling** (`src/scheduler.rs`, ~200 lines) — Configurable vault backup schedules with cron-style intervals (daily, weekly, monthly, custom hours). `BackupScheduler` with `set_schedule`/`list_schedules`/`run_backup`/`history`. CLI: `iv backup schedule/list/run/history`
+- [x] **Multi-Vault Registry** (`src/multi_vault.rs`, ~200 lines) — Manage multiple named vaults from a single installation. `MultiVaultRegistry` with `register`/`unregister`/`list`/`activate`/`active`. CLI: `iv vaults register/unregister/list/activate/active`
 - [x] **CLI expansion** — 42+ commands (was 38+), 4 new CLI handler files
 - [x] **API expansion** — 12 new REST endpoints for quantization, evaluation, backup, multi-vault, and vault management
 - [x] **Python expansion** — 4 new PyO3 classes (`PyQuantProfileStore`, `PyEvalStore`, `PyBackupScheduler`, `PyMultiVaultRegistry`)
@@ -647,18 +647,18 @@ Fixed critical wiring bugs and added comprehensive test coverage for v2 componen
 
 12 new features for vault operations, access control, extensibility, and model governance.
 
-- [x] **Model Tags & Search** (`src/tags.rs`, ~250 lines) — Tag models with arbitrary labels and key-value annotations. Full-text search by name pattern, tags, or annotations. `TagStore` with `add_tags`/`remove_tags`/`search`. CLI: `aim tag add/remove/list/annotate`, `aim search`
-- [x] **Vault Export/Import** (`src/vault_bundle.rs`, ~200 lines) — Export entire vaults (or filtered subsets) as portable tar.gz bundles. Import bundles into new vaults with overwrite control. CLI: `aim vault-export <OUTPUT>`, `aim vault-import <ARCHIVE> [TARGET]`
-- [x] **Garbage Collection** (`src/gc.rs`, ~200 lines) — Detect orphaned blobs, stale temp files, and reclaimable storage. Dry-run mode for safe preview. `GcReport` with stats. CLI: `aim gc [--dry-run]`
-- [x] **TUI Dashboard** (`src/tui.rs`, ~150 lines) — Terminal UI browser showing all vault models with version counts, sizes, formats, and timestamps in a formatted table. CLI: `aim browse`
-- [x] **Webhooks** (`src/webhooks.rs`, ~250 lines) — HTTP notification targets for vault events. `WebhookStore` with add/remove/list/fire. Implements `EventSubscriber` for automatic dispatch on VaultEvent. CLI: `aim webhook add/remove/list/test`
-- [x] **Access Control** (`src/access_control.rs`, ~200 lines) — Role-based ACL (Reader/Writer/Admin) per principal. `AclGuard` with grant/revoke/resolve/require. JSON persistence. CLI: `aim acl grant/revoke/list/check`
+- [x] **Model Tags & Search** (`src/tags.rs`, ~250 lines) — Tag models with arbitrary labels and key-value annotations. Full-text search by name pattern, tags, or annotations. `TagStore` with `add_tags`/`remove_tags`/`search`. CLI: `iv tag add/remove/list/annotate`, `iv search`
+- [x] **Vault Export/Import** (`src/vault_bundle.rs`, ~200 lines) — Export entire vaults (or filtered subsets) as portable tar.gz bundles. Import bundles into new vaults with overwrite control. CLI: `iv vault-export <OUTPUT>`, `iv vault-import <ARCHIVE> [TARGET]`
+- [x] **Garbage Collection** (`src/gc.rs`, ~200 lines) — Detect orphaned blobs, stale temp files, and reclaimable storage. Dry-run mode for safe preview. `GcReport` with stats. CLI: `iv gc [--dry-run]`
+- [x] **TUI Dashboard** (`src/tui.rs`, ~150 lines) — Terminal UI browser showing all vault models with version counts, sizes, formats, and timestamps in a formatted table. CLI: `iv browse`
+- [x] **Webhooks** (`src/webhooks.rs`, ~250 lines) — HTTP notification targets for vault events. `WebhookStore` with add/remove/list/fire. Implements `EventSubscriber` for automatic dispatch on VaultEvent. CLI: `iv webhook add/remove/list/test`
+- [x] **Access Control** (`src/access_control.rs`, ~200 lines) — Role-based ACL (Reader/Writer/Admin) per principal. `AclGuard` with grant/revoke/resolve/require. JSON persistence. CLI: `iv acl grant/revoke/list/check`
 - [x] **KMS Integration** (`src/kms.rs`, ~150 lines) — Fetch vault passphrases from external secrets managers. `KmsBackend` enum supporting env vars, AWS Secrets Manager, Azure Key Vault, HashiCorp Vault. Library API only.
-- [x] **Model Validation** (`src/validation.rs`, ~250 lines) — Integrity probes with SHA-256 checksums per model version. Record expected hashes, validate against stored files. `ValidationStore` with probe management. CLI: `aim validate <NAME> [--version V]`
-- [x] **Retention Policies** (`src/policies.rs`, ~250 lines) — Configurable retention rules per model: max versions, max age, keep minimum. Dry-run enforcement. `PolicyStore` with apply/apply_all. CLI: `aim policy set/remove/list/apply/apply-all`
-- [x] **Cross-Model Lineage DAG** (`src/lineage_graph.rs`, ~200 lines) — Directed acyclic graph tracking model derivation chains (fine-tune, quantization, distillation, merge, prune, conversion). `LineageGraph` with add_edge/ancestors/descendants/display. CLI: `aim lineage-graph add/show/ancestors/descendants`
-- [x] **Plugin System** (`src/plugins.rs`, ~200 lines) — Discover, install, and uninstall plugins via JSON manifests. `PluginRegistry` with directory scanning, manifest validation, capability listing. CLI: `aim plugin discover/install/uninstall/list/info`
-- [x] **Config Profiles** (`src/profiles.rs`, ~200 lines) — Named configuration profiles with activate/deactivate switching. Override vault settings per profile. `ProfileStore` with set/remove/activate/deactivate. CLI: `aim profile create/remove/list/activate/deactivate/show`
+- [x] **Model Validation** (`src/validation.rs`, ~250 lines) — Integrity probes with SHA-256 checksums per model version. Record expected hashes, validate against stored files. `ValidationStore` with probe management. CLI: `iv validate <NAME> [--version V]`
+- [x] **Retention Policies** (`src/policies.rs`, ~250 lines) — Configurable retention rules per model: max versions, max age, keep minimum. Dry-run enforcement. `PolicyStore` with apply/apply_all. CLI: `iv policy set/remove/list/apply/apply-all`
+- [x] **Cross-Model Lineage DAG** (`src/lineage_graph.rs`, ~200 lines) — Directed acyclic graph tracking model derivation chains (fine-tune, quantization, distillation, merge, prune, conversion). `LineageGraph` with add_edge/ancestors/descendants/display. CLI: `iv lineage-graph add/show/ancestors/descendants`
+- [x] **Plugin System** (`src/plugins.rs`, ~200 lines) — Discover, install, and uninstall plugins via JSON manifests. `PluginRegistry` with directory scanning, manifest validation, capability listing. CLI: `iv plugin discover/install/uninstall/list/info`
+- [x] **Config Profiles** (`src/profiles.rs`, ~200 lines) — Named configuration profiles with activate/deactivate switching. Override vault settings per profile. `ProfileStore` with set/remove/activate/deactivate. CLI: `iv profile create/remove/list/activate/deactivate/show`
 - [x] **CLI expansion** — 38+ commands (was 25+), 11 new CLI handler files
 - [x] **Test expansion** — 1,865 tests (was 1,809), 56 new tests from 12 modules
 
@@ -712,13 +712,13 @@ These are tracked but not planned for any specific release:
 
 ## Completed in v1.3.0
 
-- [x] **Model download** — Pull models from HuggingFace Hub (`hf:`), Ollama registry (`ollama:`), or arbitrary URLs with streaming SHA-256 verification; `aim pull` CLI command
-- [x] **Model signing & verification** — HMAC-SHA256 model signing with detached `.sig` files for provenance; `aim sign` / `aim verify` CLI commands
-- [x] **Pickle safety scanning** — Detect 7 dangerous opcodes and 12 suspicious patterns in PyTorch/pickle files; `aim scan` CLI command
-- [x] **Model diffing** — Tensor-level comparison for SafeTensors/GGUF with generic binary fallback; `aim diff` CLI command with `name@version` syntax
-- [x] **Engine interop** — Register models with Ollama (`ollama create`) and LM Studio (copy to models dir); `aim register` CLI command
-- [x] **Benchmark metadata** — Store and query benchmark results per model version with JSON filesystem storage; `aim benchmark add/show` CLI commands
-- [x] **License scanning** — Detect licenses from model cards, config.json, GGUF metadata, LICENSE files; 24 known licenses with SPDX normalization; `aim license-scan` CLI command
+- [x] **Model download** — Pull models from HuggingFace Hub (`hf:`), Ollama registry (`ollama:`), or arbitrary URLs with streaming SHA-256 verification; `iv pull` CLI command
+- [x] **Model signing & verification** — HMAC-SHA256 model signing with detached `.sig` files for provenance; `iv sign` / `iv verify` CLI commands
+- [x] **Pickle safety scanning** — Detect 7 dangerous opcodes and 12 suspicious patterns in PyTorch/pickle files; `iv scan` CLI command
+- [x] **Model diffing** — Tensor-level comparison for SafeTensors/GGUF with generic binary fallback; `iv diff` CLI command with `name@version` syntax
+- [x] **Engine interop** — Register models with Ollama (`ollama create`) and LM Studio (copy to models dir); `iv register` CLI command
+- [x] **Benchmark metadata** — Store and query benchmark results per model version with JSON filesystem storage; `iv benchmark add/show` CLI commands
+- [x] **License scanning** — Detect licenses from model cards, config.json, GGUF metadata, LICENSE files; 24 known licenses with SPDX normalization; `iv license-scan` CLI command
 - [x] **CLI expansion** — 25+ commands (was 15+), 63 CLI integration tests (was 17)
 
 ## Completed in v1.2.1

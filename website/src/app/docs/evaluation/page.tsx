@@ -11,19 +11,19 @@ export default function EvaluationPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="quick-start">Quick Start</h2>
       <CodeBlock language="bash">{`# Record an evaluation run
-aim eval record my-model --version 1 --suite mmlu --metric accuracy=0.85 --metric f1=0.82
+iv eval record my-model --version 1 --suite mmlu --metric accuracy=0.85 --metric f1=0.82
 
 # List evaluations for a model
-aim eval list my-model
+iv eval list my-model
 
 # Compare two model versions
-aim eval compare my-model@1 my-model@2 --suite mmlu
+iv eval compare my-model@1 my-model@2 --suite mmlu
 
 # List all known suites
-aim eval suites`}</CodeBlock>
+iv eval suites`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="cli">CLI Reference</h2>
-      <CodeBlock language="bash">{`aim eval <COMMAND>
+      <CodeBlock language="bash">{`iv eval <COMMAND>
 
 Commands:
   record   Record an evaluation run
@@ -32,7 +32,7 @@ Commands:
   suites   List all known evaluation suites`}</CodeBlock>
 
       <h3 className="text-xl font-bold mt-8 mb-3">Record Evaluation</h3>
-      <CodeBlock language="bash">{`aim eval record <NAME> --version <V> --suite <SUITE> --metric <NAME=VALUE>...
+      <CodeBlock language="bash">{`iv eval record <NAME> --version <V> --suite <SUITE> --metric <NAME=VALUE>...
 
 Options:
   -v, --version <V>           Model version
@@ -42,7 +42,7 @@ Options:
       --higher-is-better      Higher is better (default: true)`}</CodeBlock>
 
       <h3 className="text-xl font-bold mt-8 mb-3">Compare Versions</h3>
-      <CodeBlock language="bash">{`aim eval compare <A> <B> --suite <SUITE>
+      <CodeBlock language="bash">{`iv eval compare <A> <B> --suite <SUITE>
 
 Arguments:
   <A>    First model (name@version)
@@ -57,7 +57,7 @@ Arguments:
   f1:       0.8200 → 0.8700 (+0.0500) ↑`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="python">Python API</h2>
-      <CodeBlock language="python">{`from aimodelvault import EvalStore
+      <CodeBlock language="python">{`from ironvault import EvalStore
 
 store = EvalStore("/path/to/vault")
 

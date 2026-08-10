@@ -11,16 +11,16 @@ export default function EngineInteropPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="quick-start">Quick Start</h2>
       <CodeBlock language="bash">{`# Register with Ollama
-aim register my-model --engine ollama
+iv register my-model --engine ollama
 
 # Register with custom alias and system prompt
-aim register my-model --engine ollama --alias my-assistant --system-prompt "You are helpful."
+iv register my-model --engine ollama --alias my-assistant --system-prompt "You are helpful."
 
 # Register with LM Studio
-aim register my-model --engine lm-studio`}</CodeBlock>
+iv register my-model --engine lm-studio`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="options">CLI Options</h2>
-      <CodeBlock language="bash">{`aim register <NAME> --engine <ENGINE> [OPTIONS]
+      <CodeBlock language="bash">{`iv register <NAME> --engine <ENGINE> [OPTIONS]
 
 Options:
   --engine <ENGINE>       Target engine: ollama or lm-studio
@@ -39,7 +39,7 @@ Options:
         <li>Reports success with the registered model name</li>
       </ol>
       <CodeBlock language="bash">{`# Register and then use with Ollama
-aim register llama2-finetuned --engine ollama --alias my-llama
+iv register llama2-finetuned --engine ollama --alias my-llama
 ollama run my-llama`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="lm-studio">LM Studio</h2>

@@ -2,17 +2,17 @@
   "$schema": "https://nervosys.com/schemas/agents-discovery-v1.json",
   "schema_version": "1.0",
   "project": {
-    "id": "ai-model-vault",
-    "name": "AI Model Vault",
-    "version": "4.6.1",
+    "id": "ironvault",
+    "name": "IronVault",
+    "version": "5.0.0",
     "description": "Encrypted AI/ML model management system with versioning, 23+ format conversion, compliance validation (FIPS 140-3, CMMC 2.0, MITRE ATT&CK), RAG with MCP tools, federation, blockchain audit, model download (HuggingFace/Ollama/URL), HMAC signing & verification, pickle safety scanning, tensor-level diffing, engine interop (Ollama/LM Studio), license scanning, model tags & search, vault export/import, garbage collection, TUI dashboard, webhooks, role-based ACL, KMS integration, model validation, retention policies, cross-model lineage DAG, plugin system, config profiles, quantization pipeline, evaluation harness, backup scheduling, and multi-vault management.",
-    "homepage": "https://github.com/nervosys/AIModelVault",
-    "documentation": "https://github.com/nervosys/AIModelVault/tree/master/docs",
+    "homepage": "https://github.com/nervosys/IronVault",
+    "documentation": "https://github.com/nervosys/IronVault/tree/master/docs",
     "license": "AGPL-3.0-or-later",
     "languages": ["Rust"],
-    "binary": "aim",
+    "binary": "iv",
     "package_registry": "crates.io",
-    "package_name": "ai-model-vault"
+    "package_name": "ironvault"
   },
 
   "discovery": {
@@ -30,11 +30,11 @@
   "agent_interfaces": [
     {
       "type": "cli",
-      "binary": "aim",
-      "description": "Command-line interface with 42+ subcommands for vault, model, cloud, database, quantization, evaluation, backup, multi-vault, and utility operations. Use `aim introspect` for machine-readable CLI schema discovery.",
-      "install": "cargo install ai-model-vault",
-      "help": "aim --help",
-      "introspect": "aim introspect --format json",
+      "binary": "iv",
+      "description": "Command-line interface with 42+ subcommands for vault, model, cloud, database, quantization, evaluation, backup, multi-vault, and utility operations. Use `iv introspect` for machine-readable CLI schema discovery.",
+      "install": "cargo install ironvault",
+      "help": "iv --help",
+      "introspect": "iv introspect --format json",
       "exit_codes": {
         "0": "Success",
         "1": "General error",
@@ -47,10 +47,10 @@
         "8": "Compliance violation"
       },
       "environment_variables": [
-        {"name": "aimodelvault_CONFIG", "description": "Config directory override"},
-        {"name": "aimodelvault_HOME", "description": "Relocates all config/data/cache directories under one root"},
-        {"name": "aimodelvault_VAULT", "description": "Default vault name"},
-        {"name": "aimodelvault_PASSPHRASE", "description": "Vault passphrase for automation: literal value or KMS URI (env://, file://, aws-sm://, azure-kv://, vault://)"},
+        {"name": "IRONVAULT_CONFIG", "description": "Config directory override"},
+        {"name": "IRONVAULT_HOME", "description": "Relocates all config/data/cache directories under one root"},
+        {"name": "IRONVAULT_VAULT", "description": "Default vault name"},
+        {"name": "IRONVAULT_PASSPHRASE", "description": "Vault passphrase for automation: literal value or KMS URI (env://, file://, aws-sm://, azure-kv://, vault://)"},
         {"name": "AWS_ACCESS_KEY_ID", "description": "AWS S3 access key"},
         {"name": "AWS_SECRET_ACCESS_KEY", "description": "AWS S3 secret key"},
         {"name": "AWS_REGION", "description": "AWS region"},
@@ -78,7 +78,7 @@
       "feature_flag": "api",
       "default_port": 8080,
       "auth": "JWT (Bearer token)",
-      "start_command": "aim serve --port 8080"
+      "start_command": "iv serve --port 8080"
     },
     {
       "type": "graphql",
@@ -90,22 +90,22 @@
     {
       "type": "rust_library",
       "description": "Rust crate with public API for embedding in Rust applications.",
-      "crate": "ai-model-vault",
-      "docs_rs": "https://docs.rs/ai-model-vault",
+      "crate": "ironvault",
+      "docs_rs": "https://docs.rs/ironvault",
       "key_types": ["Vault", "ModelVersion", "ModelMetadata", "ModelFormat", "ModelCard", "DocumentStore", "KnowledgeBase", "RuleEngine", "MCPServer", "ConversionPipeline"]
     },
     {
       "type": "python_bindings",
       "description": "Python bindings via PyO3. Requires `python` cargo feature.",
       "feature_flag": "python",
-      "install": "pip install aimodelvault"
+      "install": "pip install ironvault"
     }
   ],
 
   "capabilities": {
     "model_management": {
       "description": "Store, retrieve, version, and delete AI models with full encryption",
-      "commands": ["aim init", "aim store", "aim get", "aim list", "aim versions", "aim lineage", "aim delete", "aim stats"],
+      "commands": ["iv init", "iv store", "iv get", "iv list", "iv versions", "iv lineage", "iv delete", "iv stats"],
       "formats_supported": 23,
       "versioning": "Sequential with parent lineage and branching"
     },
@@ -117,7 +117,7 @@
     },
     "format_conversion": {
       "description": "Convert models between 23+ formats with optional quantization",
-      "commands": ["aim convert", "aim list-conversions"],
+      "commands": ["iv convert", "iv list-conversions"],
       "paths": [
         "PyTorch → Safetensors/ONNX/TorchScript/CoreML/MLX",
         "Safetensors → GGUF",
@@ -128,37 +128,37 @@
     },
     "compliance": {
       "description": "Automated compliance validation against industry standards",
-      "commands": ["aim compliance"],
+      "commands": ["iv compliance"],
       "standards": ["FIPS 140-3", "CMMC 2.0 Level 2", "MITRE ATT&CK"]
     },
     "cloud_storage": {
       "description": "Push/pull models to cloud providers. Uploads are sealed client-side with AES-256-GCM (Argon2id key from the vault passphrase, fresh salt per object), so the bucket holds ciphertext. Objects pushed before 4.3.0 are plaintext and are accepted with a warning.",
-      "commands": ["aim cloud push", "aim cloud pull", "aim cloud list", "aim cloud config"],
+      "commands": ["iv cloud push", "iv cloud pull", "iv cloud list", "iv cloud config"],
       "providers": ["AWS S3", "Azure Blob Storage"]
     },
     "rag": {
       "description": "Retrieval Augmented Generation system for AI-powered document search",
-      "commands": ["aim database init", "aim database store", "aim database search", "aim database list"],
+      "commands": ["iv database init", "iv database store", "iv database search", "iv database list"],
       "components": ["DocumentStore", "KnowledgeBase", "RuleEngine", "RetrievalCache"],
       "backends": ["InMemory", "SQLite", "Sled", "Qdrant", "LanceDB"]
     },
     "model_cards": {
       "description": "Structured model documentation following Google/HuggingFace standards",
-      "commands": ["aim card"],
+      "commands": ["iv card"],
       "export_formats": ["JSON", "YAML", "Markdown"]
     },
     "utilities": {
       "description": "Archive, analyze, deduplicate, and export models",
-      "commands": ["aim archive", "aim extract", "aim analyze", "aim deduplicate", "aim export", "aim cache"],
+      "commands": ["iv archive", "iv extract", "iv analyze", "iv deduplicate", "iv export", "iv cache"],
       "tools": ["ModelArchive", "CompressionAnalyzer", "ModelAnalyzer", "ModelDeduplicator", "ModelExporter", "QuantizationInfo", "PruningInfo"]
     },
     "federation": {
       "description": "Sync vaults across peers with vector clocks and conflict resolution. Opt-in via federation.enabled; transfers are sealed client-side with AES-256-GCM by default. Peers authenticate with a shared X-API-Key, not the API's JWT.",
       "commands": [
-        "aim federation status",
-        "aim federation manifest",
-        "aim federation plan",
-        "aim federation sync"
+        "iv federation status",
+        "iv federation manifest",
+        "iv federation plan",
+        "iv federation sync"
       ],
       "endpoints": [
         "GET /api/v1/federation/manifest",
@@ -171,95 +171,95 @@
     "blockchain_audit": {
       "description": "Append-only blockchain audit trail with Merkle tree proofs. Opt-in via security.blockchain_audit; mirrors every audit-log entry into a hash-linked chain. Read-only from the CLI — entries are recorded by the audit logger, never by a command.",
       "commands": [
-        "aim chain status",
-        "aim chain verify",
-        "aim chain proof",
-        "aim chain verify-proof",
-        "aim chain search"
+        "iv chain status",
+        "iv chain verify",
+        "iv chain proof",
+        "iv chain verify-proof",
+        "iv chain search"
       ],
       "feature_flag": "default",
       "enabled_by_default": false
     },
     "agent_discovery": {
       "description": "Machine-readable CLI schema introspection for AI agent bootstrapping",
-      "commands": ["aim introspect"],
+      "commands": ["iv introspect"],
       "output_formats": ["json", "yaml", "jsonld"],
       "flags": ["--compact"],
-      "usage": "aim introspect --format json | jq '.commands[]'"
+      "usage": "iv introspect --format json | jq '.commands[]'"
     },
     "quantization": {
       "description": "Quantization pipeline with profile management and size estimation",
-      "commands": ["aim quantize set", "aim quantize remove", "aim quantize list", "aim quantize estimate"],
+      "commands": ["iv quantize set", "iv quantize remove", "iv quantize list", "iv quantize estimate"],
       "methods": ["q4_0", "q4_k_m", "q5_k_m", "q8_0", "f16", "f32"]
     },
     "evaluation": {
       "description": "Model evaluation harness for recording and comparing benchmark results",
-      "commands": ["aim eval record", "aim eval list", "aim eval compare", "aim eval suites"]
+      "commands": ["iv eval record", "iv eval list", "iv eval compare", "iv eval suites"]
     },
     "backup_scheduling": {
       "description": "Automated vault backup scheduling with configurable intervals",
-      "commands": ["aim backup schedule", "aim backup list", "aim backup run", "aim backup history"]
+      "commands": ["iv backup schedule", "iv backup list", "iv backup run", "iv backup history"]
     },
     "multi_vault": {
       "description": "Multi-vault registry for managing and switching between multiple vaults",
-      "commands": ["aim vaults register", "aim vaults unregister", "aim vaults list", "aim vaults activate", "aim vaults active"]
+      "commands": ["iv vaults register", "iv vaults unregister", "iv vaults list", "iv vaults activate", "iv vaults active"]
     },
     "model_download": {
       "description": "Download models from HuggingFace Hub, Ollama registry, or arbitrary URLs with SHA-256 verification",
-      "commands": ["aim pull"],
+      "commands": ["iv pull"],
       "sources": ["huggingface", "ollama", "url"],
       "integrity": "SHA-256 verification"
     },
     "model_signing": {
       "description": "HMAC-SHA256 signatures with detached .sig files for provenance",
-      "commands": ["aim sign", "aim verify"],
+      "commands": ["iv sign", "iv verify"],
       "algorithm": "HMAC-SHA256"
     },
     "safety_scanning": {
       "description": "Detect dangerous pickle opcodes and patterns in PyTorch/pickle files",
-      "commands": ["aim scan"],
+      "commands": ["iv scan"],
       "detects": ["REDUCE", "GLOBAL", "INST", "OBJ", "NEWOBJ", "BUILD", "eval/exec patterns"]
     },
     "model_diffing": {
       "description": "Compare model versions at the tensor level (SafeTensors, GGUF, generic byte-level)",
-      "commands": ["aim diff"]
+      "commands": ["iv diff"]
     },
     "engine_interop": {
       "description": "Register models with local inference engines",
-      "commands": ["aim register"],
+      "commands": ["iv register"],
       "engines": ["ollama", "lm-studio"]
     },
     "benchmarks": {
       "description": "Store and query benchmark results per model version",
-      "commands": ["aim benchmark add", "aim benchmark show"]
+      "commands": ["iv benchmark add", "iv benchmark show"]
     },
     "license_scanning": {
       "description": "Detect licenses from model cards, config.json, GGUF metadata, LICENSE files (SPDX-normalized)",
-      "commands": ["aim license-scan"]
+      "commands": ["iv license-scan"]
     },
     "tags_and_search": {
       "description": "Tag models with labels and annotations, search by name/tags/annotations",
-      "commands": ["aim tag add", "aim tag remove", "aim tag list", "aim tag annotate", "aim search"]
+      "commands": ["iv tag add", "iv tag remove", "iv tag list", "iv tag annotate", "iv search"]
     },
     "vault_bundle": {
       "description": "Portable tar.gz vault bundles with selective model export",
-      "commands": ["aim vault-export", "aim vault-import"]
+      "commands": ["iv vault-export", "iv vault-import"]
     },
     "garbage_collection": {
       "description": "Orphaned blob detection, temp file cleanup, and space reclaim with dry-run support",
-      "commands": ["aim gc"]
+      "commands": ["iv gc"]
     },
     "tui_dashboard": {
       "description": "Terminal UI dashboard for browsing vault contents",
-      "commands": ["aim browse"]
+      "commands": ["iv browse"]
     },
     "webhooks": {
       "description": "HTTP notification system integrated with the EventSubscriber bus",
-      "commands": ["aim webhook add", "aim webhook remove", "aim webhook list", "aim webhook test"]
+      "commands": ["iv webhook add", "iv webhook remove", "iv webhook list", "iv webhook test"]
     },
     "access_control": {
       "description": "Role-based access control (Reader/Writer/Admin) per principal",
-      "commands": ["aim acl grant", "aim acl revoke", "aim acl list", "aim acl check"],
+      "commands": ["iv acl grant", "iv acl revoke", "iv acl list", "iv acl check"],
       "roles": ["reader", "writer", "admin"]
     },
     "kms_integration": {
@@ -268,23 +268,23 @@
     },
     "model_validation": {
       "description": "Integrity probes with SHA-256 checksums per model version",
-      "commands": ["aim validate"]
+      "commands": ["iv validate"]
     },
     "retention_policies": {
       "description": "Configurable max versions/age/minimum with dry-run enforcement",
-      "commands": ["aim policy set", "aim policy remove", "aim policy list", "aim policy apply", "aim policy apply-all"]
+      "commands": ["iv policy set", "iv policy remove", "iv policy list", "iv policy apply", "iv policy apply-all"]
     },
     "lineage_graph": {
       "description": "Cross-model lineage as a directed acyclic graph tracking derivation chains",
-      "commands": ["aim lineage-graph add", "aim lineage-graph show", "aim lineage-graph ancestors", "aim lineage-graph descendants"]
+      "commands": ["iv lineage-graph add", "iv lineage-graph show", "iv lineage-graph ancestors", "iv lineage-graph descendants"]
     },
     "plugin_system": {
       "description": "Discover, install, uninstall plugins with JSON manifests",
-      "commands": ["aim plugin discover", "aim plugin install", "aim plugin uninstall", "aim plugin list", "aim plugin info"]
+      "commands": ["iv plugin discover", "iv plugin install", "iv plugin uninstall", "iv plugin list", "iv plugin info"]
     },
     "config_profiles": {
       "description": "Named configuration profiles with activate/deactivate switching",
-      "commands": ["aim profile create", "aim profile remove", "aim profile list", "aim profile activate", "aim profile deactivate", "aim profile show"]
+      "commands": ["iv profile create", "iv profile remove", "iv profile list", "iv profile activate", "iv profile deactivate", "iv profile show"]
     },
     "telemetry": {
       "description": "Anonymous, opt-in telemetry honouring DO_NOT_TRACK and AIM_TELEMETRY_DISABLED",

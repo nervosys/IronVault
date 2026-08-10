@@ -5,8 +5,8 @@ Integrity check — recomputes the SHA-256 of stored ciphertext and compares it 
 ## CLI
 
 ```bash
-aim validate my-llm              # validate every version
-aim validate my-llm --version 3  # one version
+iv validate my-llm              # validate every version
+iv validate my-llm --version 3  # one version
 ```
 
 ## MCP tool
@@ -25,4 +25,4 @@ my-llm@2  OK   sha256=cd34…
 my-llm@3  FAIL expected=ef56… got=ee99…
 ```
 
-Non-zero exit code on any failure. See [src/validation.rs](https://github.com/nervosys/AIModelVault/blob/master/src/validation.rs).
+Non-zero exit code on any failure. See [src/validation.rs](https://github.com/nervosys/IronVault/blob/master/src/validation.rs).

@@ -12,7 +12,7 @@
 
 #![cfg(feature = "api")]
 
-use ai_model_vault::api::auth::{create_token, verify_token};
+use ironvault::api::auth::{create_token, verify_token};
 use base64::Engine;
 
 /// Decode the `alg` field out of a token's JOSE header without trusting the

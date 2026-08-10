@@ -1,14 +1,14 @@
-# AI Model Vault — MkDocs Configuration
+# IronVault — MkDocs Configuration
 # Build: mkdocs build          (outputs to website/public/mkdocs/)
 # Serve: mkdocs serve           (dev preview at http://127.0.0.1:8000)
 # Deploy to Next.js: mkdocs build && next build  (from website/)
 
-site_name: AI Model Vault
+site_name: IronVault
 site_description: Universal cross-platform secure vault for AI model storage, versioning, and management
 site_author: NERVOSYS AI Team
-site_url: https://aimodelvault.nervosys.ai/mkdocs/
-repo_url: https://github.com/nervosys/AIModelVault
-repo_name: nervosys/AIModelVault
+site_url: https://ironvault.nervosys.ai/mkdocs/
+repo_url: https://github.com/nervosys/IronVault
+repo_name: nervosys/IronVault
 copyright: "&copy; 2025-2026 NERVOSYS. Licensed under AGPL-3.0-or-later."
 
 docs_dir: docs
@@ -87,7 +87,7 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/nervosys/AIModelVault
+      link: https://github.com/nervosys/IronVault
   generator: false
 
 # `--strict` promotes warnings to errors. Keep link checking strict — a broken
@@ -180,4 +180,4 @@ nav:
       - UV Integration: UV_INTEGRATION.md
       - Telemetry: TELEMETRY.md
       - Executive Summary: EXECUTIVE_SUMMARY.md
-  - API Reference: api/ai_model_vault/index.html
+  - API Reference: api/ironvault/index.html

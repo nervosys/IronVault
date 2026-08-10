@@ -1,7 +1,7 @@
-//! CLI handler for quantization profiles (aim quantize).
+//! CLI handler for quantization profiles (iv quantize).
 
-use ai_model_vault::quantization::{QuantMethod, QuantProfile, QuantProfileStore};
-use ai_model_vault::{Result, VaultConfig, VaultError};
+use ironvault::quantization::{QuantMethod, QuantProfile, QuantProfileStore};
+use ironvault::{Result, VaultConfig, VaultError};
 
 use crate::cli::args::QuantizeCommands;
 
@@ -47,7 +47,7 @@ pub fn handle_quantize(command: QuantizeCommands, config: VaultConfig) -> Result
             let from_method: QuantMethod = from.parse()?;
             let to_method: QuantMethod = to.parse()?;
             let estimated =
-                ai_model_vault::quantization::estimate_quantized_size(size, from_method, to_method);
+                ironvault::quantization::estimate_quantized_size(size, from_method, to_method);
             let ratio = size as f64 / estimated as f64;
             println!(
                 "Estimated: {} → {} bytes ({:.1}× compression, {} → {})",

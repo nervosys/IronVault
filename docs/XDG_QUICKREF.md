@@ -15,22 +15,22 @@
 
 ### Linux
 ```
-~/.config/aimodelvault/           # Configuration
-~/.local/share/aimodelvault/      # Models & data
-~/.cache/aimodelvault/            # Cache & temp files
+~/.config/ironvault/           # Configuration
+~/.local/share/ironvault/      # Models & data
+~/.cache/ironvault/            # Cache & temp files
 ```
 
 ### macOS
 ```
-~/Library/Application Support/ai.nervosys.aimodelvault/  # Config & data
-~/Library/Caches/ai.nervosys.aimodelvault/               # Cache
+~/Library/Application Support/ai.nervosys.ironvault/  # Config & data
+~/Library/Caches/ai.nervosys.ironvault/               # Cache
 ```
 
 ### Windows
 ```
-%APPDATA%\nervosys\aimodelvault\config\     # Configuration
-%APPDATA%\nervosys\aimodelvault\data\       # Models & data
-%LOCALAPPDATA%\nervosys\aimodelvault\cache\ # Cache
+%APPDATA%\nervosys\ironvault\config\     # Configuration
+%APPDATA%\nervosys\ironvault\data\       # Models & data
+%LOCALAPPDATA%\nervosys\ironvault\cache\ # Cache
 ```
 
 ## Environment Variables
@@ -61,7 +61,7 @@ $env:XDG_CACHE_HOME = "C:\custom\cache"
 
 ### Development Environment
 ```bash
-export XDG_DATA_HOME=$HOME/dev/aimodelvault_dev
+export XDG_DATA_HOME=$HOME/dev/IRONVAULT_DEV
 ```
 
 ### Network Storage
@@ -80,10 +80,10 @@ export XDG_CACHE_HOME=/tmp/test_cache
 ### Backup Strategy
 ```bash
 # Backup config (small, fast)
-tar czf config.tar.gz ~/.config/aimodelvault/
+tar czf config.tar.gz ~/.config/ironvault/
 
 # Backup models (large, important)
-tar czf models.tar.gz ~/.local/share/aimodelvault/
+tar czf models.tar.gz ~/.local/share/ironvault/
 
 # Skip cache (not needed)
 ```
@@ -114,5 +114,5 @@ cargo run --example xdg_demo --release
 ## More Information
 
 - 📖 [docs/XDG_COMPLIANCE.md](XDG_COMPLIANCE.md) - Complete guide
-- 🔍 [examples/xdg_demo.rs](https://github.com/nervosys/AIModelVault/blob/master/examples/xdg_demo.rs) - Source code
+- 🔍 [examples/xdg_demo.rs](https://github.com/nervosys/IronVault/blob/master/examples/xdg_demo.rs) - Source code
 - 📋 [XDG Spec](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) - Official specification

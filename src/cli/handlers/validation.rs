@@ -1,6 +1,6 @@
-//! CLI handler for model validation (aim validate).
+//! CLI handler for model validation (iv validate).
 
-use ai_model_vault::{Result, ValidationStore, VaultConfig, VaultError};
+use ironvault::{Result, ValidationStore, VaultConfig, VaultError};
 
 pub fn handle_validate(
     name: String,
@@ -11,7 +11,7 @@ pub fn handle_validate(
     let store = ValidationStore::new(&config.dirs.vault_dir)?;
 
     // Resolve file path from version control
-    let vc = ai_model_vault::version::VersionControl::new(&config.dirs.vault_dir)?;
+    let vc = ironvault::version::VersionControl::new(&config.dirs.vault_dir)?;
     let versions = vc.list_versions(&name);
     let ver = version.unwrap_or(0);
     let target = if ver == 0 {
@@ -40,7 +40,7 @@ pub fn handle_validate(
     }
 
     if !report.overall_pass {
-        // `aim validate` is an integrity gate. Printing "Some checks failed"
+        // `iv validate` is an integrity gate. Printing "Some checks failed"
         // and exiting 0 meant every pipeline that ran it treated a failing
         // model as valid.
         println!("Some checks failed.");

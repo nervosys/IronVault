@@ -23,24 +23,24 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            artifact_name: aim
-            asset_name: aim-linux-amd64
+            artifact_name: iv
+            asset_name: iv-linux-amd64
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
-            artifact_name: aim
-            asset_name: aim-linux-musl-amd64
+            artifact_name: iv
+            asset_name: iv-linux-musl-amd64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact_name: aim.exe
-            asset_name: aim-windows-amd64.exe
+            artifact_name: iv.exe
+            asset_name: iv-windows-amd64.exe
           - os: macos-latest
             target: x86_64-apple-darwin
-            artifact_name: aim
-            asset_name: aim-darwin-amd64
+            artifact_name: iv
+            asset_name: iv-darwin-amd64
           - os: macos-latest
             target: aarch64-apple-darwin
-            artifact_name: aim
-            asset_name: aim-darwin-arm64
+            artifact_name: iv
+            asset_name: iv-darwin-arm64
 
     steps:
     - uses: actions/checkout@v4

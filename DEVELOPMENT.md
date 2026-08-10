@@ -1,6 +1,6 @@
-# Getting Started with aimodelvault Development
+# Getting Started with ironvault Development
 
-This guide will help you get started with developing and contributing to aimodelvault.
+This guide will help you get started with developing and contributing to ironvault.
 
 ## Prerequisites
 
@@ -33,8 +33,8 @@ This guide will help you get started with developing and contributing to aimodel
 
 ```bash
 # Clone repository
-git clone https://github.com/nervosys/AIModelVault.git
-cd AIModelVault
+git clone https://github.com/nervosys/IronVault.git
+cd IronVault
 
 # Build project
 cargo build
@@ -221,7 +221,7 @@ src/
    /// # Examples
    ///
    /// ```
-   /// use aimodelvault::my_feature;
+   /// use ironvault::my_feature;
    /// my_feature();
    /// ```
    pub fn my_feature() { }
@@ -283,7 +283,7 @@ export RUST_LOG=debug
 cargo run -- list
 
 # Specific module
-export RUST_LOG=aimodelvault::vault=trace
+export RUST_LOG=ironvault::vault=trace
 cargo run -- store model ./model.pt
 ```
 
@@ -297,11 +297,11 @@ cargo run -- store model ./model.pt
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug aimodelvault",
+            "name": "Debug ironvault",
             "cargo": {
-                "args": ["build", "--bin=aimodelvault"],
+                "args": ["build", "--bin=ironvault"],
                 "filter": {
-                    "name": "aimodelvault",
+                    "name": "ironvault",
                     "kind": "bin"
                 }
             },
@@ -315,14 +315,14 @@ cargo run -- store model ./model.pt
 **GDB** (Linux):
 ```bash
 cargo build
-gdb target/debug/aimodelvault
+gdb target/debug/ironvault
 (gdb) run init
 ```
 
 **LLDB** (macOS):
 ```bash
 cargo build
-lldb target/debug/aimodelvault
+lldb target/debug/ironvault
 (lldb) run init
 ```
 
@@ -344,7 +344,7 @@ mod tests {
 ### Integration Tests
 In `tests/integration_tests.rs`:
 ```rust
-use aimodelvault::Vault;
+use ironvault::Vault;
 
 #[test]
 fn test_vault_workflow() {
@@ -384,16 +384,16 @@ cargo bench crypto_bench
 cargo install flamegraph
 
 # Profile
-cargo flamegraph --bin aimodelvault -- store model ./large_model.pt
+cargo flamegraph --bin ironvault -- store model ./large_model.pt
 ```
 
 ### Memory Profiling
 ```bash
 # Use valgrind (Linux)
-valgrind --leak-check=full target/debug/aim init
+valgrind --leak-check=full target/debug/iv init
 
 # Use heaptrack (Linux)
-heaptrack target/debug/aim init
+heaptrack target/debug/iv init
 ```
 
 ## Continuous Integration
@@ -439,7 +439,7 @@ cargo update
 cargo test -- --nocapture --test-threads=1
 
 # Check for file permissions issues
-chmod 700 ~/.local/share/aimodelvault
+chmod 700 ~/.local/share/ironvault
 ```
 
 ### Clippy Warnings
@@ -497,17 +497,17 @@ cargo clippy --fix
 
 ## Getting Help
 
-- **Documentation**: https://docs.rs/aimodelvault
-- **Discussions**: https://github.com/nervosys/AIModelVault/discussions
-- **Issues**: https://github.com/nervosys/AIModelVault/issues
+- **Documentation**: https://docs.rs/ironvault
+- **Discussions**: https://github.com/nervosys/IronVault/discussions
+- **Issues**: https://github.com/nervosys/IronVault/issues
 - **Email**: dev@nervosys.ai
 
 ## Next Steps
 
 1. Read the [Architecture Overview](IMPLEMENTATION.md)
-2. Browse the [API Documentation](https://docs.rs/aimodelvault)
+2. Browse the [API Documentation](https://docs.rs/ironvault)
 3. Try the [Examples](examples/)
-4. Check [Open Issues](https://github.com/nervosys/AIModelVault/issues)
-5. Join the [Discussions](https://github.com/nervosys/AIModelVault/discussions)
+4. Check [Open Issues](https://github.com/nervosys/IronVault/issues)
+5. Join the [Discussions](https://github.com/nervosys/IronVault/discussions)
 
 Happy coding! 🦀

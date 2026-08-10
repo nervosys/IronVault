@@ -1,4 +1,4 @@
-//! Embedded web dashboard for AI Model Vault.
+//! Embedded web dashboard for IronVault.
 //!
 //! Single-page HTML application served at the root path.
 
@@ -9,7 +9,7 @@ pub fn dashboard_html() -> &'static str {
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>AI Model Vault</title>
+<title>IronVault</title>
 <style>
 :root{--bg:#0f1117;--card:#1a1d27;--border:#2a2d3a;--text:#e1e4ed;--muted:#8b8fa3;--accent:#6366f1;--accent-hover:#818cf8;--green:#22c55e;--red:#ef4444;--orange:#f59e0b}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -46,7 +46,7 @@ th{color:var(--muted);font-weight:500;text-transform:uppercase;font-size:.7rem;l
 <body>
 
 <div class="header">
-  <h1><span>&#9670;</span> AI Model Vault</h1>
+  <h1><span>&#9670;</span> IronVault</h1>
   <div class="topbar-actions">
     <span id="status" class="badge off">Locked</span>
     <button class="btn" id="logoutBtn" style="display:none" onclick="logout()">Logout</button>

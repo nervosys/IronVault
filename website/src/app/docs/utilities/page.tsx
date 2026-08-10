@@ -10,53 +10,53 @@ export default function UtilitiesPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="analysis">Model Analysis</h2>
       <CodeBlock language="bash">{`# Get model information
-aim info my-model
+iv info my-model
 
 # Show detailed statistics
-aim stats
+iv stats
 
 # Verify model integrity
-aim verify my-model`}</CodeBlock>
+iv verify my-model`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="cache">Cache Management</h2>
       <CodeBlock language="bash">{`# Show cache usage
-aim cache info
+iv cache info
 
 # Clear cache
-aim cache clear
+iv cache clear
 
 # Set cache size limit (in MB)
-aim cache set-limit 1024`}</CodeBlock>
+iv cache set-limit 1024`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="archive">Model Archival</h2>
       <CodeBlock language="bash">{`# Archive a model (compress and store separately)
-aim archive my-model
+iv archive my-model
 
 # List archived models
-aim archive list
+iv archive list
 
 # Restore from archive
-aim archive restore my-model`}</CodeBlock>
+iv archive restore my-model`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="cleanup">Cleanup</h2>
       <CodeBlock language="bash">{`# Remove old versions (keep last N)
-aim cleanup --keep-versions 3
+iv cleanup --keep-versions 3
 
 # Remove orphaned data
-aim cleanup --orphans
+iv cleanup --orphans
 
 # Dry run (show what would be deleted)
-aim cleanup --keep-versions 3 --dry-run`}</CodeBlock>
+iv cleanup --keep-versions 3 --dry-run`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="import-export">Import & Export</h2>
       <CodeBlock language="bash">{`# Export a vault (tar.gz, encrypted)
-aim export --output vault-backup.tar.gz
+iv export --output vault-backup.tar.gz
 
 # Import a vault backup
-aim import vault-backup.tar.gz --target-vault restored-vault`}</CodeBlock>
+iv import vault-backup.tar.gz --target-vault restored-vault`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="rust-api">Rust API</h2>
-      <CodeBlock language="rust">{`use ai_model_vault::utils::{
+      <CodeBlock language="rust">{`use ironvault::utils::{
     ModelAnalyzer, CacheManager, ArchiveManager
 };
 
@@ -88,12 +88,12 @@ archive.archive_model("my-model", &vault)?;`}</CodeBlock>
           </thead>
           <tbody className="text-[var(--color-text-secondary)]">
             {[
-              ["AIM_VAULT_DIR", "Override default vault directory"],
-              ["AIM_LOG_LEVEL", "Logging level (error, warn, info, debug, trace)"],
-              ["AIM_CACHE_LIMIT", "Cache size limit in bytes"],
-              ["AIM_JWT_SECRET", "JWT signing secret for API server"],
-              ["AIM_HOST", "API server bind address"],
-              ["AIM_PORT", "API server port"],
+              ["IRONVAULT_VAULT_DIR", "Override default vault directory"],
+              ["IRONVAULT_LOG_LEVEL", "Logging level (error, warn, info, debug, trace)"],
+              ["IRONVAULT_CACHE_LIMIT", "Cache size limit in bytes"],
+              ["IRONVAULT_JWT_SECRET", "JWT signing secret for API server"],
+              ["IRONVAULT_HOST", "API server bind address"],
+              ["IRONVAULT_PORT", "API server port"],
             ].map(([name, desc]) => (
               <tr key={name} className="border-b border-[var(--color-border)]">
                 <td className="p-3"><code className="px-1.5 py-0.5 bg-[var(--color-bg-secondary)] rounded text-xs">{name}</code></td>

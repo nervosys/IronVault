@@ -1,7 +1,7 @@
 #![no_main]
 use libfuzzer_sys::fuzz_target;
 
-use ai_model_vault::model_card::ModelCard;
+use ironvault::model_card::ModelCard;
 
 fuzz_target!(|data: &[u8]| {
     // Try to parse arbitrary bytes as JSON and YAML model cards.

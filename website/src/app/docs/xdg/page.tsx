@@ -20,10 +20,10 @@ export default function XDGPage() {
           </thead>
           <tbody className="text-[var(--color-text-secondary)]">
             {[
-              ["$XDG_CONFIG_HOME", "~/.config/ai-model-vault/", "Configuration files"],
-              ["$XDG_DATA_HOME", "~/.local/share/ai-model-vault/", "Vault data and databases"],
-              ["$XDG_CACHE_HOME", "~/.cache/ai-model-vault/", "Temporary and cache files"],
-              ["$XDG_STATE_HOME", "~/.local/state/ai-model-vault/", "Log files and runtime state"],
+              ["$XDG_CONFIG_HOME", "~/.config/ironvault/", "Configuration files"],
+              ["$XDG_DATA_HOME", "~/.local/share/ironvault/", "Vault data and databases"],
+              ["$XDG_CACHE_HOME", "~/.cache/ironvault/", "Temporary and cache files"],
+              ["$XDG_STATE_HOME", "~/.local/state/ironvault/", "Log files and runtime state"],
             ].map(([variable, path, purpose]) => (
               <tr key={variable} className="border-b border-[var(--color-border)]">
                 <td className="p-3"><code className="px-1.5 py-0.5 bg-[var(--color-bg-secondary)] rounded text-xs">{variable}</code></td>
@@ -51,13 +51,13 @@ export default function XDGPage() {
           <tbody className="text-[var(--color-text-secondary)]">
             <tr className="border-b border-[var(--color-border)]">
               <td className="p-3 font-medium text-[var(--color-text)]">Windows</td>
-              <td className="p-3"><code className="text-xs">%APPDATA%\ai-model-vault\</code></td>
-              <td className="p-3"><code className="text-xs">%LOCALAPPDATA%\ai-model-vault\</code></td>
+              <td className="p-3"><code className="text-xs">%APPDATA%\ironvault\</code></td>
+              <td className="p-3"><code className="text-xs">%LOCALAPPDATA%\ironvault\</code></td>
             </tr>
             <tr className="border-b border-[var(--color-border)]">
               <td className="p-3 font-medium text-[var(--color-text)]">macOS</td>
-              <td className="p-3"><code className="text-xs">~/Library/Preferences/ai-model-vault/</code></td>
-              <td className="p-3"><code className="text-xs">~/Library/Application Support/ai-model-vault/</code></td>
+              <td className="p-3"><code className="text-xs">~/Library/Preferences/ironvault/</code></td>
+              <td className="p-3"><code className="text-xs">~/Library/Application Support/ironvault/</code></td>
             </tr>
           </tbody>
         </table>
@@ -69,14 +69,14 @@ export XDG_DATA_HOME=/custom/data
 export XDG_CONFIG_HOME=/custom/config
 export XDG_CACHE_HOME=/custom/cache
 
-# Or use the AIM_VAULT_DIR override
-export AIM_VAULT_DIR=/custom/vault/path`}</CodeBlock>
+# Or use the IRONVAULT_VAULT_DIR override
+export IRONVAULT_VAULT_DIR=/custom/vault/path`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="structure">File Layout</h2>
-      <CodeBlock language="text">{`~/.config/ai-model-vault/
+      <CodeBlock language="text">{`~/.config/ironvault/
   └── config.toml          # Global configuration
 
-~/.local/share/ai-model-vault/
+~/.local/share/ironvault/
   ├── vaults/              # Vault directories
   │   ├── default/
   │   │   ├── vault.db     # SQLite metadata
@@ -86,14 +86,14 @@ export AIM_VAULT_DIR=/custom/vault/path`}</CodeBlock>
   │       └── models/
   └── cards/               # Model cards
 
-~/.cache/ai-model-vault/
+~/.cache/ironvault/
   ├── downloads/           # Temporary downloads
   └── conversions/         # Conversion cache`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="rust-api">Rust API</h2>
-      <CodeBlock language="rust">{`use ai_model_vault::xdg::XdgDirs;
+      <CodeBlock language="rust">{`use ironvault::xdg::XdgDirs;
 
-let dirs = XdgDirs::new("ai-model-vault")?;
+let dirs = XdgDirs::new("ironvault")?;
 
 println!("Config: {}", dirs.config_dir().display());
 println!("Data:   {}", dirs.data_dir().display());

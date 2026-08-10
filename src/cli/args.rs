@@ -4,7 +4,7 @@ use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
 #[derive(Parser)]
-#[command(name = "aim")]
+#[command(name = "iv")]
 #[command(version = env!("CARGO_PKG_VERSION"))]
 #[command(about = "Universal secure vault for AI model formats (Neural & Neurosymbolic)", long_about = None)]
 pub struct Cli {
@@ -21,11 +21,11 @@ pub struct Cli {
 
     /// Use SQLite for version storage (ACID, indexed, concurrent)
     #[cfg(feature = "sqlite")]
-    #[arg(long, env = "AIM_SQLITE_VERSIONS")]
+    #[arg(long, env = "IRONVAULT_SQLITE_VERSIONS")]
     pub sqlite_versions: bool,
 
     /// Disable telemetry for this session
-    #[arg(long, env = "AIM_TELEMETRY_DISABLED")]
+    #[arg(long, env = "IRONVAULT_TELEMETRY_DISABLED")]
     pub no_telemetry: bool,
 }
 
@@ -219,15 +219,15 @@ pub enum Commands {
     #[cfg(feature = "api")]
     Serve {
         /// Host address to bind to
-        #[arg(long, default_value = "127.0.0.1", env = "AIM_HOST")]
+        #[arg(long, default_value = "127.0.0.1", env = "IRONVAULT_HOST")]
         host: String,
 
         /// Port to listen on
-        #[arg(short, long, default_value_t = 8080, env = "AIM_PORT")]
+        #[arg(short, long, default_value_t = 8080, env = "IRONVAULT_PORT")]
         port: u16,
 
         /// JWT secret for token signing
-        #[arg(long, env = "AIM_JWT_SECRET")]
+        #[arg(long, env = "IRONVAULT_JWT_SECRET")]
         jwt_secret: String,
 
         /// Token expiry in seconds
@@ -246,7 +246,7 @@ pub enum Commands {
         ///
         /// Without it, revoked tokens are re-admitted when the server
         /// restarts. Use durable storage that outlives the process.
-        #[arg(long, env = "AIM_REVOCATION_STORE")]
+        #[arg(long, env = "IRONVAULT_REVOCATION_STORE")]
         revocation_store: Option<std::path::PathBuf>,
     },
 
@@ -829,7 +829,7 @@ pub enum FederationCommands {
 
     /// Show what a sync with a peer would transfer, without transferring it
     Plan {
-        /// Peer node ID (see `aim federation status`)
+        /// Peer node ID (see `iv federation status`)
         peer: String,
     },
 
@@ -857,7 +857,7 @@ pub enum ChainCommands {
 
     /// Emit a Merkle inclusion proof for one entry
     Proof {
-        /// Block index (see `aim chain status` for the height)
+        /// Block index (see `iv chain status` for the height)
         #[arg(short, long)]
         block: u64,
 
@@ -870,11 +870,11 @@ pub enum ChainCommands {
         output: Option<std::path::PathBuf>,
     },
 
-    /// Verify a proof produced by `aim chain proof`
+    /// Verify a proof produced by `iv chain proof`
     ///
     /// Checks the proof internally -- that the entry hashes to a leaf which
     /// reaches the stated Merkle root. It does not confirm that root belongs
-    /// to this vault's chain; run `aim chain verify` for that.
+    /// to this vault's chain; run `iv chain verify` for that.
     VerifyProof {
         /// Path to the proof JSON
         proof: std::path::PathBuf,

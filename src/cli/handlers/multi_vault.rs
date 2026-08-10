@@ -1,7 +1,7 @@
-//! CLI handler for multi-vault management (aim vaults).
+//! CLI handler for multi-vault management (iv vaults).
 
-use ai_model_vault::multi_vault::{VaultEntry, VaultRegistry};
-use ai_model_vault::{Result, VaultConfig, VaultError};
+use ironvault::multi_vault::{VaultEntry, VaultRegistry};
+use ironvault::{Result, VaultConfig, VaultError};
 
 use crate::cli::args::VaultsCommands;
 

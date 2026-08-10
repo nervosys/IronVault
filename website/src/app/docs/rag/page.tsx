@@ -12,7 +12,7 @@ export default function RAGPage() {
       <p className="text-[var(--color-text-secondary)] mb-4">
         In-memory document store with vector embeddings for semantic search.
       </p>
-      <CodeBlock language="rust">{`use ai_model_vault::rag::{DocumentStore, Document};
+      <CodeBlock language="rust">{`use ironvault::rag::{DocumentStore, Document};
 
 let mut store = DocumentStore::new();
 
@@ -30,7 +30,7 @@ for result in results {
       <p className="text-[var(--color-text-secondary)] mb-4">
         Automatic text chunking with configurable parameters.
       </p>
-      <CodeBlock language="rust">{`use ai_model_vault::rag::KnowledgeBase;
+      <CodeBlock language="rust">{`use ironvault::rag::KnowledgeBase;
 
 let mut kb = KnowledgeBase::new();
 
@@ -44,7 +44,7 @@ let chunks = kb.retrieve("transformer architecture", 3)?;`}</CodeBlock>
       <p className="text-[var(--color-text-secondary)] mb-4">
         Model Context Protocol server for AI agent integrations. Register custom tools for agent execution.
       </p>
-      <CodeBlock language="rust">{`use ai_model_vault::rag::{McpServer, McpTool, ToolResult};
+      <CodeBlock language="rust">{`use ironvault::rag::{McpServer, McpTool, ToolResult};
 
 let mut server = McpServer::new("vault-agent");
 
@@ -93,7 +93,7 @@ let result = server.execute("search_documents", &params)?;`}</CodeBlock>
       </div>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="rule-engine">Rule Engine</h2>
-      <CodeBlock language="rust">{`use ai_model_vault::rag::RuleEngine;
+      <CodeBlock language="rust">{`use ironvault::rag::RuleEngine;
 
 let mut engine = RuleEngine::new();
 

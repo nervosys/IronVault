@@ -1,6 +1,6 @@
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-use ai_model_vault::model_card::*;
-use ai_model_vault::{Result, Vault, VaultConfig};
+use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::model_card::*;
+use ironvault::{Result, Vault, VaultConfig};
 use tempfile::tempdir;
 
 #[test]

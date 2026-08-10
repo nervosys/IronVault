@@ -6,17 +6,17 @@ Attach structured benchmark scores to model versions — track MMLU, HumanEval, 
 
 ```bash
 # Add a benchmark result
-aim benchmark add my-model --version 1 --benchmark mmlu --score 72.5 --unit percent
+iv benchmark add my-model --version 1 --benchmark mmlu --score 72.5 --unit percent
 
 # Add with hardware and dataset context
-aim benchmark add my-model --version 1 --benchmark humaneval --score 48.2 --unit percent \
+iv benchmark add my-model --version 1 --benchmark humaneval --score 48.2 --unit percent \
     --higher-is-better --hardware "A100 80GB" --dataset "HumanEval"
 
 # Show benchmarks for a model
-aim benchmark show my-model
+iv benchmark show my-model
 
 # Show specific version in JSON
-aim benchmark show my-model --version 1 --format json
+iv benchmark show my-model --version 1 --format json
 ```
 
 ## CLI Reference
@@ -24,7 +24,7 @@ aim benchmark show my-model --version 1 --format json
 ### benchmark add
 
 ```
-aim benchmark add <NAME> [OPTIONS]
+iv benchmark add <NAME> [OPTIONS]
 
 Arguments:
   <NAME>                    Model name in vault
@@ -42,7 +42,7 @@ Options:
 ### benchmark show
 
 ```
-aim benchmark show <NAME> [OPTIONS]
+iv benchmark show <NAME> [OPTIONS]
 
 Arguments:
   <NAME>                    Model name in vault
@@ -90,7 +90,7 @@ benchmarks/
 ## Rust API
 
 ```rust
-use ai_model_vault::benchmark::{BenchmarkStore, BenchmarkRecord};
+use ironvault::benchmark::{BenchmarkStore, BenchmarkRecord};
 
 let store = BenchmarkStore::new("./data")?;
 

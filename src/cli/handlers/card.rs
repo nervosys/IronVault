@@ -1,7 +1,7 @@
 //! Model card command handlers (create, show, validate, convert, template, attach, extract, generate).
 
-use ai_model_vault::model_card::*;
-use ai_model_vault::{Result, VaultConfig, VaultError};
+use ironvault::model_card::*;
+use ironvault::{Result, VaultConfig, VaultError};
 use std::io::{self, Write};
 
 use crate::cli::args::CardCommands;

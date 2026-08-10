@@ -1,6 +1,6 @@
 # Supported AI Model Formats
 
-**AI Model Vault** supports all major AI model formats for both Neural and Neurosymbolic AI models. Formats are automatically detected from file extensions, or can be explicitly specified.
+**IronVault** supports all major AI model formats for both Neural and Neurosymbolic AI models. Formats are automatically detected from file extensions, or can be explicitly specified.
 
 ## ✅ Currently Implemented Formats
 
@@ -161,7 +161,7 @@ Based on real-world usage as of October 2025:
 
 ## Future Format Support
 
-AI Model Vault is designed to be extensible. Additional formats can be added through:
+IronVault is designed to be extensible. Additional formats can be added through:
 1. Extending the `ModelFormat` enum in `src/formats.rs`
 2. Adding extension mappings in `from_extension()`
 3. Adding CLI format name mappings in `src/main.rs`
@@ -177,7 +177,7 @@ AI Model Vault is designed to be extensible. Additional formats can be added thr
 
 ---
 
-**Note**: While AI Model Vault supports storing all these formats securely with encryption, version control, and compliance tracking, format *conversion* between formats is a separate feature that may require additional tooling (e.g., `optimum`, `onnx`, `coremltools`).
+**Note**: While IronVault supports storing all these formats securely with encryption, version control, and compliance tracking, format *conversion* between formats is a separate feature that may require additional tooling (e.g., `optimum`, `onnx`, `coremltools`).
 
 
 1. **Safetensors (.safetensors)** — the default on Hugging Face for new Transformer checkpoints; emphasized by HF docs (safe serialization on by default). ([Hugging Face][1])

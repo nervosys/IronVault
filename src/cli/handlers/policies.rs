@@ -1,6 +1,6 @@
-//! CLI handler for snapshot/retention policies (aim policy).
+//! CLI handler for snapshot/retention policies (iv policy).
 
-use ai_model_vault::{PolicyStore, Result, VaultConfig};
+use ironvault::{PolicyStore, Result, VaultConfig};
 
 use crate::cli::args::PolicyCommands;
 
@@ -18,7 +18,7 @@ pub fn handle_policy(
             max_age_days,
             keep_minimum,
         } => {
-            use ai_model_vault::policies::RetentionPolicy;
+            use ironvault::policies::RetentionPolicy;
             let policy = RetentionPolicy {
                 max_versions: max_versions.unwrap_or(usize::MAX),
                 max_age_days: max_age_days.unwrap_or(u32::MAX as u64) as u32,
@@ -46,7 +46,7 @@ pub fn handle_policy(
             }
         }
         PolicyCommands::Apply { model, dry_run } => {
-            let mut vc = ai_model_vault::version::VersionControl::new(&config.dirs.vault_dir)?;
+            let mut vc = ironvault::version::VersionControl::new(&config.dirs.vault_dir)?;
             if let Some(m) = model {
                 let report = store.apply(&m, &mut vc, dry_run)?;
                 if dry_run {

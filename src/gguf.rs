@@ -10,7 +10,7 @@
 //!
 //! Every read is bounds-checked. A truncated, corrupt, or hostile file yields
 //! `None` or a partial result rather than panicking, because both callers
-//! (`aim diff`, license scanning) run against files the vault does not control.
+//! (`iv diff`, license scanning) run against files the vault does not control.
 
 /// `gguf_metadata_value_type` tags.
 const UINT8: u32 = 0;

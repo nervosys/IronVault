@@ -11,18 +11,18 @@ export default function BenchmarksPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="quick-start">Quick Start</h2>
       <CodeBlock language="bash">{`# Add a benchmark result
-aim benchmark add my-model --version 1 --benchmark mmlu --score 72.5 --unit percent
+iv benchmark add my-model --version 1 --benchmark mmlu --score 72.5 --unit percent
 
 # Add with hardware context
-aim benchmark add my-model --version 1 --benchmark humaneval --score 48.2 --unit percent \\
+iv benchmark add my-model --version 1 --benchmark humaneval --score 48.2 --unit percent \\
     --higher-is-better --hardware "A100 80GB" --dataset "HumanEval"
 
 # Show benchmarks
-aim benchmark show my-model
-aim benchmark show my-model --version 1 --format json`}</CodeBlock>
+iv benchmark show my-model
+iv benchmark show my-model --version 1 --format json`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="add">benchmark add</h2>
-      <CodeBlock language="bash">{`aim benchmark add <NAME> [OPTIONS]
+      <CodeBlock language="bash">{`iv benchmark add <NAME> [OPTIONS]
 
 Options:
   --version <V>             Model version (required)
@@ -34,7 +34,7 @@ Options:
   --dataset <DS>            Dataset name`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="show">benchmark show</h2>
-      <CodeBlock language="bash">{`aim benchmark show <NAME> [OPTIONS]
+      <CodeBlock language="bash">{`iv benchmark show <NAME> [OPTIONS]
 
 Options:
   --version <V>             Filter by version

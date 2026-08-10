@@ -3,8 +3,8 @@ requires = ["maturin>=1.7,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "aimodelvault"
-version = "4.6.1"
+name = "ironvault"
+version = "5.0.0"
 description = "Universal cross-platform XDG-compliant secure vault for AI model formats"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -39,11 +39,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/nervosys/AIModelVault"
-Documentation = "https://github.com/nervosys/AIModelVault/tree/master/docs"
-Repository = "https://github.com/nervosys/AIModelVault"
-Issues = "https://github.com/nervosys/AIModelVault/issues"
-Changelog = "https://github.com/nervosys/AIModelVault/blob/master/CHANGELOG.md"
+Homepage = "https://github.com/nervosys/IronVault"
+Documentation = "https://github.com/nervosys/IronVault/tree/master/docs"
+Repository = "https://github.com/nervosys/IronVault"
+Issues = "https://github.com/nervosys/IronVault/issues"
+Changelog = "https://github.com/nervosys/IronVault/blob/master/CHANGELOG.md"
 
 [project.optional-dependencies]
 ml = [
@@ -76,11 +76,11 @@ docs = [
 ]
 
 [project.scripts]
-aimodelvault = "aimodelvault.cli:main"
+ironvault = "ironvault.cli:main"
 
 [tool.maturin]
 python-source = "src"
-module-name = "aimodelvault._native"
+module-name = "ironvault._native"
 features = ["pyo3/extension-module", "python"]
 manifest-path = "Cargo.toml"
 bindings = "pyo3"
@@ -88,7 +88,7 @@ bindings = "pyo3"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --cov=aimodelvault --cov-report=html --cov-report=term"
+addopts = "-v --cov=ironvault --cov-report=html --cov-report=term"
 
 [tool.black]
 line-length = 100

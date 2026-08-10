@@ -1,6 +1,6 @@
 //! Comprehensive cryptography tests
 
-use ai_model_vault::crypto::{
+use ironvault::crypto::{
     compression::{compress, decompress, CompressionAlgorithm, CompressionLevel},
     FipsCrypto, KeyManager,
 };

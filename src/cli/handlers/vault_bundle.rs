@@ -1,10 +1,10 @@
-//! CLI handler for vault export/import (aim vault-export / aim vault-import).
+//! CLI handler for vault export/import (iv vault-export / iv vault-import).
 
-use ai_model_vault::{Result, VaultConfig};
+use ironvault::{Result, VaultConfig};
 use std::path::PathBuf;
 
 pub fn handle_vault_export(output: PathBuf, config: VaultConfig) -> Result<()> {
-    let report = ai_model_vault::vault_bundle::export_vault(&config.dirs.vault_dir, &output, None)?;
+    let report = ironvault::vault_bundle::export_vault(&config.dirs.vault_dir, &output, None)?;
     println!("Exported vault to {:?}", output);
     println!("  Models: {}", report.models_exported.len());
     println!("  Versions: {}", report.total_versions);
@@ -18,7 +18,7 @@ pub fn handle_vault_import(
     config: VaultConfig,
 ) -> Result<()> {
     let dest = target.unwrap_or_else(|| config.dirs.vault_dir.clone());
-    let report = ai_model_vault::vault_bundle::import_vault(&dest, &archive, false)?;
+    let report = ironvault::vault_bundle::import_vault(&dest, &archive, false)?;
     println!("Imported vault from {:?}", archive);
     println!("  Models: {}", report.models_imported);
     println!("  Versions imported: {}", report.versions_imported);

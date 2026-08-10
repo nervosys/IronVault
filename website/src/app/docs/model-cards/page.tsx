@@ -11,31 +11,31 @@ export default function ModelCardsPage() {
       <h2 className="text-2xl font-bold mt-10 mb-4" id="overview">What are Model Cards?</h2>
       <p className="text-[var(--color-text-secondary)] mb-4">
         Model Cards are structured documents that describe an ML model&apos;s intended use, training data,
-        evaluation metrics, ethical considerations, and limitations. AI Model Vault provides first-class
+        evaluation metrics, ethical considerations, and limitations. IronVault provides first-class
         support for creating, attaching, and exporting model cards in JSON, YAML, and Markdown formats.
       </p>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="cli">CLI Usage</h2>
       <CodeBlock language="bash">{`# Create a model card
-aim card create my-model \\
+iv card create my-model \\
   --author "ML Team" \\
   --task "text-generation" \\
   --description "Fine-tuned GPT-2 for code generation"
 
 # Show card details
-aim card show my-model
+iv card show my-model
 
 # Export as Markdown
-aim card export my-model --format markdown --output card.md
+iv card export my-model --format markdown --output card.md
 
 # Export as JSON
-aim card export my-model --format json --output card.json
+iv card export my-model --format json --output card.json
 
 # Export as YAML
-aim card export my-model --format yaml --output card.yaml
+iv card export my-model --format yaml --output card.yaml
 
 # Attach an external card file
-aim card attach my-model --file card.json`}</CodeBlock>
+iv card attach my-model --file card.json`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="structure">Card Structure</h2>
       <div className="overflow-x-auto">
@@ -66,7 +66,7 @@ aim card attach my-model --file card.json`}</CodeBlock>
       </div>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="rust">Rust API</h2>
-      <CodeBlock language="rust">{`use ai_model_vault::model_card::ModelCard;
+      <CodeBlock language="rust">{`use ironvault::model_card::ModelCard;
 
 // Build a card
 let card = ModelCard::builder("my-model")

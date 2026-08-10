@@ -1,4 +1,4 @@
-//! CLI integration tests for the `aim` binary.
+//! CLI integration tests for the `iv` binary.
 //!
 //! Uses `assert_cmd` to exercise the CLI end-to-end, validating argument parsing,
 //! help output, version display, and vault lifecycle commands.
@@ -7,10 +7,10 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 use tempfile::tempdir;
 
-/// Helper to get a Command for the `aim` binary.
-fn aim() -> Command {
+/// Helper to get a Command for the `iv` binary.
+fn iv() -> Command {
     #[allow(deprecated)]
-    Command::cargo_bin("aim").unwrap()
+    Command::cargo_bin("iv").unwrap()
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -19,7 +19,7 @@ fn aim() -> Command {
 
 #[test]
 fn test_cli_help() {
-    aim()
+    iv()
         .arg("--help")
         .assert()
         .success()
@@ -29,11 +29,11 @@ fn test_cli_help() {
 
 #[test]
 fn test_cli_version() {
-    aim()
+    iv()
         .arg("--version")
         .assert()
         .success()
-        .stdout(predicate::str::contains("1.2.1").or(predicate::str::contains("aim")));
+        .stdout(predicate::str::contains("1.2.1").or(predicate::str::contains("iv")));
 }
 
 #[test]
@@ -41,7 +41,7 @@ fn test_cli_no_args_shows_help() {
     // With no subcommand, clap prints help as a convenience — but the command
     // line was still incomplete, so this is invalid input (6), not success.
     // It must not be 2 either: that code means authentication failed.
-    aim().assert().code(6);
+    iv().assert().code(6);
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ fn test_cli_no_args_shows_help() {
 
 #[test]
 fn test_cli_init_help() {
-    aim()
+    iv()
         .args(["init", "--help"])
         .assert()
         .success()
@@ -59,7 +59,7 @@ fn test_cli_init_help() {
 
 #[test]
 fn test_cli_store_help() {
-    aim()
+    iv()
         .args(["store", "--help"])
         .assert()
         .success()
@@ -68,12 +68,12 @@ fn test_cli_store_help() {
 
 #[test]
 fn test_cli_list_help() {
-    aim().args(["list", "--help"]).assert().success();
+    iv().args(["list", "--help"]).assert().success();
 }
 
 #[test]
 fn test_cli_convert_help() {
-    aim()
+    iv()
         .args(["convert", "--help"])
         .assert()
         .success()
@@ -82,7 +82,7 @@ fn test_cli_convert_help() {
 
 #[test]
 fn test_cli_compliance_help() {
-    aim()
+    iv()
         .args(["compliance", "--help"])
         .assert()
         .success()
@@ -97,15 +97,15 @@ fn test_cli_compliance_help() {
 fn test_cli_init_vault() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init", "--name", "test-vault"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("Vault").or(predicate::str::contains("initialized").or(predicate::str::contains("created"))));
 }
 
-/// With neither `aimodelvault_PASSPHRASE` nor anything on stdin, `list` must
+/// With neither `IRONVAULT_PASSPHRASE` nor anything on stdin, `list` must
 /// fail rather than unlock with an empty passphrase — a closed stdin reads as
 /// "" from the prompt, which would otherwise derive a key from no secret.
 /// The unattended paths are covered by `test_cli_list_empty_vault_non_interactive`.
@@ -113,16 +113,16 @@ fn test_cli_init_vault() {
 fn test_cli_list_without_passphrase_source() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["list"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
-        .env_remove("aimodelvault_PASSPHRASE")
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+        .env_remove("IRONVAULT_PASSPHRASE")
         .timeout(std::time::Duration::from_secs(10))
         // Only the exit status is asserted: with no terminal, `rpassword` may
         // either return an empty string or fail outright depending on how the
@@ -132,22 +132,22 @@ fn test_cli_list_without_passphrase_source() {
         .failure();
 }
 
-/// An explicitly empty `aimodelvault_PASSPHRASE` must not unlock the vault
+/// An explicitly empty `IRONVAULT_PASSPHRASE` must not unlock the vault
 /// either — it falls through to the prompt, which now refuses an empty secret.
 #[test]
 fn test_cli_empty_passphrase_env_is_rejected() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["list"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
-        .env("aimodelvault_PASSPHRASE", "")
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_PASSPHRASE", "")
         .timeout(std::time::Duration::from_secs(10))
         .assert()
         .failure();
@@ -155,7 +155,7 @@ fn test_cli_empty_passphrase_env_is_rejected() {
 
 #[test]
 fn test_cli_list_conversions() {
-    aim().args(["list-conversions"]).assert().success().stdout(
+    iv().args(["list-conversions"]).assert().success().stdout(
         predicate::str::contains("safetensors")
             .or(predicate::str::contains("Safetensors"))
             .or(predicate::str::contains("GGUF"))
@@ -167,15 +167,15 @@ fn test_cli_list_conversions() {
 fn test_cli_stats_on_vault() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["stats"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -186,12 +186,12 @@ fn test_cli_stats_on_vault() {
 
 #[test]
 fn test_cli_unknown_subcommand() {
-    aim().arg("nonexistent-command").assert().failure();
+    iv().arg("nonexistent-command").assert().failure();
 }
 
 #[test]
 fn test_cli_store_missing_args() {
-    aim()
+    iv()
         .args(["store"])
         .assert()
         .failure()
@@ -200,7 +200,7 @@ fn test_cli_store_missing_args() {
 
 #[test]
 fn test_cli_get_missing_args() {
-    aim()
+    iv()
         .args(["get"])
         .assert()
         .failure()
@@ -216,9 +216,9 @@ fn test_cli_sqlite_versions_flag_accepted() {
     // The --sqlite-versions flag should be accepted without error
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["--sqlite-versions", "init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -227,15 +227,15 @@ fn test_cli_sqlite_versions_flag_accepted() {
 fn test_cli_compliance_runs() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["compliance"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -246,7 +246,7 @@ fn test_cli_compliance_runs() {
 
 #[test]
 fn test_cli_versions_help() {
-    aim()
+    iv()
         .args(["versions", "--help"])
         .assert()
         .success()
@@ -255,7 +255,7 @@ fn test_cli_versions_help() {
 
 #[test]
 fn test_cli_lineage_help() {
-    aim()
+    iv()
         .args(["lineage", "--help"])
         .assert()
         .success()
@@ -264,7 +264,7 @@ fn test_cli_lineage_help() {
 
 #[test]
 fn test_cli_delete_help() {
-    aim()
+    iv()
         .args(["delete", "--help"])
         .assert()
         .success()
@@ -273,7 +273,7 @@ fn test_cli_delete_help() {
 
 #[test]
 fn test_cli_archive_help() {
-    aim()
+    iv()
         .args(["archive", "--help"])
         .assert()
         .success()
@@ -282,7 +282,7 @@ fn test_cli_archive_help() {
 
 #[test]
 fn test_cli_extract_help() {
-    aim()
+    iv()
         .args(["extract", "--help"])
         .assert()
         .success()
@@ -291,7 +291,7 @@ fn test_cli_extract_help() {
 
 #[test]
 fn test_cli_analyze_help() {
-    aim()
+    iv()
         .args(["analyze", "--help"])
         .assert()
         .success()
@@ -300,7 +300,7 @@ fn test_cli_analyze_help() {
 
 #[test]
 fn test_cli_deduplicate_help() {
-    aim()
+    iv()
         .args(["deduplicate", "--help"])
         .assert()
         .success()
@@ -309,7 +309,7 @@ fn test_cli_deduplicate_help() {
 
 #[test]
 fn test_cli_export_help() {
-    aim()
+    iv()
         .args(["export", "--help"])
         .assert()
         .success()
@@ -318,7 +318,7 @@ fn test_cli_export_help() {
 
 #[test]
 fn test_cli_cache_help() {
-    aim()
+    iv()
         .args(["cache", "--help"])
         .assert()
         .success()
@@ -327,7 +327,7 @@ fn test_cli_cache_help() {
 
 #[test]
 fn test_cli_change_passphrase_help() {
-    aim()
+    iv()
         .args(["change-passphrase", "--help"])
         .assert()
         .success()
@@ -340,7 +340,7 @@ fn test_cli_change_passphrase_help() {
 
 #[test]
 fn test_cli_cloud_help() {
-    aim()
+    iv()
         .args(["cloud", "--help"])
         .assert()
         .success()
@@ -349,7 +349,7 @@ fn test_cli_cloud_help() {
 
 #[test]
 fn test_cli_database_help() {
-    aim()
+    iv()
         .args(["database", "--help"])
         .assert()
         .success()
@@ -358,7 +358,7 @@ fn test_cli_database_help() {
 
 #[test]
 fn test_cli_card_help() {
-    aim()
+    iv()
         .args(["card", "--help"])
         .assert()
         .success()
@@ -367,7 +367,7 @@ fn test_cli_card_help() {
 
 #[test]
 fn test_cli_telemetry_help() {
-    aim()
+    iv()
         .args(["telemetry", "--help"])
         .assert()
         .success()
@@ -380,7 +380,7 @@ fn test_cli_telemetry_help() {
 
 #[test]
 fn test_cli_telemetry_status() {
-    aim()
+    iv()
         .args(["telemetry", "status"])
         .assert()
         .success()
@@ -395,13 +395,13 @@ fn test_cli_telemetry_status() {
 #[test]
 fn test_cli_telemetry_disable_then_status() {
     // Disable telemetry, then check status reports disabled
-    aim()
+    iv()
         .args(["telemetry", "disable"])
         .env("DO_NOT_TRACK", "1")
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["telemetry", "status"])
         .env("DO_NOT_TRACK", "1")
         .assert()
@@ -417,7 +417,7 @@ fn test_cli_database_init_and_stats() {
     let dir = tempdir().unwrap();
     let db_path = dir.path().join("test.db");
 
-    aim()
+    iv()
         .args([
             "database",
             "init",
@@ -429,7 +429,7 @@ fn test_cli_database_init_and_stats() {
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["database", "stats", "--path", db_path.to_str().unwrap()])
         .assert()
         .success();
@@ -440,7 +440,7 @@ fn test_cli_database_list_empty() {
     let dir = tempdir().unwrap();
     let db_path = dir.path().join("test.db");
 
-    aim()
+    iv()
         .args([
             "database",
             "init",
@@ -452,7 +452,7 @@ fn test_cli_database_list_empty() {
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["database", "list", "--path", db_path.to_str().unwrap()])
         .assert()
         .success();
@@ -469,7 +469,7 @@ fn test_cli_database_store_and_search() {
     )
     .unwrap();
 
-    aim()
+    iv()
         .args([
             "database",
             "init",
@@ -481,7 +481,7 @@ fn test_cli_database_store_and_search() {
         .assert()
         .success();
 
-    aim()
+    iv()
         .args([
             "database",
             "store",
@@ -493,7 +493,7 @@ fn test_cli_database_store_and_search() {
         .assert()
         .success();
 
-    aim()
+    iv()
         .args([
             "database",
             "search",
@@ -514,7 +514,7 @@ fn test_cli_card_template_basic() {
     let dir = tempdir().unwrap();
     let output = dir.path().join("card.json");
 
-    aim()
+    iv()
         .args([
             "card",
             "template",
@@ -535,7 +535,7 @@ fn test_cli_card_create_and_validate() {
     let dir = tempdir().unwrap();
     let output = dir.path().join("card.json");
 
-    aim()
+    iv()
         .args([
             "card",
             "create",
@@ -556,7 +556,7 @@ fn test_cli_card_create_and_validate() {
 
     assert!(output.exists());
 
-    aim()
+    iv()
         .args(["card", "validate", output.to_str().unwrap()])
         .assert()
         .success();
@@ -567,7 +567,7 @@ fn test_cli_card_create_and_show() {
     let dir = tempdir().unwrap();
     let output = dir.path().join("card.yaml");
 
-    aim()
+    iv()
         .args([
             "card",
             "create",
@@ -586,7 +586,7 @@ fn test_cli_card_create_and_show() {
         .assert()
         .success();
 
-    aim()
+    iv()
         .args([
             "card",
             "show",
@@ -605,7 +605,7 @@ fn test_cli_card_convert_json_to_yaml() {
     let json_out = dir.path().join("card.json");
     let yaml_out = dir.path().join("card.yaml");
 
-    aim()
+    iv()
         .args([
             "card",
             "create",
@@ -624,7 +624,7 @@ fn test_cli_card_convert_json_to_yaml() {
         .assert()
         .success();
 
-    aim()
+    iv()
         .args([
             "card",
             "convert",
@@ -643,7 +643,7 @@ fn test_cli_card_convert_json_to_yaml() {
 
 #[test]
 fn test_cli_delete_missing_args() {
-    aim()
+    iv()
         .args(["delete"])
         .assert()
         .failure()
@@ -652,7 +652,7 @@ fn test_cli_delete_missing_args() {
 
 #[test]
 fn test_cli_archive_missing_args() {
-    aim()
+    iv()
         .args(["archive"])
         .assert()
         .failure()
@@ -661,7 +661,7 @@ fn test_cli_archive_missing_args() {
 
 #[test]
 fn test_cli_versions_missing_args() {
-    aim()
+    iv()
         .args(["versions"])
         .assert()
         .failure()
@@ -670,7 +670,7 @@ fn test_cli_versions_missing_args() {
 
 #[test]
 fn test_cli_lineage_missing_args() {
-    aim()
+    iv()
         .args(["lineage"])
         .assert()
         .failure()
@@ -679,7 +679,7 @@ fn test_cli_lineage_missing_args() {
 
 #[test]
 fn test_cli_export_missing_args() {
-    aim()
+    iv()
         .args(["export"])
         .assert()
         .failure()
@@ -694,15 +694,15 @@ fn test_cli_export_missing_args() {
 fn test_cli_cache_on_vault() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["cache"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -710,7 +710,7 @@ fn test_cli_cache_on_vault() {
 #[test]
 fn test_cli_list_conversions_contains_formats() {
     // Validate that list-conversions includes expected format names
-    aim()
+    iv()
         .args(["list-conversions"])
         .assert()
         .success()
@@ -726,9 +726,9 @@ fn test_cli_list_conversions_contains_formats() {
 fn test_cli_init_custom_name() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init", "--name", "my-custom-vault"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(
@@ -742,15 +742,15 @@ fn test_cli_init_custom_name() {
 fn test_cli_sqlite_versions_with_stats() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["--sqlite-versions", "init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["--sqlite-versions", "stats"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -759,15 +759,15 @@ fn test_cli_sqlite_versions_with_stats() {
 fn test_cli_sqlite_versions_with_compliance() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["--sqlite-versions", "init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["--sqlite-versions", "compliance"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -780,16 +780,16 @@ fn test_cli_sqlite_versions_with_compliance() {
 fn test_cli_no_telemetry_flag_with_init() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["--no-telemetry", "init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
 
 #[test]
 fn test_cli_do_not_track_env() {
-    aim()
+    iv()
         .args(["compliance"])
         .env("DO_NOT_TRACK", "1")
         .assert()
@@ -802,7 +802,7 @@ fn test_cli_do_not_track_env() {
 
 #[test]
 fn test_cli_convert_missing_args() {
-    aim()
+    iv()
         .args(["convert"])
         .assert()
         .failure()
@@ -815,7 +815,7 @@ fn test_cli_convert_missing_args() {
 
 #[test]
 fn test_cli_cloud_push_missing_args() {
-    aim()
+    iv()
         .args(["cloud", "push"])
         .assert()
         .failure()
@@ -824,7 +824,7 @@ fn test_cli_cloud_push_missing_args() {
 
 #[test]
 fn test_cli_cloud_pull_missing_args() {
-    aim()
+    iv()
         .args(["cloud", "pull"])
         .assert()
         .failure()
@@ -833,7 +833,7 @@ fn test_cli_cloud_pull_missing_args() {
 
 #[test]
 fn test_cli_cloud_list_missing_args() {
-    aim()
+    iv()
         .args(["cloud", "list"])
         .assert()
         .failure()
@@ -846,7 +846,7 @@ fn test_cli_cloud_list_missing_args() {
 
 #[test]
 fn test_cli_extract_nonexistent_archive() {
-    aim()
+    iv()
         .args(["extract", "nonexistent.tar"])
         .assert()
         .failure();
@@ -861,7 +861,7 @@ fn test_cli_database_search_no_results() {
     let dir = tempdir().unwrap();
     let db_path = dir.path().join("empty.db");
 
-    aim()
+    iv()
         .args([
             "database",
             "init",
@@ -873,7 +873,7 @@ fn test_cli_database_search_no_results() {
         .assert()
         .success();
 
-    aim()
+    iv()
         .args([
             "database",
             "search",
@@ -890,7 +890,7 @@ fn test_cli_database_store_nonexistent_file() {
     let dir = tempdir().unwrap();
     let db_path = dir.path().join("test.db");
 
-    aim()
+    iv()
         .args([
             "database",
             "init",
@@ -902,7 +902,7 @@ fn test_cli_database_store_nonexistent_file() {
         .assert()
         .success();
 
-    aim()
+    iv()
         .args([
             "database",
             "store",
@@ -921,7 +921,7 @@ fn test_cli_database_store_nonexistent_file() {
 
 #[test]
 fn test_cli_card_validate_nonexistent_file() {
-    aim()
+    iv()
         .args(["card", "validate", "no-such-card.json"])
         .assert()
         .failure();
@@ -929,7 +929,7 @@ fn test_cli_card_validate_nonexistent_file() {
 
 #[test]
 fn test_cli_card_show_nonexistent_file() {
-    aim()
+    iv()
         .args(["card", "show", "no-such-card.json"])
         .assert()
         .failure();
@@ -943,15 +943,15 @@ fn test_cli_card_show_nonexistent_file() {
 fn test_cli_sqlite_versions_with_cache() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["--sqlite-versions", "init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["--sqlite-versions", "cache"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -960,15 +960,15 @@ fn test_cli_sqlite_versions_with_cache() {
 fn test_cli_init_twice_same_dir() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -979,7 +979,7 @@ fn test_cli_init_twice_same_dir() {
 
 #[test]
 fn test_cli_tag_help() {
-    aim()
+    iv()
         .args(["tag", "--help"])
         .assert()
         .success()
@@ -988,7 +988,7 @@ fn test_cli_tag_help() {
 
 #[test]
 fn test_cli_search_help() {
-    aim()
+    iv()
         .args(["search", "--help"])
         .assert()
         .success()
@@ -997,7 +997,7 @@ fn test_cli_search_help() {
 
 #[test]
 fn test_cli_vault_export_help() {
-    aim()
+    iv()
         .args(["vault-export", "--help"])
         .assert()
         .success()
@@ -1006,7 +1006,7 @@ fn test_cli_vault_export_help() {
 
 #[test]
 fn test_cli_vault_import_help() {
-    aim()
+    iv()
         .args(["vault-import", "--help"])
         .assert()
         .success()
@@ -1015,7 +1015,7 @@ fn test_cli_vault_import_help() {
 
 #[test]
 fn test_cli_gc_help() {
-    aim().args(["gc", "--help"]).assert().success().stdout(
+    iv().args(["gc", "--help"]).assert().success().stdout(
         predicate::str::contains("gc")
             .or(predicate::str::contains("garbage").or(predicate::str::contains("clean"))),
     );
@@ -1023,7 +1023,7 @@ fn test_cli_gc_help() {
 
 #[test]
 fn test_cli_browse_help() {
-    aim()
+    iv()
         .args(["browse", "--help"])
         .assert()
         .success()
@@ -1032,7 +1032,7 @@ fn test_cli_browse_help() {
 
 #[test]
 fn test_cli_webhook_help() {
-    aim()
+    iv()
         .args(["webhook", "--help"])
         .assert()
         .success()
@@ -1041,7 +1041,7 @@ fn test_cli_webhook_help() {
 
 #[test]
 fn test_cli_acl_help() {
-    aim()
+    iv()
         .args(["acl", "--help"])
         .assert()
         .success()
@@ -1050,7 +1050,7 @@ fn test_cli_acl_help() {
 
 #[test]
 fn test_cli_validate_help() {
-    aim()
+    iv()
         .args(["validate", "--help"])
         .assert()
         .success()
@@ -1059,7 +1059,7 @@ fn test_cli_validate_help() {
 
 #[test]
 fn test_cli_policy_help() {
-    aim()
+    iv()
         .args(["policy", "--help"])
         .assert()
         .success()
@@ -1068,7 +1068,7 @@ fn test_cli_policy_help() {
 
 #[test]
 fn test_cli_lineage_graph_help() {
-    aim()
+    iv()
         .args(["lineage-graph", "--help"])
         .assert()
         .success()
@@ -1077,7 +1077,7 @@ fn test_cli_lineage_graph_help() {
 
 #[test]
 fn test_cli_plugin_help() {
-    aim()
+    iv()
         .args(["plugin", "--help"])
         .assert()
         .success()
@@ -1086,7 +1086,7 @@ fn test_cli_plugin_help() {
 
 #[test]
 fn test_cli_profile_help() {
-    aim()
+    iv()
         .args(["profile", "--help"])
         .assert()
         .success()
@@ -1101,15 +1101,15 @@ fn test_cli_profile_help() {
 fn test_cli_gc_dry_run_on_vault() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["gc", "--dry-run"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -1118,28 +1118,28 @@ fn test_cli_gc_dry_run_on_vault() {
 fn test_cli_acl_grant_list_revoke() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["acl", "grant", "alice", "writer"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["acl", "list"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("alice"));
 
-    aim()
+    iv()
         .args(["acl", "revoke", "alice"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -1149,21 +1149,21 @@ fn test_cli_webhook_add_list_remove() {
     let dir = tempdir().unwrap();
     let id = format!("hook-{}", std::process::id());
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["webhook", "add", &id, "https://example.com/hook"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["webhook", "list"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("example.com"));
@@ -1173,21 +1173,21 @@ fn test_cli_webhook_add_list_remove() {
 fn test_cli_policy_set_show() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["policy", "set", "test-model", "--max-versions", "5"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["policy", "show", "test-model"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("test-model"));
@@ -1197,28 +1197,28 @@ fn test_cli_policy_set_show() {
 fn test_cli_profile_create_list_activate() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["profile", "create", "dev"])
-        .env("aimodelvault_CONFIG", dir.path().to_str().unwrap())
+        .env("IRONVAULT_CONFIG", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["profile", "list"])
-        .env("aimodelvault_CONFIG", dir.path().to_str().unwrap())
+        .env("IRONVAULT_CONFIG", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("dev"));
 
-    aim()
+    iv()
         .args(["profile", "activate", "dev"])
-        .env("aimodelvault_CONFIG", dir.path().to_str().unwrap())
+        .env("IRONVAULT_CONFIG", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["profile", "show", "dev"])
-        .env("aimodelvault_CONFIG", dir.path().to_str().unwrap())
+        .env("IRONVAULT_CONFIG", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("dev"));
@@ -1228,15 +1228,15 @@ fn test_cli_profile_create_list_activate() {
 fn test_cli_lineage_graph_show_empty() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["lineage-graph", "show", "any-model"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -1245,15 +1245,15 @@ fn test_cli_lineage_graph_show_empty() {
 fn test_cli_plugin_list_empty() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["plugin", "list"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -1262,21 +1262,21 @@ fn test_cli_plugin_list_empty() {
 fn test_cli_tag_add_list_on_vault() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["tag", "add", "my-model", "llm", "production"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["tag", "list", "my-model"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("llm"));
@@ -1288,7 +1288,7 @@ fn test_cli_tag_add_list_on_vault() {
 
 #[test]
 fn test_cli_validate_missing_args() {
-    aim()
+    iv()
         .args(["validate"])
         .assert()
         .failure()
@@ -1297,7 +1297,7 @@ fn test_cli_validate_missing_args() {
 
 #[test]
 fn test_cli_vault_export_missing_args() {
-    aim()
+    iv()
         .args(["vault-export"])
         .assert()
         .failure()
@@ -1306,7 +1306,7 @@ fn test_cli_vault_export_missing_args() {
 
 #[test]
 fn test_cli_vault_import_missing_args() {
-    aim()
+    iv()
         .args(["vault-import"])
         .assert()
         .failure()
@@ -1315,7 +1315,7 @@ fn test_cli_vault_import_missing_args() {
 
 #[test]
 fn test_cli_tag_add_missing_args() {
-    aim()
+    iv()
         .args(["tag", "add"])
         .assert()
         .failure()
@@ -1326,15 +1326,15 @@ fn test_cli_tag_add_missing_args() {
 fn test_cli_search_empty_query() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["search"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -1345,7 +1345,7 @@ fn test_cli_search_empty_query() {
 
 #[test]
 fn test_cli_quantize_help() {
-    aim()
+    iv()
         .args(["quantize", "--help"])
         .assert()
         .success()
@@ -1358,7 +1358,7 @@ fn test_cli_quantize_help() {
 
 #[test]
 fn test_cli_eval_help() {
-    aim()
+    iv()
         .args(["eval", "--help"])
         .assert()
         .success()
@@ -1367,7 +1367,7 @@ fn test_cli_eval_help() {
 
 #[test]
 fn test_cli_backup_help() {
-    aim()
+    iv()
         .args(["backup", "--help"])
         .assert()
         .success()
@@ -1376,7 +1376,7 @@ fn test_cli_backup_help() {
 
 #[test]
 fn test_cli_vaults_help() {
-    aim().args(["vaults", "--help"]).assert().success().stdout(
+    iv().args(["vaults", "--help"]).assert().success().stdout(
         predicate::str::contains("vaults")
             .or(predicate::str::contains("Vaults").or(predicate::str::contains("vault"))),
     );
@@ -1390,13 +1390,13 @@ fn test_cli_vaults_help() {
 fn test_cli_quantize_set_list_remove() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args([
             "quantize",
             "set",
@@ -1406,20 +1406,20 @@ fn test_cli_quantize_set_list_remove() {
             "--description",
             "Fast 4-bit",
         ])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["quantize", "list"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("fast-q4"));
 
-    aim()
+    iv()
         .args(["quantize", "remove", "fast-q4"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -1428,13 +1428,13 @@ fn test_cli_quantize_set_list_remove() {
 fn test_cli_quantize_estimate() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args([
             "quantize",
             "estimate",
@@ -1443,7 +1443,7 @@ fn test_cli_quantize_estimate() {
             "--to",
             "q4_k_m",
         ])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -1452,13 +1452,13 @@ fn test_cli_quantize_estimate() {
 fn test_cli_eval_record_list_suites() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args([
             "eval",
             "record",
@@ -1472,20 +1472,20 @@ fn test_cli_eval_record_list_suites() {
             "--unit",
             "score",
         ])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["eval", "list", "my-model"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("mmlu").or(predicate::str::contains("my-model")));
 
-    aim()
+    iv()
         .args(["eval", "suites"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("mmlu"));
@@ -1496,13 +1496,13 @@ fn test_cli_backup_set_list_remove() {
     let dir = tempdir().unwrap();
     let backup_dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args([
             "backup",
             "set",
@@ -1514,20 +1514,20 @@ fn test_cli_backup_set_list_remove() {
             "--output-dir",
             backup_dir.path().to_str().unwrap(),
         ])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["backup", "list"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("nightly"));
 
-    aim()
+    iv()
         .args(["backup", "remove", "nightly"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -1536,15 +1536,15 @@ fn test_cli_backup_set_list_remove() {
 fn test_cli_backup_history_empty() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["backup", "history"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -1554,13 +1554,13 @@ fn test_cli_vaults_register_list_activate_deactivate() {
     let dir = tempdir().unwrap();
     let vault_dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args([
             "vaults",
             "register",
@@ -1569,32 +1569,32 @@ fn test_cli_vaults_register_list_activate_deactivate() {
             "--description",
             "Production vault",
         ])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["vaults", "list"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("prod"));
 
-    aim()
+    iv()
         .args(["vaults", "activate", "prod"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["vaults", "deactivate"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["vaults", "unregister", "prod"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 }
@@ -1605,7 +1605,7 @@ fn test_cli_vaults_register_list_activate_deactivate() {
 
 #[test]
 fn test_cli_quantize_set_missing_method() {
-    aim()
+    iv()
         .args(["quantize", "set", "test-profile"])
         .assert()
         .failure()
@@ -1614,7 +1614,7 @@ fn test_cli_quantize_set_missing_method() {
 
 #[test]
 fn test_cli_eval_record_missing_args() {
-    aim()
+    iv()
         .args(["eval", "record"])
         .assert()
         .failure()
@@ -1623,7 +1623,7 @@ fn test_cli_eval_record_missing_args() {
 
 #[test]
 fn test_cli_backup_set_missing_args() {
-    aim()
+    iv()
         .args(["backup", "set"])
         .assert()
         .failure()
@@ -1632,7 +1632,7 @@ fn test_cli_backup_set_missing_args() {
 
 #[test]
 fn test_cli_vaults_register_missing_path() {
-    aim()
+    iv()
         .args(["vaults", "register", "test-vault"])
         .assert()
         .failure()
@@ -1641,7 +1641,7 @@ fn test_cli_vaults_register_missing_path() {
 
 #[test]
 fn test_cli_eval_compare_missing_suite() {
-    aim()
+    iv()
         .args(["eval", "compare", "a@1", "b@1"])
         .assert()
         .failure()
@@ -1649,7 +1649,7 @@ fn test_cli_eval_compare_missing_suite() {
 }
 
 // ──────────────────────────────────────────────────────────────
-// Non-interactive passphrase (aimodelvault_PASSPHRASE / stdin / KMS URI)
+// Non-interactive passphrase (IRONVAULT_PASSPHRASE / stdin / KMS URI)
 //
 // Before these existed, every passphrase-gated command required a TTY, so the
 // vault round-trip below could not be tested from CI at all.
@@ -1666,33 +1666,33 @@ fn test_cli_roundtrip_with_passphrase_env() {
     let model = dir.path().join("model.safetensors");
     std::fs::write(&model, b"fake-safetensors-payload").unwrap();
 
-    aim()
+    iv()
         .args(["init", "--name", "roundtrip"])
-        .env("aimodelvault_HOME", vault_dir)
+        .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["store", "demo", model.to_str().unwrap()])
-        .env("aimodelvault_HOME", vault_dir)
-        .env("aimodelvault_PASSPHRASE", TEST_PASS)
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
         .success()
         .stdout(predicate::str::contains("stored successfully"));
 
-    aim()
+    iv()
         .args(["list"])
-        .env("aimodelvault_HOME", vault_dir)
-        .env("aimodelvault_PASSPHRASE", TEST_PASS)
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
         .success()
         .stdout(predicate::str::contains("demo"));
 
     let out = dir.path().join("retrieved.safetensors");
-    aim()
+    iv()
         .args(["get", "demo", out.to_str().unwrap()])
-        .env("aimodelvault_HOME", vault_dir)
-        .env("aimodelvault_PASSPHRASE", TEST_PASS)
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
         .success();
 
@@ -1711,24 +1711,24 @@ fn test_cli_wrong_passphrase_fails() {
     let model = dir.path().join("m.bin");
     std::fs::write(&model, b"payload").unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", vault_dir)
+        .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["store", "m", model.to_str().unwrap()])
-        .env("aimodelvault_HOME", vault_dir)
-        .env("aimodelvault_PASSPHRASE", TEST_PASS)
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
         .success();
 
     let out = dir.path().join("out.bin");
-    aim()
+    iv()
         .args(["get", "m", out.to_str().unwrap()])
-        .env("aimodelvault_HOME", vault_dir)
-        .env("aimodelvault_PASSPHRASE", "not-the-right-passphrase")
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_PASSPHRASE", "not-the-right-passphrase")
         .assert()
         .failure();
 }
@@ -1739,17 +1739,17 @@ fn test_cli_passphrase_via_kms_env_uri() {
     let dir = tempdir().unwrap();
     let vault_dir = dir.path().to_str().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", vault_dir)
+        .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["list"])
-        .env("aimodelvault_HOME", vault_dir)
-        .env("aimodelvault_PASSPHRASE", "env://AIM_CLI_TEST_SECRET")
-        .env("AIM_CLI_TEST_SECRET", TEST_PASS)
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_PASSPHRASE", "env://IRONVAULT_CLI_TEST_SECRET")
+        .env("IRONVAULT_CLI_TEST_SECRET", TEST_PASS)
         .assert()
         .success();
 }
@@ -1768,17 +1768,17 @@ fn test_cli_passphrase_via_kms_file_uri() {
         std::fs::set_permissions(&secret, std::fs::Permissions::from_mode(0o600)).unwrap();
     }
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", vault_dir)
+        .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["list"])
-        .env("aimodelvault_HOME", vault_dir)
+        .env("IRONVAULT_HOME", vault_dir)
         .env(
-            "aimodelvault_PASSPHRASE",
+            "IRONVAULT_PASSPHRASE",
             format!("file://{}", secret.display()),
         )
         .assert()
@@ -1791,16 +1791,16 @@ fn test_cli_unresolvable_kms_uri_fails() {
     let dir = tempdir().unwrap();
     let vault_dir = dir.path().to_str().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", vault_dir)
+        .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["list"])
-        .env("aimodelvault_HOME", vault_dir)
-        .env("aimodelvault_PASSPHRASE", "env://AIM_NOT_SET_ANYWHERE_42")
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_PASSPHRASE", "env://IRONVAULT_NOT_SET_ANYWHERE_42")
         .assert()
         .failure();
 }
@@ -1811,16 +1811,16 @@ fn test_cli_passphrase_via_stdin() {
     let dir = tempdir().unwrap();
     let vault_dir = dir.path().to_str().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", vault_dir)
+        .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["list"])
-        .env("aimodelvault_HOME", vault_dir)
-        .env_remove("aimodelvault_PASSPHRASE")
+        .env("IRONVAULT_HOME", vault_dir)
+        .env_remove("IRONVAULT_PASSPHRASE")
         .write_stdin(format!("{TEST_PASS}\n"))
         .assert()
         .success();
@@ -1833,21 +1833,21 @@ fn test_cli_list_empty_vault_non_interactive() {
     let dir = tempdir().unwrap();
     let vault_dir = dir.path().to_str().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", vault_dir)
+        .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["list"])
-        .env("aimodelvault_HOME", vault_dir)
-        .env("aimodelvault_PASSPHRASE", TEST_PASS)
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
         .success();
 }
 
-/// `aim sign` / `aim verify` accept a KMS URI for --key, not just a file path.
+/// `iv sign` / `iv verify` accept a KMS URI for --key, not just a file path.
 /// The secret may be a bare hex seed, as a secret manager would store it.
 #[test]
 fn test_cli_sign_verify_with_kms_key_uri() {
@@ -1857,20 +1857,20 @@ fn test_cli_sign_verify_with_kms_key_uri() {
     let model = dir.path().join("model.bin");
     std::fs::write(&model, b"contents to be signed").unwrap();
 
-    // A 32-byte seed, hex-encoded, as `aim sign` would have generated.
+    // A 32-byte seed, hex-encoded, as `iv sign` would have generated.
     let seed = "a".repeat(64);
 
-    aim()
+    iv()
         .args([
             "sign",
             "ignored",
             "--file",
             model.to_str().unwrap(),
             "--key",
-            "env://AIM_TEST_SIGN_KEY",
+            "env://IRONVAULT_TEST_SIGN_KEY",
         ])
-        .env("aimodelvault_HOME", vault_dir)
-        .env("AIM_TEST_SIGN_KEY", &seed)
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_TEST_SIGN_KEY", &seed)
         .assert()
         .success()
         .stdout(predicate::str::contains("KMS"));
@@ -1881,7 +1881,7 @@ fn test_cli_sign_verify_with_kms_key_uri() {
         "detached signature should be written next to the file"
     );
 
-    aim()
+    iv()
         .args([
             "verify",
             "ignored",
@@ -1890,10 +1890,10 @@ fn test_cli_sign_verify_with_kms_key_uri() {
             "--signature",
             sig.to_str().unwrap(),
             "--key",
-            "env://AIM_TEST_SIGN_KEY",
+            "env://IRONVAULT_TEST_SIGN_KEY",
         ])
-        .env("aimodelvault_HOME", vault_dir)
-        .env("AIM_TEST_SIGN_KEY", &seed)
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_TEST_SIGN_KEY", &seed)
         .assert()
         .success()
         .stdout(predicate::str::contains("Verification PASSED"));
@@ -1906,17 +1906,17 @@ fn test_cli_sign_rejects_bad_kms_key() {
     let model = dir.path().join("m.bin");
     std::fs::write(&model, b"data").unwrap();
 
-    aim()
+    iv()
         .args([
             "sign",
             "ignored",
             "--file",
             model.to_str().unwrap(),
             "--key",
-            "env://AIM_TEST_BAD_KEY",
+            "env://IRONVAULT_TEST_BAD_KEY",
         ])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
-        .env("AIM_TEST_BAD_KEY", "not-a-valid-seed")
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_TEST_BAD_KEY", "not-a-valid-seed")
         .assert()
         .failure();
 }
@@ -1926,7 +1926,7 @@ fn test_cli_sign_rejects_bad_kms_key() {
 // ──────────────────────────────────────────────────────────────
 
 /// Regression: version records store `format.name()` ("PyTorch"), which
-/// `from_extension` does not recognise. `aim convert` used to parse the stored
+/// `from_extension` does not recognise. `iv convert` used to parse the stored
 /// format that way, yielding `Custom("pytorch")`, so it could never find a
 /// conversion path for ANY vaulted model.
 #[test]
@@ -1940,27 +1940,27 @@ fn test_cli_convert_resolves_stored_format() {
     bytes.extend_from_slice(&[0u8; 60]);
     std::fs::write(&model, &bytes).unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", vault_dir)
+        .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["store", "demo", model.to_str().unwrap()])
-        .env("aimodelvault_HOME", vault_dir)
-        .env("aimodelvault_PASSPHRASE", TEST_PASS)
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
         .success();
 
     let work = dir.path().join("work");
     std::fs::create_dir_all(&work).unwrap();
 
-    aim()
+    iv()
         .args(["convert", "demo", "--to-format", "onnx"])
         .current_dir(&work)
-        .env("aimodelvault_HOME", vault_dir)
-        .env("aimodelvault_PASSPHRASE", TEST_PASS)
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
         .success()
         .stdout(predicate::str::contains("Source format: PyTorch"))
@@ -1979,26 +1979,26 @@ fn test_cli_convert_writes_plan_not_fake_target_file() {
     bytes.extend_from_slice(&[0u8; 60]);
     std::fs::write(&model, &bytes).unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", vault_dir)
+        .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
-    aim()
+    iv()
         .args(["store", "demo", model.to_str().unwrap()])
-        .env("aimodelvault_HOME", vault_dir)
-        .env("aimodelvault_PASSPHRASE", TEST_PASS)
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
         .success();
 
     let work = dir.path().join("work");
     std::fs::create_dir_all(&work).unwrap();
 
-    aim()
+    iv()
         .args(["convert", "demo", "--to-format", "onnx"])
         .current_dir(&work)
-        .env("aimodelvault_HOME", vault_dir)
-        .env("aimodelvault_PASSPHRASE", TEST_PASS)
+        .env("IRONVAULT_HOME", vault_dir)
+        .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
         .success()
         .stdout(predicate::str::contains("No ONNX file was produced"));
@@ -2056,7 +2056,7 @@ fn write_gguf(path: &std::path::Path, tensors: &[(&str, &[u64], u32)]) {
     std::fs::write(path, data).unwrap();
 }
 
-/// `aim diff` used to fabricate its GGUF tensor map from the header's tensor
+/// `iv diff` used to fabricate its GGUF tensor map from the header's tensor
 /// *count* alone — `tensor_0`, `tensor_1`, … with no shape and dtype
 /// `"unknown"`. Two files with equal tensor counts therefore always reported as
 /// identical. This pair differs in dtype, in one tensor name, and in one shape,
@@ -2085,7 +2085,7 @@ fn test_cli_diff_gguf_reports_real_tensor_changes() {
         ],
     );
 
-    aim()
+    iv()
         .args(["diff", left.to_str().unwrap(), right.to_str().unwrap()])
         .assert()
         .success()
@@ -2109,7 +2109,7 @@ fn test_cli_diff_truncated_gguf_is_handled() {
     let cut = dir.path().join("cut.gguf");
     std::fs::write(&cut, &bytes[..bytes.len() - 12]).unwrap();
 
-    aim()
+    iv()
         .args(["diff", full.to_str().unwrap(), cut.to_str().unwrap()])
         .assert()
         .success();
@@ -2128,7 +2128,7 @@ fn test_cli_diff_truncated_gguf_is_handled() {
 /// generic failure, and it must not exit 1.
 #[test]
 fn test_cli_exit_code_invalid_input() {
-    aim()
+    iv()
         .args(["introspect", "--format", "not-a-format"])
         .assert()
         .code(6)
@@ -2141,16 +2141,16 @@ fn test_cli_exit_code_invalid_input() {
 fn test_cli_exit_code_not_found() {
     let dir = tempdir().unwrap();
 
-    aim()
+    iv()
         .args(["init"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    aim()
+    iv()
         .args(["versions", "no-such-model"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
-        .env("aimodelvault_PASSPHRASE", "correct horse battery staple")
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_PASSPHRASE", "correct horse battery staple")
         .timeout(std::time::Duration::from_secs(30))
         .assert()
         .code(3);
@@ -2162,28 +2162,28 @@ fn test_cli_exit_code_not_found() {
 /// input (6).
 #[test]
 fn test_cli_exit_code_usage_error_is_not_confused_with_auth_failure() {
-    aim()
+    iv()
         .args(["no-such-subcommand"])
         .assert()
         .code(6)
         .stderr(predicate::str::contains("unrecognized subcommand"));
 
-    aim().args(["versions", "--no-such-flag"]).assert().code(6);
+    iv().args(["versions", "--no-such-flag"]).assert().code(6);
 
     // A required argument left off, and no subcommand at all, are the same
     // category — clap prints help for both, but the command line was still
     // incomplete.
-    aim().args(["versions"]).assert().code(6);
-    aim().assert().code(6);
+    iv().args(["versions"]).assert().code(6);
+    iv().assert().code(6);
 }
 
 /// `--help` and `--version` route through the same error path inside clap, but
 /// they are successes, not usage errors.
 #[test]
 fn test_cli_exit_code_help_and_version_are_success() {
-    aim().args(["--help"]).assert().code(0);
-    aim().args(["--version"]).assert().code(0);
-    aim().args(["versions", "--help"]).assert().code(0);
+    iv().args(["--help"]).assert().code(0);
+    iv().args(["--version"]).assert().code(0);
+    iv().args(["versions", "--help"]).assert().code(0);
 }
 
 /// Exit 7 — configuration error. A malformed `--config` file is distinct from
@@ -2195,28 +2195,28 @@ fn test_cli_exit_code_config_error() {
     // Tab indentation is invalid YAML.
     std::fs::write(&bad, "dirs:\n\t data_dir: /tmp\n").unwrap();
 
-    aim()
+    iv()
         .args(["--config", bad.to_str().unwrap(), "list"])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .timeout(std::time::Duration::from_secs(30))
         .assert()
         .code(7);
 
     // A `--config` path that does not exist is also a config error, not a
     // generic I/O failure.
-    aim()
+    iv()
         .args([
             "--config",
             dir.path().join("absent.yaml").to_str().unwrap(),
             "list",
         ])
-        .env("aimodelvault_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .timeout(std::time::Duration::from_secs(30))
         .assert()
         .code(7);
 }
 
-/// Exit 5 — integrity/verification failure. `aim verify` is what a pipeline
+/// Exit 5 — integrity/verification failure. `iv verify` is what a pipeline
 /// gates on, so its failure code is the one that matters most.
 #[test]
 fn test_cli_exit_code_verify_failure() {
@@ -2225,7 +2225,7 @@ fn test_cli_exit_code_verify_failure() {
     std::fs::write(&model, b"the real payload").unwrap();
     let key = dir.path().join("signing_key.json");
 
-    aim()
+    iv()
         .args([
             "sign",
             "model",
@@ -2243,7 +2243,7 @@ fn test_cli_exit_code_verify_failure() {
     // Tamper with the payload, leaving the signature alone.
     std::fs::write(&model, b"the WRONG payload").unwrap();
 
-    aim()
+    iv()
         .args([
             "verify",
             "model",
@@ -2268,7 +2268,7 @@ fn test_cli_exit_code_verify_without_key_is_not_success() {
     std::fs::write(&model, b"payload").unwrap();
     let key = dir.path().join("signing_key.json");
 
-    aim()
+    iv()
         .args([
             "sign",
             "model",
@@ -2282,7 +2282,7 @@ fn test_cli_exit_code_verify_without_key_is_not_success() {
 
     let sig = dir.path().join("model.sig");
 
-    aim()
+    iv()
         .args([
             "verify",
             "model",
@@ -2299,8 +2299,8 @@ fn test_cli_exit_code_verify_without_key_is_not_success() {
 /// Success must stay 0 — the mapping must not make ordinary runs look failed.
 #[test]
 fn test_cli_exit_code_success_is_zero() {
-    aim().args(["--version"]).assert().code(0);
-    aim()
+    iv().args(["--version"]).assert().code(0);
+    iv()
         .args(["introspect", "--format", "json"])
         .assert()
         .code(0);
@@ -2311,7 +2311,7 @@ fn test_cli_exit_code_success_is_zero() {
 /// machine-readable manifests answer to the implementation.
 #[test]
 fn test_published_exit_code_tables_match_the_implementation() {
-    use ai_model_vault::{
+    use ironvault::{
         EXIT_AUTH, EXIT_COMPLIANCE, EXIT_CONFIG, EXIT_GENERAL, EXIT_INTEGRITY, EXIT_INVALID_INPUT,
         EXIT_NOT_FOUND, EXIT_PERMISSION, EXIT_SUCCESS,
     };
@@ -2443,7 +2443,7 @@ fn test_well_known_manifests_declare_the_crate_version() {
     );
 }
 
-/// `aim cloud` supports S3 and Azure. GCS was removed along with the
+/// `iv cloud` supports S3 and Azure. GCS was removed along with the
 /// `cloud-storage` crate, and there is no `gcs` cargo feature — so a manifest
 /// advertising it sends an agent down a path that cannot work.
 #[test]
@@ -2457,14 +2457,14 @@ fn test_manifests_do_not_advertise_removed_gcs_support() {
         let body = std::fs::read_to_string(root.join(name)).unwrap();
         assert!(
             !body.contains("GCS") && !body.contains("Google Cloud Storage"),
-            "{name} advertises GCS, which `aim cloud` cannot do"
+            "{name} advertises GCS, which `iv cloud` cannot do"
         );
     }
 }
 
-/// The PyPI distribution is `aimodelvault`; the crates.io crate is
-/// `ai-model-vault`. agents.json told agents to run `pip install
-/// ai-model-vault`, which does not resolve. Names that differ by punctuation
+/// The PyPI distribution is `ironvault`; the crates.io crate is
+/// `ironvault`. agents.json told agents to run `pip install
+/// ironvault`, which does not resolve. Names that differ by punctuation
 /// across two registries are exactly the kind of thing that rots silently.
 #[test]
 fn test_manifest_python_install_uses_the_real_pypi_name() {

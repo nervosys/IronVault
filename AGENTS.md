@@ -1,13 +1,13 @@
 # AGENTS.md — AI Agent Discovery Guide
 
 > Machine-readable project context for AI agents, LLM assistants, and automated tools.
-> AI Model Vault is **designed agent-first** — every capability is reachable from CLI, REST/GraphQL, and MCP, all derived from a single introspectable schema.
+> IronVault is **designed agent-first** — every capability is reachable from CLI, REST/GraphQL, and MCP, all derived from a single introspectable schema.
 
 ## Bootstrap in three commands
 
 ```bash
 # 1. Get the full CLI schema (commands, flags, types, examples)
-aim introspect --format json
+iv introspect --format json
 
 # 2. List the 86 MCP tools (JSON Schema inputs)
 cat .well-known/mcp-manifest.json | jq '.tools[] | {name, description}'
@@ -24,7 +24,7 @@ Three runnable Rust examples cover the three canonical integration patterns:
 
 | Example                                                            | Pattern                  | Shows                                                                                            |
 | ------------------------------------------------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------ |
-| [`examples/agent_bootstrap.rs`](examples/agent_bootstrap.rs)       | Out-of-process via CLI   | Shell out to `aim introspect`, parse the schema, invoke a subcommand, handle the error envelope. |
+| [`examples/agent_bootstrap.rs`](examples/agent_bootstrap.rs)       | Out-of-process via CLI   | Shell out to `iv introspect`, parse the schema, invoke a subcommand, handle the error envelope. |
 | [`examples/agent_mcp_workflow.rs`](examples/agent_mcp_workflow.rs) | In-process via MCP       | Register vault-backed `MCPTool`s, drive them in an agent loop with JSON parameters.              |
 | [`examples/agent_pipeline.rs`](examples/agent_pipeline.rs)         | Direct Rust API pipeline | End-to-end: scan → store → tag → search → sign → verify, emitting an audit envelope.             |
 
@@ -35,13 +35,13 @@ Run any of them with `cargo run --example <name>`.
 Passphrase-gated commands (`store`, `get`, `list`, `sign`, `cloud *`, …) resolve the
 passphrase in this order, so no TTY is required:
 
-1. `$aimodelvault_PASSPHRASE` — a literal passphrase, or a KMS URI to resolve
+1. `$IRONVAULT_PASSPHRASE` — a literal passphrase, or a KMS URI to resolve
 2. A line piped on stdin, when stdin is not a terminal
 3. An interactive masked prompt
 
 ```bash
-aimodelvault_PASSPHRASE='vault://secret/aim/passphrase' aim list --format json
-printf '%s\n' "$PASSPHRASE" | aim list
+IRONVAULT_PASSPHRASE='vault://secret/iv/passphrase' iv list --format json
+printf '%s\n' "$PASSPHRASE" | iv list
 ```
 
 An unresolvable KMS URI is a hard error — the CLI never falls back to an empty
@@ -51,30 +51,30 @@ passphrase. See [docs/KMS.md](docs/KMS.md) for the URI table and backend setup.
 
 | Guarantee         | Detail                                                                                                                                  |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| JSON output       | Every read subcommand accepts `--format json`. Schemas evolve with semver; breaking changes bump the major version of `ai-model-vault`. |
+| JSON output       | Every read subcommand accepts `--format json`. Schemas evolve with semver; breaking changes bump the major version of `ironvault`. |
 | Exit codes        | `0` ok · `1` general · `2` auth failed · `3` not found · `4` permission denied · `5` integrity · `6` invalid input · `7` config · `8` compliance |
 | Idempotent reads  | `list`, `get`, `search`, `versions`, `lineage`, `stats`, `compliance`, `introspect`, every `*/show` and `*/list` are side-effect free   |
 | Destructive gates | `delete`, `policy apply`, `gc`, `vault-import` either require explicit names or accept `--dry-run`                                      |
 | Error envelope    | Errors emit JSON `{ "code": "...", "message": "...", "hint": "..." }` on stderr; never bare strings                                     |
-| No surprise I/O   | The CLI never makes network calls except `aim pull`, `aim cloud *`, and opt-in telemetry (off by default; honors `DO_NOT_TRACK=1`)      |
+| No surprise I/O   | The CLI never makes network calls except `iv pull`, `iv cloud *`, and opt-in telemetry (off by default; honors `DO_NOT_TRACK=1`)      |
 | URI scheme        | `aimv://vault/model@version` resolves through any of the three surfaces                                                                 |
-| Conversion honesty | `aim convert` and `POST /api/v1/convert` never emit a file or payload in the target format unless the bytes really are that format. When external tooling is required the REST response sets `converted: false` and carries a `plan`; the CLI writes `<output>.plan.json` and produces no target-format file |
+| Conversion honesty | `iv convert` and `POST /api/v1/convert` never emit a file or payload in the target format unless the bytes really are that format. When external tooling is required the REST response sets `converted: false` and carries a `plan`; the CLI writes `<output>.plan.json` and produces no target-format file |
 
 ## Project Identity
 
 | Key            | Value                                    |
 | -------------- | ---------------------------------------- |
-| **Name**       | AI Model Vault                           |
-| **Binary**     | `aim`                                    |
-| **Crate**      | `ai-model-vault`                         |
+| **Name**       | IronVault                           |
+| **Binary**     | `iv`                                    |
+| **Crate**      | `ironvault`                         |
 | **Version**    | 3.0.0                                    |
 | **Language**   | Rust (edition 2021, MSRV 1.89)           |
 | **License**    | AGPL-3.0-or-later                        |
-| **Repository** | https://github.com/nervosys/AIModelVault |
+| **Repository** | https://github.com/nervosys/IronVault |
 
 ## What This Project Does
 
-AI Model Vault is an **encrypted AI/ML model management system**. It provides:
+IronVault is an **encrypted AI/ML model management system**. It provides:
 
 1. **Encrypted Storage** — AES-256-GCM encryption with Argon2id key derivation (FIPS 140-3)
 2. **Version Control** — Sequential versioning with parent lineage trees and instant rollback
@@ -120,151 +120,151 @@ AI Model Vault is an **encrypted AI/ML model management system**. It provides:
 
 ```bash
 # Vault lifecycle
-aim init [--name NAME]                    # Create encrypted vault
-aim store <NAME> <PATH> [-f FORMAT]       # Store model (auto-detects format)
-aim get <NAME> <OUTPUT> [-v VERSION]      # Retrieve & decrypt model
-aim list                                  # List all models
-aim versions <NAME>                       # List versions
-aim lineage <NAME> <VERSION>              # Show ancestry tree
-aim delete <NAME> <VERSION>               # Delete version
-aim stats                                 # Storage statistics
-aim compliance [--verbose]                # FIPS/CMMC/MITRE check
+iv init [--name NAME]                    # Create encrypted vault
+iv store <NAME> <PATH> [-f FORMAT]       # Store model (auto-detects format)
+iv get <NAME> <OUTPUT> [-v VERSION]      # Retrieve & decrypt model
+iv list                                  # List all models
+iv versions <NAME>                       # List versions
+iv lineage <NAME> <VERSION>              # Show ancestry tree
+iv delete <NAME> <VERSION>               # Delete version
+iv stats                                 # Storage statistics
+iv compliance [--verbose]                # FIPS/CMMC/MITRE check
 
 # Format conversion
-aim convert <MODEL> --to-format <FMT> [--quantization q4_k_m] [--validate]
-aim list-conversions                      # Show conversion paths
+iv convert <MODEL> --to-format <FMT> [--quantization q4_k_m] [--validate]
+iv list-conversions                      # Show conversion paths
 
 # Cloud storage
-aim cloud push <MODEL> --provider s3 --bucket <BUCKET>
-aim cloud pull <MODEL> --provider s3 --bucket <BUCKET> --remote-path <PATH>
-aim cloud list --provider s3 --bucket <BUCKET>
+iv cloud push <MODEL> --provider s3 --bucket <BUCKET>
+iv cloud pull <MODEL> --provider s3 --bucket <BUCKET> --remote-path <PATH>
+iv cloud list --provider s3 --bucket <BUCKET>
 
 # RAG / Database
-aim database init --path <P> --db-type sqlite
-aim database store --path <P> --input <FILE>
-aim database search --path <P> <QUERY>
+iv database init --path <P> --db-type sqlite
+iv database store --path <P> --input <FILE>
+iv database search --path <P> <QUERY>
 
 # Utilities
-aim archive <MODELS>... <OUTPUT> [-f tar|zip]
-aim extract <ARCHIVE> [-o DIR]
-aim analyze <NAME>
-aim deduplicate
-aim export <NAME> <OUTPUT>
+iv archive <MODELS>... <OUTPUT> [-f tar|zip]
+iv extract <ARCHIVE> [-o DIR]
+iv analyze <NAME>
+iv deduplicate
+iv export <NAME> <OUTPUT>
 
 # API server (requires --features api)
-aim serve [--port 8080] [--jwt-secret SECRET]
+iv serve [--port 8080] [--jwt-secret SECRET]
 
 # Agent discovery (machine-readable CLI schema)
-aim introspect [--format json|yaml|jsonld] [--compact]
+iv introspect [--format json|yaml|jsonld] [--compact]
 
 # Model download
-aim pull <SOURCE> [-o DIR] [--sha256 HASH] [--token TOKEN] [--store] [--name NAME]
+iv pull <SOURCE> [-o DIR] [--sha256 HASH] [--token TOKEN] [--store] [--name NAME]
 
 # Model signing & verification
 # KEY is a file path or a KMS URI (e.g. azure-kv://vault/hmac-key)
-aim sign <NAME> [--version V] [--key KEY] [--identity ID] [--file PATH]
-aim verify <NAME> --signature <SIG> [--key KEY] [--file PATH]
+iv sign <NAME> [--version V] [--key KEY] [--identity ID] [--file PATH]
+iv verify <NAME> --signature <SIG> [--key KEY] [--file PATH]
 
 # Safety scanning
-aim scan [<NAME>] [--file PATH] [--version V] [--format text|json]
+iv scan [<NAME>] [--file PATH] [--version V] [--format text|json]
 
 # Model diffing
-aim diff <LEFT> <RIGHT> [--format text|json]   # LEFT/RIGHT: file path or name@version
+iv diff <LEFT> <RIGHT> [--format text|json]   # LEFT/RIGHT: file path or name@version
 
 # Engine registration
-aim register <NAME> --engine <ollama|lm-studio> [--version V] [--alias NAME] [--system-prompt TEXT]
+iv register <NAME> --engine <ollama|lm-studio> [--version V] [--alias NAME] [--system-prompt TEXT]
 
 # Benchmark metadata
-aim benchmark add <NAME> --version V --benchmark <BENCH> --score <N> --unit <UNIT>
-aim benchmark show <NAME> [--version V] [--format text|json]
+iv benchmark add <NAME> --version V --benchmark <BENCH> --score <N> --unit <UNIT>
+iv benchmark show <NAME> [--version V] [--format text|json]
 
 # License scanning
-aim license-scan <PATH> [--format text|json]
+iv license-scan <PATH> [--format text|json]
 
 # Model tags & search
-aim tag add <MODEL> <TAGS>...                # Add tags to a model
-aim tag remove <MODEL> <TAGS>...             # Remove tags from a model
-aim tag list <MODEL>                          # List tags on a model
-aim tag annotate <MODEL> --key <K> --value <V>  # Add key-value annotation
-aim search <QUERY> [--tag TAG] [--format text|json]  # Search models
+iv tag add <MODEL> <TAGS>...                # Add tags to a model
+iv tag remove <MODEL> <TAGS>...             # Remove tags from a model
+iv tag list <MODEL>                          # List tags on a model
+iv tag annotate <MODEL> --key <K> --value <V>  # Add key-value annotation
+iv search <QUERY> [--tag TAG] [--format text|json]  # Search models
 
 # Vault export/import
-aim vault-export <OUTPUT>                     # Export vault as tar.gz bundle
-aim vault-import <ARCHIVE> [TARGET]           # Import vault bundle
+iv vault-export <OUTPUT>                     # Export vault as tar.gz bundle
+iv vault-import <ARCHIVE> [TARGET]           # Import vault bundle
 
 # Garbage collection
-aim gc [--dry-run]                            # Clean orphaned blobs & temp files
+iv gc [--dry-run]                            # Clean orphaned blobs & temp files
 
 # TUI dashboard
-aim browse                                    # Browse vault in terminal UI
+iv browse                                    # Browse vault in terminal UI
 
 # Webhooks
-aim webhook add --url <URL> [--secret SECRET]  # Add webhook target
-aim webhook remove <ID>                       # Remove webhook target
-aim webhook list                              # List webhook targets
-aim webhook test <ID>                         # Test webhook delivery
+iv webhook add --url <URL> [--secret SECRET]  # Add webhook target
+iv webhook remove <ID>                       # Remove webhook target
+iv webhook list                              # List webhook targets
+iv webhook test <ID>                         # Test webhook delivery
 
 # Access control
-aim acl grant <PRINCIPAL> --role <ROLE>        # Grant role (reader/writer/admin)
-aim acl revoke <PRINCIPAL>                    # Revoke access
-aim acl list                                  # List ACL entries
-aim acl check <PRINCIPAL> --role <ROLE>        # Check permission
+iv acl grant <PRINCIPAL> --role <ROLE>        # Grant role (reader/writer/admin)
+iv acl revoke <PRINCIPAL>                    # Revoke access
+iv acl list                                  # List ACL entries
+iv acl check <PRINCIPAL> --role <ROLE>        # Check permission
 
 # Model validation
-aim validate <NAME> [--version V]             # Validate model integrity
+iv validate <NAME> [--version V]             # Validate model integrity
 
 # Retention policies
-aim policy set <MODEL> [--max-versions N] [--max-age-days N] [--keep-minimum N]
-aim policy remove <MODEL>                     # Remove retention policy
-aim policy list                               # List all policies
-aim policy apply <MODEL> [--dry-run]          # Apply policy to model
-aim policy apply-all [--dry-run]              # Apply all policies
+iv policy set <MODEL> [--max-versions N] [--max-age-days N] [--keep-minimum N]
+iv policy remove <MODEL>                     # Remove retention policy
+iv policy list                               # List all policies
+iv policy apply <MODEL> [--dry-run]          # Apply policy to model
+iv policy apply-all [--dry-run]              # Apply all policies
 
 # Cross-model lineage DAG
-aim lineage-graph add --child <C> --parents <P>... --kind <KIND>
-aim lineage-graph show                        # Display lineage graph
-aim lineage-graph ancestors <MODEL>           # Show ancestors
-aim lineage-graph descendants <MODEL>         # Show descendants
+iv lineage-graph add --child <C> --parents <P>... --kind <KIND>
+iv lineage-graph show                        # Display lineage graph
+iv lineage-graph ancestors <MODEL>           # Show ancestors
+iv lineage-graph descendants <MODEL>         # Show descendants
 
 # Plugin system
-aim plugin discover                           # Scan for plugins
-aim plugin install <PATH>                     # Install plugin from manifest
-aim plugin uninstall <ID>                     # Uninstall plugin
-aim plugin list                               # List installed plugins
-aim plugin info <ID>                          # Show plugin details
+iv plugin discover                           # Scan for plugins
+iv plugin install <PATH>                     # Install plugin from manifest
+iv plugin uninstall <ID>                     # Uninstall plugin
+iv plugin list                               # List installed plugins
+iv plugin info <ID>                          # Show plugin details
 
 # Config profiles
-aim profile create <NAME> [--description TEXT] [--override KEY=VALUE]...
-aim profile remove <NAME>                     # Remove profile
-aim profile list                              # List all profiles
-aim profile activate <NAME>                   # Activate profile
-aim profile deactivate                        # Deactivate current profile
-aim profile show                              # Show active profile
+iv profile create <NAME> [--description TEXT] [--override KEY=VALUE]...
+iv profile remove <NAME>                     # Remove profile
+iv profile list                              # List all profiles
+iv profile activate <NAME>                   # Activate profile
+iv profile deactivate                        # Deactivate current profile
+iv profile show                              # Show active profile
 
 # Quantization pipeline
-aim quantize set <MODEL> --method <METHOD> [--version V] [--bits N]
-aim quantize remove <MODEL> [--version V]     # Remove quantization profile
-aim quantize list [MODEL]                     # List quantization profiles
-aim quantize estimate <MODEL> --method <METHOD>  # Estimate output size
+iv quantize set <MODEL> --method <METHOD> [--version V] [--bits N]
+iv quantize remove <MODEL> [--version V]     # Remove quantization profile
+iv quantize list [MODEL]                     # List quantization profiles
+iv quantize estimate <MODEL> --method <METHOD>  # Estimate output size
 
 # Evaluation harness
-aim eval record <MODEL> --suite <SUITE> --metric <METRIC> --score <N> [--version V]
-aim eval list <MODEL> [--version V] [--suite SUITE] [--format text|json]
-aim eval compare <MODEL> --versions <V1,V2,...> [--format text|json]
-aim eval suites                               # List known evaluation suites
+iv eval record <MODEL> --suite <SUITE> --metric <METRIC> --score <N> [--version V]
+iv eval list <MODEL> [--version V] [--suite SUITE] [--format text|json]
+iv eval compare <MODEL> --versions <V1,V2,...> [--format text|json]
+iv eval suites                               # List known evaluation suites
 
 # Backup scheduling
-aim backup schedule <VAULT> --interval <daily|weekly|monthly|custom> [--hour H]
-aim backup list                               # List backup schedules
-aim backup run [VAULT]                        # Run backup now
-aim backup history [VAULT] [--format text|json]  # Show backup history
+iv backup schedule <VAULT> --interval <daily|weekly|monthly|custom> [--hour H]
+iv backup list                               # List backup schedules
+iv backup run [VAULT]                        # Run backup now
+iv backup history [VAULT] [--format text|json]  # Show backup history
 
 # Multi-vault management
-aim vaults register <NAME> <PATH>             # Register a vault
-aim vaults unregister <NAME>                  # Unregister a vault
-aim vaults list                               # List all registered vaults
-aim vaults activate <NAME>                    # Switch active vault
-aim vaults active                             # Show active vault
+iv vaults register <NAME> <PATH>             # Register a vault
+iv vaults unregister <NAME>                  # Unregister a vault
+iv vaults list                               # List all registered vaults
+iv vaults activate <NAME>                    # Switch active vault
+iv vaults active                             # Show active vault
 ```
 
 ## Supported Model Formats (23+)
@@ -278,7 +278,7 @@ aim vaults active                             # Show active vault
 
 ## Conversion Paths
 
-`aim list-conversions` is the authoritative list. Ten converters are registered,
+`iv list-conversions` is the authoritative list. Ten converters are registered,
 in two classes:
 
 **Native (pure Rust — produces a real file):**
@@ -301,7 +301,7 @@ SafeTensors → GGUF            (gguf / llama-cpp-python; q4_0, q4_k_m, q5_k_m, 
 
 Multi-step paths (e.g. PyTorch → ONNX → TensorRT) are found by BFS but stop at
 the first plan-only step. For those, `POST /api/v1/convert` returns
-`converted: false` with a `plan`, and `aim convert` writes `<output>.plan.json`
+`converted: false` with a `plan`, and `iv convert` writes `<output>.plan.json`
 and no target-format file.
 
 ## MCP Tools (Model Context Protocol)
@@ -335,17 +335,17 @@ Custom tools can be registered via `MCPServer::register_tool(tool, executor_fn)`
 
 | Variable                                                     | Purpose                              |
 | ------------------------------------------------------------ | ------------------------------------ |
-| `aimodelvault_PASSPHRASE`                                    | Vault passphrase for CI/automation — a literal value or a KMS URI (`env://`, `file://`, `aws-sm://`, `azure-kv://`, `vault://`). See [docs/KMS.md](docs/KMS.md) |
-| `aimodelvault_VAULT`                                         | Default vault name                   |
-| `aimodelvault_CONFIG`                                        | Config directory override (`config.yaml`, profiles, plugins) |
-| `aimodelvault_HOME`                                          | Relocates all config/data/cache directories under one root — use for test isolation, containers, and per-project vaults |
+| `IRONVAULT_PASSPHRASE`                                    | Vault passphrase for CI/automation — a literal value or a KMS URI (`env://`, `file://`, `aws-sm://`, `azure-kv://`, `vault://`). See [docs/KMS.md](docs/KMS.md) |
+| `IRONVAULT_VAULT`                                         | Default vault name                   |
+| `IRONVAULT_CONFIG`                                        | Config directory override (`config.yaml`, profiles, plugins) |
+| `IRONVAULT_HOME`                                          | Relocates all config/data/cache directories under one root — use for test isolation, containers, and per-project vaults |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION` | AWS S3 credentials                   |
 | `AZURE_STORAGE_ACCOUNT` / `AZURE_STORAGE_SAS_TOKEN`          | Azure: account + SAS, or Entra ID (`AZURE_TENANT_ID` / `AZURE_CLIENT_ID` / `AZURE_CLIENT_SECRET`). Shared keys are not supported |
 | `GOOGLE_APPLICATION_CREDENTIALS` / `GCP_PROJECT`             | GCS credentials                      |
-| `AIM_TELEMETRY_ENABLED`                                      | Set to `false` to disable telemetry  |
-| `AIM_TELEMETRY_DISABLED`                                     | Set to `1` to disable telemetry      |
+| `IRONVAULT_TELEMETRY_ENABLED`                                      | Set to `false` to disable telemetry  |
+| `IRONVAULT_TELEMETRY_DISABLED`                                     | Set to `1` to disable telemetry      |
 | `DO_NOT_TRACK`                                               | Set to `1` to disable telemetry      |
-| `AIM_SQLITE_VERSIONS`                                        | Use SQLite version backend           |
+| `IRONVAULT_SQLITE_VERSIONS`                                        | Use SQLite version backend           |
 
 ## Project Layout
 
@@ -419,7 +419,7 @@ src/
 | MITRE ATT&CK     | Design-level mitigations for T1552, T1486, T1078, T1005 (not a pentest)          |
 
 Certification claims are deliberately absent: no software product can grant
-itself FIPS 140-3 validation or CMMC certification. `aim compliance` reports
+itself FIPS 140-3 validation or CMMC certification. `iv compliance` reports
 which checks it actually verified and which are design assertions.
 
 ## Agent Interaction Patterns
@@ -427,39 +427,39 @@ which checks it actually verified and which are design assertions.
 ### Bootstrap (agent-first discovery)
 ```bash
 # 1. Get the full CLI schema as JSON (pipe to jq, parse, etc.)
-aim introspect --format json
+iv introspect --format json
 
 # 2. Compact mode omits descriptions and examples for smaller payloads
-aim introspect --format json --compact
+iv introspect --format json --compact
 
 # 3. JSON-LD output links to the ontology for semantic interop
-aim introspect --format jsonld
+iv introspect --format jsonld
 ```
 
 ### Store a model
 ```bash
-aim init
-aim store my-llm ./model.safetensors -d "Fine-tuned LLaMA" --framework pytorch --task text-generation
+iv init
+iv store my-llm ./model.safetensors -d "Fine-tuned LLaMA" --framework pytorch --task text-generation
 ```
 
 ### Convert for edge deployment
 ```bash
-aim convert my-llm --to-format gguf --quantization q4_k_m --validate
+iv convert my-llm --to-format gguf --quantization q4_k_m --validate
 ```
 
 ### Check compliance
 ```bash
-aim compliance --verbose
+iv compliance --verbose
 ```
 
 ### Search RAG knowledge base
 ```bash
-aim database init --path ./kb --db-type sqlite
-aim database store --path ./kb --input paper.pdf
-aim database search --path ./kb "transformer attention mechanism"
+iv database init --path ./kb --db-type sqlite
+iv database store --path ./kb --input paper.pdf
+iv database search --path ./kb "transformer attention mechanism"
 ```
 
 ### Push to cloud
 ```bash
-aim cloud push my-llm --provider s3 --bucket my-models
+iv cloud push my-llm --provider s3 --bucket my-models
 ```

@@ -5,10 +5,10 @@ HTTP notification fan-out. Subscribers receive a JSON POST whenever a vault even
 ## CLI
 
 ```bash
-aim webhook add --url https://example.com/hook --secret S3CR3T
-aim webhook list
-aim webhook test <ID>
-aim webhook remove <ID>
+iv webhook add --url https://example.com/hook --secret S3CR3T
+iv webhook list
+iv webhook test <ID>
+iv webhook remove <ID>
 ```
 
 ## MCP tools
@@ -30,4 +30,4 @@ aim webhook remove <ID>
 }
 ```
 
-If a secret is configured, the request includes `X-AIM-Signature: sha256=<HMAC>` over the raw body. See [src/webhooks.rs](https://github.com/nervosys/AIModelVault/blob/master/src/webhooks.rs).
+If a secret is configured, the request includes `X-AIM-Signature: sha256=<HMAC>` over the raw body. See [src/webhooks.rs](https://github.com/nervosys/IronVault/blob/master/src/webhooks.rs).

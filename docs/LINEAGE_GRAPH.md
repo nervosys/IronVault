@@ -1,6 +1,6 @@
 # Cross-Model Lineage DAG
 
-While `aim lineage` shows the parent/child tree *within* one model, `aim lineage-graph` tracks derivations *across* models — e.g. `llama-base → llama-instruct → llama-quant`.
+While `iv lineage` shows the parent/child tree *within* one model, `iv lineage-graph` tracks derivations *across* models — e.g. `llama-base → llama-instruct → llama-quant`.
 
 ## Edge kinds
 
@@ -9,15 +9,15 @@ While `aim lineage` shows the parent/child tree *within* one model, `aim lineage
 ## CLI
 
 ```bash
-aim lineage-graph add --child llama-instruct --parents llama-base --kind fine-tune
-aim lineage-graph add --child llama-q4 --parents llama-instruct --kind quantize
-aim lineage-graph show
-aim lineage-graph ancestors llama-q4
-aim lineage-graph descendants llama-base
+iv lineage-graph add --child llama-instruct --parents llama-base --kind fine-tune
+iv lineage-graph add --child llama-q4 --parents llama-instruct --kind quantize
+iv lineage-graph show
+iv lineage-graph ancestors llama-q4
+iv lineage-graph descendants llama-base
 ```
 
 ## MCP tools
 
 `lineage_graph_add`, `lineage_graph_show`, `lineage_graph_ancestors`, `lineage_graph_descendants`.
 
-The store is a DAG — cycles are rejected at insert time. See [src/lineage_graph.rs](https://github.com/nervosys/AIModelVault/blob/master/src/lineage_graph.rs).
+The store is a DAG — cycles are rejected at insert time. See [src/lineage_graph.rs](https://github.com/nervosys/IronVault/blob/master/src/lineage_graph.rs).

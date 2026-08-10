@@ -1,6 +1,6 @@
-# 🚀 AI Model Vault - Launch Readiness Checklist
+# 🚀 IronVault - Launch Readiness Checklist
 
-**Project**: AI Model Vault  
+**Project**: IronVault  
 **Version**: 1.1.0  
 **Review Date**: November 3, 2025  
 **Status**: ⚠️ FINAL CHECKS NEEDED
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-AI Model Vault is a feature-complete, production-ready secure storage system for AI models with:
+IronVault is a feature-complete, production-ready secure storage system for AI models with:
 - ✅ 148+ tests passing (100% core functionality)
 - ✅ 23+ AI model formats supported
 - ✅ FIPS 140-3 compliant security
@@ -297,7 +297,7 @@ cargo update -p generic-array
 
 ## 🎉 Conclusion
 
-**AI Model Vault is 95% ready for launch!**
+**IronVault is 95% ready for launch!**
 
 After fixing the HDF5 optional dependency issue, the project will be 100% ready for production use. All core features are complete, tested, documented, and secure.
 

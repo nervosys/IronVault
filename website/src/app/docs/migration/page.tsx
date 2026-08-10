@@ -37,11 +37,11 @@ vault.unlock("passphrase")?;`}</CodeBlock>
           </thead>
           <tbody className="text-[var(--color-text-secondary)]">
             {[
-              ["aim store <file>", "aim store <name> --file <file>", "Explicit name parameter"],
-              ["aim get <name>", "aim get <name> --output <file>", "Output file now required"],
-              ["aim info <name>", "aim get <name> --info", "Merged into get command"],
-              ["aim password", "aim change-passphrase", "Renamed for clarity"],
-              ["aim server", "aim serve", "Renamed for consistency"],
+              ["iv store <file>", "iv store <name> --file <file>", "Explicit name parameter"],
+              ["iv get <name>", "iv get <name> --output <file>", "Output file now required"],
+              ["iv info <name>", "iv get <name> --info", "Merged into get command"],
+              ["iv password", "iv change-passphrase", "Renamed for clarity"],
+              ["iv server", "iv serve", "Renamed for consistency"],
             ].map(([old, now, notes], i) => (
               <tr key={i} className="border-b border-[var(--color-border)]">
                 <td className="p-3"><code className="text-xs">{old}</code></td>
@@ -58,9 +58,9 @@ vault.unlock("passphrase")?;`}</CodeBlock>
         Configuration is now fully XDG-compliant. Old config locations are no longer read:
       </p>
       <ul className="space-y-1 text-[var(--color-text-secondary)]">
-        <li>• <strong>Config</strong>: <code className="text-xs px-1 bg-[var(--color-bg-secondary)] rounded">~/.config/ai-model-vault/</code></li>
-        <li>• <strong>Data</strong>: <code className="text-xs px-1 bg-[var(--color-bg-secondary)] rounded">~/.local/share/ai-model-vault/</code></li>
-        <li>• <strong>Cache</strong>: <code className="text-xs px-1 bg-[var(--color-bg-secondary)] rounded">~/.cache/ai-model-vault/</code></li>
+        <li>• <strong>Config</strong>: <code className="text-xs px-1 bg-[var(--color-bg-secondary)] rounded">~/.config/ironvault/</code></li>
+        <li>• <strong>Data</strong>: <code className="text-xs px-1 bg-[var(--color-bg-secondary)] rounded">~/.local/share/ironvault/</code></li>
+        <li>• <strong>Cache</strong>: <code className="text-xs px-1 bg-[var(--color-bg-secondary)] rounded">~/.cache/ironvault/</code></li>
       </ul>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="data">Data Migration</h2>
@@ -69,10 +69,10 @@ vault.unlock("passphrase")?;`}</CodeBlock>
         However, to benefit from the new XDG paths:
       </p>
       <CodeBlock language="bash">{`# Move vault data to XDG directory
-mv ~/.aim/vaults/ ~/.local/share/ai-model-vault/vaults/
+mv ~/.iv/vaults/ ~/.local/share/ironvault/vaults/
 
 # Move configuration
-mv ~/.aim/config.toml ~/.config/ai-model-vault/config.toml`}</CodeBlock>
+mv ~/.iv/config.toml ~/.config/ironvault/config.toml`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="features">Feature Flags</h2>
       <p className="text-[var(--color-text-secondary)] mb-4">
@@ -80,10 +80,10 @@ mv ~/.aim/config.toml ~/.config/ai-model-vault/config.toml`}</CodeBlock>
         includes all optional features:
       </p>
       <CodeBlock language="bash">{`# v0.x — had to specify each feature
-cargo install ai-model-vault --features "api,cloud,python"
+cargo install ironvault --features "api,cloud,python"
 
 # v1.0.0 — use full for everything
-cargo install ai-model-vault --features full`}</CodeBlock>
+cargo install ironvault --features full`}</CodeBlock>
     </>
   );
 }

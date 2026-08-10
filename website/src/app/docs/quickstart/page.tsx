@@ -6,50 +6,50 @@ export default function QuickStartPage() {
     <>
       <h1 className="text-4xl font-bold mb-4">Quick Start</h1>
       <p className="text-lg text-[var(--color-text-secondary)] mb-8">
-        Get up and running with AI Model Vault in under 5 minutes.
+        Get up and running with IronVault in under 5 minutes.
       </p>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="install">Installation</h2>
 
       <h3 className="text-lg font-semibold mt-6 mb-2">From crates.io</h3>
-      <CodeBlock language="bash">{`cargo install ai-model-vault`}</CodeBlock>
+      <CodeBlock language="bash">{`cargo install ironvault`}</CodeBlock>
 
       <h3 className="text-lg font-semibold mt-6 mb-2">From source</h3>
-      <CodeBlock language="bash">{`git clone https://github.com/nervosys/AIModelVault.git
-cd AIModelVault
+      <CodeBlock language="bash">{`git clone https://github.com/nervosys/IronVault.git
+cd IronVault
 cargo build --release
-# Binary is at target/release/aim`}</CodeBlock>
+# Binary is at target/release/iv`}</CodeBlock>
 
       <h3 className="text-lg font-semibold mt-6 mb-2">Python (via PyPI)</h3>
-      <CodeBlock language="bash">{`pip install aimodelvault
+      <CodeBlock language="bash">{`pip install ironvault
 # With ML extras:
-pip install "aimodelvault[ml]"`}</CodeBlock>
+pip install "ironvault[ml]"`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="first-vault">Create Your First Vault</h2>
       <CodeBlock language="bash">{`# Initialize a new vault
-aim init my-vault
+iv init my-vault
 
 # Store a model
-aim store my-model --format safetensors --file model.safetensors
+iv store my-model --format safetensors --file model.safetensors
 
 # List stored models
-aim list
+iv list
 
 # Retrieve a model
-aim get my-model --output ./retrieved/`}</CodeBlock>
+iv get my-model --output ./retrieved/`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="version-control">Version Control</h2>
       <CodeBlock language="bash">{`# Store a new version of an existing model
-aim store my-model --format safetensors --file model-v2.safetensors
+iv store my-model --format safetensors --file model-v2.safetensors
 
 # List versions
-aim versions my-model
+iv versions my-model
 
 # Get a specific version
-aim get my-model --version 1 --output ./v1/
+iv get my-model --version 1 --output ./v1/
 
 # View model lineage
-aim lineage my-model`}</CodeBlock>
+iv lineage my-model`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="api-server">Start the API Server</h2>
       <Callout type="info" title="Requires API feature">
@@ -57,7 +57,7 @@ aim lineage my-model`}</CodeBlock>
         enable the REST API.
       </Callout>
       <CodeBlock language="bash">{`# Start the server
-aim serve --host 0.0.0.0 --port 8080
+iv serve --host 0.0.0.0 --port 8080
 
 # Get a JWT token
 curl -X POST http://localhost:8080/auth/token \\
@@ -70,9 +70,9 @@ curl http://localhost:8080/models \\
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="rust-api">Rust Library Usage</h2>
       <CodeBlock language="rust" title="Cargo.toml">{`[dependencies]
-ai-model-vault = "1.0.0"`}</CodeBlock>
+ironvault = "1.0.0"`}</CodeBlock>
 
-      <CodeBlock language="rust" title="main.rs">{`use ai_model_vault::vault::Vault;
+      <CodeBlock language="rust" title="main.rs">{`use ironvault::vault::Vault;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create and unlock vault

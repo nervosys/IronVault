@@ -1,6 +1,6 @@
-//! CLI handler for plugin management (aim plugin).
+//! CLI handler for plugin management (iv plugin).
 
-use ai_model_vault::{PluginRegistry, Result, VaultConfig};
+use ironvault::{PluginRegistry, Result, VaultConfig};
 
 use crate::cli::args::PluginCommands;
 
@@ -25,8 +25,8 @@ pub fn handle_plugin(command: PluginCommands, config: VaultConfig) -> Result<()>
             // Load manifest from the plugin directory
             let manifest_path = path.join("plugin.json");
             let data = std::fs::read_to_string(&manifest_path)?;
-            let manifest: ai_model_vault::plugins::PluginManifest = serde_json::from_str(&data)
-                .map_err(|e| ai_model_vault::VaultError::SerializationError(e.to_string()))?;
+            let manifest: ironvault::plugins::PluginManifest = serde_json::from_str(&data)
+                .map_err(|e| ironvault::VaultError::SerializationError(e.to_string()))?;
             registry.install(manifest)?;
             println!("Plugin installed from {:?}", path);
         }

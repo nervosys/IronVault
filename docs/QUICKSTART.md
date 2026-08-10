@@ -1,6 +1,6 @@
-# aimodelvault Quick Start Guide
+# ironvault Quick Start Guide
 
-> **Current version: 1.2.1** — See [CHANGELOG](https://github.com/nervosys/AIModelVault/blob/master/CHANGELOG.md) for details.
+> **Current version: 1.2.1** — See [CHANGELOG](https://github.com/nervosys/IronVault/blob/master/CHANGELOG.md) for details.
 
 ## What's New in v1.2
 
@@ -8,7 +8,7 @@
 - **Vault Metrics** — `VaultMetrics` atomic counters (models stored/retrieved/deleted, bytes, errors); `MetricsSnapshot` for point-in-time reporting
 - **Observability API** — `GET /api/v1/metrics` and `GET /api/v1/events` endpoints; enhanced `GET /api/v1/health` with vault state
 - **VaultBuilder** — Fluent builder pattern: `.config()`, `.sqlite_versions()`, `.subscriber()`, `.no_default_subscribers()`
-- **SQLite Version Backend** — ACID-compliant version storage with WAL mode; auto-migration from JSON; enable with `--sqlite-versions` or `AIM_SQLITE_VERSIONS=1`
+- **SQLite Version Backend** — ACID-compliant version storage with WAL mode; auto-migration from JSON; enable with `--sqlite-versions` or `IRONVAULT_SQLITE_VERSIONS=1`
 - **Streaming Encryption** — Chunked AES-256-GCM for large models with constant 8 MiB memory budget
 - **Agent-Addressable URIs** — `aimv://vault/model@version/resource?query` scheme
 - **Domain Error Types** — `CryptoError`, `StorageError`, `ConversionError` with `From` into `VaultError`
@@ -18,8 +18,8 @@
 ### From Source
 
 ```bash
-git clone https://github.com/nervosys/AIModelVault.git
-cd AIModelVault
+git clone https://github.com/nervosys/IronVault.git
+cd IronVault
 cargo build --release
 cargo install --path .
 ```
@@ -27,7 +27,7 @@ cargo install --path .
 ### From crates.io
 
 ```bash
-cargo install aimodelvault
+cargo install ironvault
 ```
 
 ## Basic Usage
@@ -36,17 +36,17 @@ cargo install aimodelvault
 
 ```bash
 # Initialize default vault
-aim init
+iv init
 
 # Initialize named vault
-aim init --name my-models
+iv init --name my-models
 ```
 
 ### 2. Store a Model
 
 ```bash
 # Store a PyTorch model
-aim store my-gpt2 \
+iv store my-gpt2 \
   --path ./model.pt \
   --format pytorch \
   --description "Fine-tuned GPT-2 model" \
@@ -60,55 +60,55 @@ aim store my-gpt2 \
 
 ```bash
 # List all models
-aim list
+iv list
 
 # Show versions of a specific model
-aim versions my-gpt2
+iv versions my-gpt2
 ```
 
 ### 4. Retrieve a Model
 
 ```bash
 # Get latest version
-aim get my-gpt2 --output ./retrieved_model.pt
+iv get my-gpt2 --output ./retrieved_model.pt
 
 # Get specific version
-aim get my-gpt2 --version 2 --output ./model_v2.pt
+iv get my-gpt2 --version 2 --output ./model_v2.pt
 ```
 
 ### 5. View Version History
 
 ```bash
 # Show lineage of a version
-aim lineage my-gpt2 --version 3
+iv lineage my-gpt2 --version 3
 ```
 
 ### 6. Delete a Version
 
 ```bash
 # Delete specific version
-aim delete my-gpt2 --version 1
+iv delete my-gpt2 --version 1
 
 # Force delete without confirmation
-aim delete my-gpt2 --version 1 --force
+iv delete my-gpt2 --version 1 --force
 ```
 
 ### 7. View Statistics
 
 ```bash
-aim stats
+iv stats
 ```
 
 ### 8. Run Compliance Checks
 
 ```bash
-aim compliance
+iv compliance
 ```
 
 ## Python API Usage
 
 ```python
-from aimodelvault import Vault
+from ironvault import Vault
 
 # Initialize vault
 vault = Vault()
@@ -136,22 +136,22 @@ for v in versions:
 
 ## Configuration
 
-aimodelvault follows XDG Base Directory specification:
+ironvault follows XDG Base Directory specification:
 
-- **Config**: `~/.config/aimodelvault/config.yaml`
-- **Data**: `~/.local/share/aimodelvault/vaults/`
-- **Logs**: `~/.local/share/aimodelvault/logs/`
-- **Cache**: `~/.cache/aimodelvault/`
+- **Config**: `~/.config/ironvault/config.yaml`
+- **Data**: `~/.local/share/ironvault/vaults/`
+- **Logs**: `~/.local/share/ironvault/logs/`
+- **Cache**: `~/.cache/ironvault/`
 
 ### Configuration File
 
-Edit `~/.config/aimodelvault/config.yaml`:
+Edit `~/.config/ironvault/config.yaml`:
 
 ```yaml
 version: "1.0"
 
 vault:
-  data_dir: ~/.local/share/aimodelvault/vaults
+  data_dir: ~/.local/share/ironvault/vaults
   default_vault: default
 
 crypto:
@@ -181,9 +181,9 @@ compliance:
 
 1. **Use strong passphrases**: Minimum 20 characters, mix of letters, numbers, symbols
 2. **Never share passphrases**: Each vault should have a unique passphrase
-3. **Backup your vault**: Regularly backup `~/.local/share/aimodelvault/`
-4. **Review audit logs**: Check `~/.local/share/aimodelvault/logs/audit.log`
-5. **Keep software updated**: Run `cargo install aimodelvault` regularly
+3. **Backup your vault**: Regularly backup `~/.local/share/ironvault/`
+4. **Review audit logs**: Check `~/.local/share/ironvault/logs/audit.log`
+5. **Keep software updated**: Run `cargo install ironvault` regularly
 6. **Secure your system**: Use full-disk encryption and secure boot
 
 ## Advanced Features
@@ -192,8 +192,8 @@ compliance:
 
 ```bash
 # Store in one format, retrieve in another (future feature)
-aim store model.pt --format pytorch
-aim get model --output model.onnx --target-format onnx
+iv store model.pt --format pytorch
+iv get model --output model.onnx --target-format onnx
 ```
 
 ### Version Branching
@@ -228,28 +228,28 @@ Unfortunately, there is no way to recover a vault if you forget the passphrase. 
 
 ```bash
 # Fix permissions
-chmod 700 ~/.local/share/aimodelvault/vaults
-chmod 600 ~/.config/aimodelvault/config.yaml
+chmod 700 ~/.local/share/ironvault/vaults
+chmod 600 ~/.config/ironvault/config.yaml
 ```
 
 ### Corrupted Vault
 
 ```bash
 # Check integrity against a signature (--key is required for a real check)
-aim verify my-model --signature my-model.sig --key signing_key.json
+iv verify my-model --signature my-model.sig --key signing_key.json
 
 # Restore from backup
-cp -r /backup/aimodelvault ~/.local/share/
+cp -r /backup/ironvault ~/.local/share/
 ```
 
 ## Support
 
-- Documentation: https://aimodelvault.nervosys.ai/docs
-- Issues: https://github.com/nervosys/AIModelVault/issues
+- Documentation: https://ironvault.nervosys.ai/docs
+- Issues: https://github.com/nervosys/IronVault/issues
 - Security: security@nervosys.ai
 
 ## Next Steps
 
 - Read the [CLI Reference](CLI.md)
-- Explore [Security Features](https://github.com/nervosys/AIModelVault/blob/master/SECURITY.md)
-- View [API Documentation](https://docs.rs/aimodelvault)
+- Explore [Security Features](https://github.com/nervosys/IronVault/blob/master/SECURITY.md)
+- View [API Documentation](https://docs.rs/ironvault)

@@ -318,7 +318,7 @@ mod tests {
         let account = std::env::var("TEST_AZURE_ACCOUNT").unwrap();
         let container = std::env::var("TEST_AZURE_CONTAINER").unwrap();
 
-        let backend = AzureBackend::new(account, container, Some("test-aimodelvault".to_string()))
+        let backend = AzureBackend::new(account, container, Some("test-ironvault".to_string()))
             .await
             .unwrap();
 

@@ -6,22 +6,22 @@ Record, compare, and query model evaluation results across benchmark suites and 
 
 ```bash
 # Record an evaluation run
-aim eval record my-model --version 1 --suite mmlu --metric accuracy=0.85 --metric f1=0.82
+iv eval record my-model --version 1 --suite mmlu --metric accuracy=0.85 --metric f1=0.82
 
 # List evaluations for a model
-aim eval list my-model
+iv eval list my-model
 
 # Compare two model versions
-aim eval compare my-model@1 my-model@2 --suite mmlu
+iv eval compare my-model@1 my-model@2 --suite mmlu
 
 # List all known suites
-aim eval suites
+iv eval suites
 ```
 
 ## CLI Reference
 
 ```
-aim eval <COMMAND>
+iv eval <COMMAND>
 
 Commands:
   record   Record an evaluation run
@@ -30,10 +30,10 @@ Commands:
   suites   List all known evaluation suites
 ```
 
-### `aim eval record`
+### `iv eval record`
 
 ```
-aim eval record <NAME> --version <V> --suite <SUITE> --metric <NAME=VALUE>... [OPTIONS]
+iv eval record <NAME> --version <V> --suite <SUITE> --metric <NAME=VALUE>... [OPTIONS]
 
 Arguments:
   <NAME>              Model name
@@ -46,10 +46,10 @@ Options:
       --higher-is-better      Higher is better (default: true)
 ```
 
-### `aim eval list`
+### `iv eval list`
 
 ```
-aim eval list <NAME> [OPTIONS]
+iv eval list <NAME> [OPTIONS]
 
 Arguments:
   <NAME>              Model name
@@ -59,10 +59,10 @@ Options:
   -f, --format <FMT>          Output format: text (default) or json
 ```
 
-### `aim eval compare`
+### `iv eval compare`
 
 ```
-aim eval compare <A> <B> --suite <SUITE> [OPTIONS]
+iv eval compare <A> <B> --suite <SUITE> [OPTIONS]
 
 Arguments:
   <A>    First model (name@version)
@@ -78,7 +78,7 @@ Options:
 Metrics are specified as `name=value` pairs:
 
 ```bash
-aim eval record my-model --version 1 --suite mmlu \
+iv eval record my-model --version 1 --suite mmlu \
   --metric accuracy=0.85 \
   --metric precision=0.87 \
   --metric recall=0.83 \
@@ -98,7 +98,7 @@ Comparison: my-model v1 vs v2 on mmlu
 ## Python API
 
 ```python
-from aimodelvault import EvalStore
+from ironvault import EvalStore
 
 store = EvalStore("/path/to/vault")
 
@@ -142,7 +142,7 @@ curl -X POST http://localhost:8080/api/v1/evaluations \
 ## Library API
 
 ```rust
-use ai_model_vault::{EvalStore, MetricResult};
+use ironvault::{EvalStore, MetricResult};
 
 let store = EvalStore::new("/path/to/vault")?;
 

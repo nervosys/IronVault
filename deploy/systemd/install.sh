@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Install the aim-server systemd unit with service-scoped configuration.
+# Install the ironvault-server systemd unit with service-scoped configuration.
 #
-# Everything this script writes applies to the aim-server unit alone. Nothing
+# Everything this script writes applies to the ironvault-server unit alone. Nothing
 # is written to /etc/environment, /etc/profile.d, or any other machine-global
 # location, so no other process on the host inherits the collector endpoint or
 # the bearer token.
@@ -16,7 +16,7 @@
 #   --otlp-headers-file PATH   file whose contents are the OTLP headers value,
 #                              e.g. "Authorization=Bearer <token>"
 #   --enable-telemetry         opt this deployment in to reporting
-#   --binary PATH              aim binary to install (default: ./target/release/aim)
+#   --binary PATH              iv binary to install (default: ./target/release/iv)
 #   --dry-run                  print what would change, write nothing
 #
 # The credential is read from a *file*, never from an argument. Command-line
@@ -26,18 +26,18 @@
 
 set -euo pipefail
 
-ENV_DIR=/etc/aim
+ENV_DIR=/etc/ironvault
 ENV_FILE="${ENV_DIR}/server.env"
-UNIT_SRC="$(dirname "$0")/aim-server.service"
-UNIT_DST=/etc/systemd/system/aim-server.service
-STATE_DIR=/var/lib/aim
-SERVICE_USER=aim
-BINARY_SRC="./target/release/aim"
-BINARY_DST=/usr/local/bin/aim
+UNIT_SRC="$(dirname "$0")/ironvault-server.service"
+UNIT_DST=/etc/systemd/system/ironvault-server.service
+STATE_DIR=/var/lib/ironvault
+SERVICE_USER=ironvault
+BINARY_SRC="./target/release/iv"
+BINARY_DST=/usr/local/bin/iv
 
 OTLP_ENDPOINT=""
 OTLP_PROTOCOL="http/protobuf"
-OTLP_SERVICE_NAME="ai-model-vault"
+OTLP_SERVICE_NAME="ironvault"
 OTLP_HEADERS_FILE=""
 TELEMETRY_ENABLED="false"
 DRY_RUN=0
@@ -82,7 +82,7 @@ else
     note "telemetry disabled (default); pass --enable-telemetry to opt in"
 fi
 
-printf 'Installing aim-server:\n'
+printf 'Installing ironvault-server:\n'
 
 # --- service account and directories ----------------------------------------
 if ! id -u "$SERVICE_USER" >/dev/null 2>&1; then
@@ -113,22 +113,22 @@ write_env_file() {
     chmod 0600 "$tmp"
 
     local jwt_secret
-    if [ -f "$ENV_FILE" ] && grep -q '^AIM_JWT_SECRET=.\+' "$ENV_FILE"; then
-        jwt_secret="$(grep '^AIM_JWT_SECRET=' "$ENV_FILE" | head -1 | cut -d= -f2-)"
-        note "preserving existing AIM_JWT_SECRET"
+    if [ -f "$ENV_FILE" ] && grep -q '^IRONVAULT_JWT_SECRET=.\+' "$ENV_FILE"; then
+        jwt_secret="$(grep '^IRONVAULT_JWT_SECRET=' "$ENV_FILE" | head -1 | cut -d= -f2-)"
+        note "preserving existing IRONVAULT_JWT_SECRET"
     else
         jwt_secret="$(openssl rand -base64 48 | tr -d '\n')"
-        note "generated a new AIM_JWT_SECRET"
+        note "generated a new IRONVAULT_JWT_SECRET"
     fi
 
     {
         echo "# Managed by deploy/systemd/install.sh. Service-scoped: loaded by the"
-        echo "# aim-server unit only, never by /etc/environment or a profile script."
+        echo "# ironvault-server unit only, never by /etc/environment or a profile script."
         echo "# Mode 0600, owned by root. Contains credentials -- do not commit."
         echo
-        echo "AIM_JWT_SECRET=${jwt_secret}"
+        echo "IRONVAULT_JWT_SECRET=${jwt_secret}"
         echo
-        echo "AIM_TELEMETRY_ENABLED=${TELEMETRY_ENABLED}"
+        echo "IRONVAULT_TELEMETRY_ENABLED=${TELEMETRY_ENABLED}"
 
         if [ -n "$OTLP_ENDPOINT" ]; then
             echo
@@ -151,7 +151,7 @@ write_env_file() {
 
 if [ "$DRY_RUN" -eq 1 ]; then
     note "would write ${ENV_FILE} (0600 root:root) with:"
-    note "    AIM_TELEMETRY_ENABLED=${TELEMETRY_ENABLED}"
+    note "    IRONVAULT_TELEMETRY_ENABLED=${TELEMETRY_ENABLED}"
     [ -n "$OTLP_ENDPOINT" ] && note "    OTEL_EXPORTER_OTLP_ENDPOINT=${OTLP_ENDPOINT}"
     [ -n "$OTLP_ENDPOINT" ] && note "    OTEL_EXPORTER_OTLP_PROTOCOL=${OTLP_PROTOCOL}"
     [ -n "$OTLP_ENDPOINT" ] && note "    OTEL_SERVICE_NAME=${OTLP_SERVICE_NAME}"
@@ -167,7 +167,7 @@ note "installing unit -> ${UNIT_DST}"
 run install -m 0644 -o root -g root "$UNIT_SRC" "$UNIT_DST"
 run systemctl daemon-reload
 
-printf '\nDone. Start it with:\n  sudo systemctl enable --now aim-server\n'
+printf '\nDone. Start it with:\n  sudo systemctl enable --now ironvault-server\n'
 
 if [ -n "$OTLP_HEADERS_FILE" ] && [ "$DRY_RUN" -eq 0 ]; then
     printf '\nThe token is now in %s and nowhere else on this host.\n' "$ENV_FILE"

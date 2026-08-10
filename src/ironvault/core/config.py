@@ -16,16 +16,16 @@ class VaultConfig:
     XDG-compliant vault configuration.
     
     Directory structure:
-    - Config: ~/.config/aimodelvault/ (or platform equivalent)
-    - Data: ~/.local/share/aimodelvault/ (or platform equivalent)
-    - Cache: ~/.cache/aimodelvault/ (or platform equivalent)
+    - Config: ~/.config/ironvault/ (or platform equivalent)
+    - Data: ~/.local/share/ironvault/ (or platform equivalent)
+    - Cache: ~/.cache/ironvault/ (or platform equivalent)
     
     Compliance:
         - XDG Base Directory Specification
         - CMMC AC.3.014: Separate duties of individuals
     """
     
-    APP_NAME = "aimodelvault"
+    APP_NAME = "ironvault"
     APP_AUTHOR = "nervosys"
     
     def __init__(self, config_override: Optional[Dict[str, Any]] = None) -> None:

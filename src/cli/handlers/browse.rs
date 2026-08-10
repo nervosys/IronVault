@@ -1,9 +1,9 @@
-//! CLI handler for TUI browse (aim browse).
+//! CLI handler for TUI browse (iv browse).
 
-use ai_model_vault::{Result, VaultConfig};
+use ironvault::{Result, VaultConfig};
 
 pub fn handle_browse(config: VaultConfig) -> Result<()> {
-    let output = ai_model_vault::tui::browse(&config.dirs.vault_dir)?;
+    let output = ironvault::tui::browse(&config.dirs.vault_dir)?;
     println!("{}", output);
     Ok(())
 }

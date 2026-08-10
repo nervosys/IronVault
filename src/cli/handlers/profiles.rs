@@ -1,7 +1,7 @@
-//! CLI handler for config profiles (aim profile).
+//! CLI handler for config profiles (iv profile).
 
-use ai_model_vault::profiles::Profile;
-use ai_model_vault::{ProfileStore, Result, VaultConfig, VaultError};
+use ironvault::profiles::Profile;
+use ironvault::{ProfileStore, Result, VaultConfig, VaultError};
 
 use crate::cli::args::ProfileCommands;
 

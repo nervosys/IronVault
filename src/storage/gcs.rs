@@ -166,7 +166,7 @@ mod tests {
         let bucket = std::env::var("TEST_GCS_BUCKET").unwrap();
         let project = std::env::var("TEST_GCS_PROJECT").unwrap();
 
-        let backend = GcsBackend::new(bucket, project, Some("test-aimodelvault".to_string()))
+        let backend = GcsBackend::new(bucket, project, Some("test-ironvault".to_string()))
             .await
             .unwrap();
 

@@ -1,7 +1,7 @@
 #![no_main]
 use libfuzzer_sys::fuzz_target;
 
-use ai_model_vault::diff::ModelDiffer;
+use ironvault::diff::ModelDiffer;
 
 fuzz_target!(|data: &[u8]| {
     // Split the input in half to create two "model" files to diff.

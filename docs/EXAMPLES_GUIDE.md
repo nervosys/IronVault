@@ -1,10 +1,10 @@
 # 🚀 Quick Start Examples Guide
 
-This guide shows you how to explore AI Model Vault's features using the included examples.
+This guide shows you how to explore IronVault's features using the included examples.
 
 ## 📚 Available Examples
 
-AI Model Vault includes 5 comprehensive examples demonstrating all features:
+IronVault includes 5 comprehensive examples demonstrating all features:
 
 ### 1. `basic_usage.rs` - Core Vault Operations ⭐ **START HERE**
 **What it shows**: Essential vault operations for everyday use
@@ -152,9 +152,9 @@ cargo run --example mcp_tools_demo
 cargo run --example basic_usage
 
 # 2. Try it yourself with CLI
-aim init
-aim store my-model ./model.pt --format pytorch
-aim get my-model ./retrieved.pt
+iv init
+iv store my-model ./model.pt --format pytorch
+iv get my-model ./retrieved.pt
 ```
 
 ### Workflow 2: Backup & Restore
@@ -163,8 +163,8 @@ aim get my-model ./retrieved.pt
 cargo run --example utilities_demo
 
 # 2. Create your own backup
-aim archive model1 model2 backup.tar
-aim extract backup.tar --output ./restored
+iv archive model1 model2 backup.tar
+iv extract backup.tar --output ./restored
 ```
 
 ### Workflow 3: Find Duplicates
@@ -173,7 +173,7 @@ aim extract backup.tar --output ./restored
 cargo run --example utilities_demo
 
 # 2. Find your duplicates
-aim deduplicate --detailed
+iv deduplicate --detailed
 ```
 
 ### Workflow 4: RAG Application
@@ -266,7 +266,7 @@ By running all 5 examples, you'll understand:
 ✅ Which FIPS-approved algorithms are used, and why that is not FIPS 140-3 validation  
 
 **Time investment**: 30-40 minutes to run all examples  
-**Knowledge gain**: Complete understanding of AI Model Vault  
+**Knowledge gain**: Complete understanding of IronVault  
 
 ---
 

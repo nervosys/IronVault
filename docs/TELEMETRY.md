@@ -1,19 +1,19 @@
 # Telemetry and OTLP export
 
-`aim` ships with **anonymous, opt-in** telemetry — off by default unless the
+`iv` ships with **anonymous, opt-in** telemetry — off by default unless the
 user explicitly enables it. Nothing is collected or transmitted until then.
 
 ## Opt-out (multiple ways, any one suffices)
 
 ```bash
-export AIM_TELEMETRY_ENABLED=false
-export AIM_TELEMETRY_DISABLED=1
+export IRONVAULT_TELEMETRY_ENABLED=false
+export IRONVAULT_TELEMETRY_DISABLED=1
 export DO_NOT_TRACK=1
 ```
 
-Or `aim telemetry disable`, or set `telemetry.enabled = false` in `config.toml`.
+Or `iv telemetry disable`, or set `telemetry.enabled = false` in `config.toml`.
 
-`aim telemetry status` reports the current state and the device ID.
+`iv telemetry status` reports the current state and the device ID.
 
 ## What is sent (when enabled)
 
@@ -61,10 +61,10 @@ The **exact size is never sent**, only the bucket. The format label comes from
 `ModelFormat::telemetry_name`, not `name()` — the latter returns whatever
 string the user passed for a custom format, and a test asserts it cannot leak.
 
-`Conversion`, on `aim convert` — source and target format labels from the same
+`Conversion`, on `iv convert` — source and target format labels from the same
 fixed set, plus duration and outcome.
 
-`ApiCall`, per HTTP request when running `aim serve`:
+`ApiCall`, per HTTP request when running `iv serve`:
 
 | Field | Example |
 |---|---|
@@ -133,7 +133,7 @@ Build with the `otel` feature, then configure with the standard OpenTelemetry
 environment variables. Any OTLP collector or vendor endpoint works.
 
 ```bash
-cargo install ai-model-vault --features otel
+cargo install ironvault --features otel
 ```
 
 | Variable | Meaning |
@@ -179,7 +179,7 @@ chmod 600 /tmp/otlp-headers
 sudo ./deploy/systemd/install.sh \
     --otlp-endpoint     https://collector.example.com/otlp \
     --otlp-protocol     http/protobuf \
-    --otlp-service-name ai-model-vault \
+    --otlp-service-name ironvault \
     --otlp-headers-file /tmp/otlp-headers \
     --enable-telemetry
 
@@ -194,16 +194,16 @@ arguments are world-readable through `/proc/<pid>/cmdline` while the process
 runs. A token passed as `--otlp-headers` would be visible to every local user,
 which is the exposure `EnvironmentFile` exists to prevent.
 
-The script creates the `aim` system user, `/var/lib/aim`, and
-`/etc/aim/server.env` at 0600 root-owned, generates `AIM_JWT_SECRET` if there
+The script creates the `ironvault` system user, `/var/lib/ironvault`, and
+`/etc/ironvault/server.env` at 0600 root-owned, generates `IRONVAULT_JWT_SECRET` if there
 isn't one (preserving an existing value across re-runs), and reloads systemd.
 It is idempotent.
 
 Omitting `--enable-telemetry` configures the exporter without turning
 collection on — the two remain separate decisions.
 
-To do it by hand instead, copy `aim-server.env.example` to
-`/etc/aim/server.env`, `chmod 0600`, `chown root:root`, and fill it in.
+To do it by hand instead, copy `ironvault-server.env.example` to
+`/etc/ironvault/server.env`, `chmod 0600`, `chown root:root`, and fill it in.
 
 The unit uses `EnvironmentFile=`, not `Environment=`. `Environment=` values are
 visible in `systemctl show` and `systemd-analyze dump` to any local user, which
@@ -212,7 +212,7 @@ for a bearer token means every account on the machine can read it.
 ### Containers and Kubernetes
 
 The `Dockerfile` and Helm chart were **removed in 4.5.0**, so there is no
-first-party container image or chart to configure. If you run `aim` in a
+first-party container image or chart to configure. If you run `iv` in a
 container you build yourself, the same rule applies as everywhere else: pass
 `OTEL_EXPORTER_OTLP_HEADERS` from a mounted secret or an injected environment
 variable, never a baked-in image layer or a committed values file.
@@ -224,9 +224,9 @@ compromised if it has ever appeared in a shell history, a chat window, a CI
 log, a screenshot, or a commit — including one later amended or force-pushed,
 since the object usually survives in the reflog and on any fork.
 
-Rotate at the provider, then update `/etc/aim/server.env` or whatever supplies
-the environment where `aim` runs. No application change is needed; the value is
+Rotate at the provider, then update `/etc/ironvault/server.env` or whatever supplies
+the environment where `iv` runs. No application change is needed; the value is
 read from the environment at process start.
 
-See [src/telemetry.rs](https://github.com/nervosys/AIModelVault/blob/master/src/telemetry.rs)
-and [src/telemetry_otlp.rs](https://github.com/nervosys/AIModelVault/blob/master/src/telemetry_otlp.rs).
+See [src/telemetry.rs](https://github.com/nervosys/IronVault/blob/master/src/telemetry.rs)
+and [src/telemetry_otlp.rs](https://github.com/nervosys/IronVault/blob/master/src/telemetry_otlp.rs).

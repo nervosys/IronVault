@@ -1,7 +1,7 @@
 //! Configuration and error handling tests
 
-use ai_model_vault::config::{DirectoryPaths, VaultConfig};
-use ai_model_vault::error::VaultError;
+use ironvault::config::{DirectoryPaths, VaultConfig};
+use ironvault::error::VaultError;
 
 #[test]
 fn test_default_config() {

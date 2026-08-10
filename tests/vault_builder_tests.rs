@@ -4,8 +4,8 @@
 //! EventBus subscribers, MetricsSubscriber, AuditLogSubscriber, streaming)
 //! work correctly when integrated through the live vault pipeline.
 
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-use ai_model_vault::{EventBus, EventSubscriber, VaultBuilder, VaultConfig, VaultEvent};
+use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::{EventBus, EventSubscriber, VaultBuilder, VaultConfig, VaultEvent};
 use std::sync::{Arc, Mutex};
 use tempfile::tempdir;
 
@@ -74,7 +74,7 @@ fn test_vault_new_has_no_metrics() {
     let mut config = VaultConfig::new().unwrap();
     config.dirs.vault_dir = dir.path().to_path_buf();
 
-    let vault = ai_model_vault::Vault::new(Some(config)).unwrap();
+    let vault = ironvault::Vault::new(Some(config)).unwrap();
     // Vault::new() doesn't wire MetricsSubscriber, so metrics is None
     assert!(vault.metrics().is_none());
 }
@@ -145,7 +145,7 @@ impl RecordingSubscriber {
 }
 
 impl EventSubscriber for RecordingSubscriber {
-    fn on_event(&self, event: &VaultEvent) -> ai_model_vault::Result<()> {
+    fn on_event(&self, event: &VaultEvent) -> ironvault::Result<()> {
         let name = match event {
             VaultEvent::VaultCreated { .. } => "VaultCreated",
             VaultEvent::VaultUnlocked { .. } => "VaultUnlocked",
@@ -640,7 +640,7 @@ fn test_sqlite_backend_delete() {
 
 #[test]
 fn test_aimv_uri_parse_roundtrip() {
-    use ai_model_vault::AimvUri;
+    use ironvault::AimvUri;
 
     let uri = AimvUri::parse("aimv://my-vault/llama-3@2").unwrap();
     assert_eq!(uri.vault, Some("my-vault".to_string()));
@@ -650,7 +650,7 @@ fn test_aimv_uri_parse_roundtrip() {
 
 #[test]
 fn test_aimv_uri_no_version() {
-    use ai_model_vault::AimvUri;
+    use ironvault::AimvUri;
 
     let uri = AimvUri::parse("aimv://default/my-model").unwrap();
     assert_eq!(uri.vault, Some("default".to_string()));
@@ -660,7 +660,7 @@ fn test_aimv_uri_no_version() {
 
 #[test]
 fn test_aimv_uri_invalid() {
-    use ai_model_vault::AimvUri;
+    use ironvault::AimvUri;
 
     assert!(AimvUri::parse("http://wrong").is_err());
     assert!(AimvUri::parse("").is_err());

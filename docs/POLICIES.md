@@ -1,6 +1,6 @@
 # Retention Policies
 
-Declarative version pruning rules, enforced explicitly via `aim policy apply` (never automatic).
+Declarative version pruning rules, enforced explicitly via `iv policy apply` (never automatic).
 
 ## Policy fields
 
@@ -13,15 +13,15 @@ Declarative version pruning rules, enforced explicitly via `aim policy apply` (n
 ## CLI
 
 ```bash
-aim policy set my-llm --max-versions 5 --keep-minimum 2
-aim policy list
-aim policy apply my-llm --dry-run
-aim policy apply-all
-aim policy remove my-llm
+iv policy set my-llm --max-versions 5 --keep-minimum 2
+iv policy list
+iv policy apply my-llm --dry-run
+iv policy apply-all
+iv policy remove my-llm
 ```
 
 ## MCP tools
 
 `policy_set`, `policy_remove`, `policy_list`, `policy_apply`, `policy_apply_all`.
 
-`--dry-run` reports the actions that would be taken without deleting anything. See [src/policies.rs](https://github.com/nervosys/AIModelVault/blob/master/src/policies.rs).
+`--dry-run` reports the actions that would be taken without deleting anything. See [src/policies.rs](https://github.com/nervosys/IronVault/blob/master/src/policies.rs).

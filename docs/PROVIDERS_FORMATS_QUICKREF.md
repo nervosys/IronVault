@@ -122,7 +122,7 @@ TensorFlow   →  TFLite          (TFLiteConverter)
 ### Format Detection
 
 ```rust
-use ai_model_vault::formats::ModelFormat;
+use ironvault::formats::ModelFormat;
 
 let format = ModelFormat::from_extension("safetensors");
 println!("{}", format.name()); // "Safetensors"
@@ -131,7 +131,7 @@ println!("{}", format.name()); // "Safetensors"
 ### Model Metadata
 
 ```rust
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
+use ironvault::formats::{ModelFormat, ModelMetadata};
 
 let metadata = ModelMetadata::new(
     "llama-2-7b".to_string(),
@@ -147,7 +147,7 @@ let metadata = ModelMetadata::new(
 ### Format Converter
 
 ```rust
-use ai_model_vault::formats::FormatConverter;
+use ironvault::formats::FormatConverter;
 
 let mut converter = FormatConverter::new();
 
@@ -280,4 +280,4 @@ aimv convert model.safetensors --to gguf --quant q4_k_m
 
 ---
 
-**AI Model Vault (AIMV)** - Universal model storage supporting 23+ formats
+**IronVault (AIMV)** - Universal model storage supporting 23+ formats

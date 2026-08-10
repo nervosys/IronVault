@@ -1,7 +1,7 @@
 .PHONY: help build test clean install run format lint security doc examples docs-mkdocs docs-serve
 
 help:
-	@echo "AI Model Vault - Makefile commands"
+	@echo "IronVault - Makefile commands"
 	@echo ""
 	@echo "Development:"
 	@echo "  make build      - Build the project"
@@ -21,7 +21,7 @@ help:
 	@echo "  make examples    - Run examples"
 	@echo ""
 	@echo "Installation:"
-	@echo "  make install    - Install aim (AI Model Vault)"
+	@echo "  make install    - Install iv (IronVault)"
 	@echo "  make clean      - Clean build artifacts"
 
 build:

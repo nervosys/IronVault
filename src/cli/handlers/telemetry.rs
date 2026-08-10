@@ -1,7 +1,7 @@
 //! Telemetry CLI command handlers.
 
 use crate::cli::args::TelemetryCommands;
-use ai_model_vault::{telemetry, Result, VaultConfig};
+use ironvault::{telemetry, Result, VaultConfig};
 use std::fs;
 
 /// Handle telemetry commands
@@ -51,9 +51,9 @@ fn show_status(config: &VaultConfig) -> Result<()> {
     println!("  • Personal information");
 
     println!("\nTo opt out:");
-    println!("  aim telemetry disable");
-    println!("  # Or set AIM_TELEMETRY_ENABLED=false");
-    println!("  # Or set AIM_TELEMETRY_DISABLED=1");
+    println!("  iv telemetry disable");
+    println!("  # Or set IRONVAULT_TELEMETRY_ENABLED=false");
+    println!("  # Or set IRONVAULT_TELEMETRY_DISABLED=1");
     println!("  # Or set DO_NOT_TRACK=1");
 
     Ok(())
@@ -66,7 +66,7 @@ fn enable_telemetry(config: &mut VaultConfig) -> Result<()> {
     telemetry::init_default(Some(&config.dirs.config_dir))?;
 
     println!("✓ Telemetry enabled");
-    println!("  Thank you for helping improve AI Model Vault!");
+    println!("  Thank you for helping improve IronVault!");
 
     Ok(())
 }
@@ -109,10 +109,10 @@ fn reset_device_id(config: &mut VaultConfig) -> Result<()> {
 }
 
 fn is_env_disabled() -> bool {
-    std::env::var("AIM_TELEMETRY_ENABLED")
+    ironvault::env::var("IRONVAULT_TELEMETRY_ENABLED").ok_or(())
         .map(|v| v.to_lowercase() == "false" || v == "0")
         .unwrap_or(false)
-        || std::env::var("AIM_TELEMETRY_DISABLED")
+        || ironvault::env::var("IRONVAULT_TELEMETRY_DISABLED").ok_or(())
             .map(|v| v == "1" || v.to_lowercase() == "true")
             .unwrap_or(false)
         || std::env::var("DO_NOT_TRACK")

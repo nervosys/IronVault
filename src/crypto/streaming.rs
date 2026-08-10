@@ -38,6 +38,12 @@ use crate::error::{Result, VaultError};
 pub const DEFAULT_CHUNK_SIZE: usize = 4 * 1024 * 1024;
 
 /// Stream header magic bytes.
+///
+/// Deliberately **not** renamed for IronVault, for the same reason as
+/// [`crate::cloud_envelope::MAGIC`]: this is the first four bytes of every
+/// chunked model already encrypted on disk. Renaming it orphans them —
+/// [`is_chunked_format`] would stop recognising them and decryption would
+/// reject them as corrupt.
 pub const STREAM_MAGIC: &[u8; 4] = b"AIMV";
 
 /// Current wire format version.
@@ -262,7 +268,7 @@ mod tests {
         let passphrase = b"test_passphrase_with_sufficient_entropy".to_vec();
         let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
-        let data = b"Hello, AI Model Vault streaming encryption!";
+        let data = b"Hello, IronVault streaming encryption!";
         let encrypted = encrypt_chunked(&crypto, data, &key, 16).unwrap();
 
         assert!(is_chunked_format(&encrypted));

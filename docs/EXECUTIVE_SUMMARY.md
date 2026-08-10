@@ -1,6 +1,6 @@
-# 🎉 AI Model Vault - Feature Complete & Launch Ready
+# 🎉 IronVault - Feature Complete & Launch Ready
 
-**Project**: AI Model Vault  
+**Project**: IronVault  
 **Version**: 0.1.0  
 **Date**: November 3, 2025  
 **Status**: ✅ **100% READY FOR PRODUCTION LAUNCH**
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-AI Model Vault is a **production-ready**, **FIPS-approved algorithms** (not a CMVP-validated module) secure storage system for AI models with comprehensive features, extensive testing, and complete documentation. All critical systems are operational and ready for immediate deployment.
+IronVault is a **production-ready**, **FIPS-approved algorithms** (not a CMVP-validated module) secure storage system for AI models with comprehensive features, extensive testing, and complete documentation. All critical systems are operational and ready for immediate deployment.
 
 ### Key Highlights
 - ✅ **148 tests passing** (100% success rate)
@@ -198,7 +198,7 @@ AI Model Vault is a **production-ready**, **FIPS-approved algorithms** (not a CM
 ### Installation Options
 ```bash
 # Basic install (no system dependencies)
-cargo install ai-model-vault
+cargo install ironvault
 
 # With cloud storage
 cargo build --features cloud
@@ -207,8 +207,8 @@ cargo build --features cloud
 
 
 # From source
-git clone https://github.com/nervosys/AIModelVault.git
-cd AIModelVault && cargo build --release
+git clone https://github.com/nervosys/IronVault.git
+cd IronVault && cargo build --release
 ```
 
 ---
@@ -300,8 +300,8 @@ cd AIModelVault && cargo build --release
 
 ## 📞 Support & Contact
 
-**Repository**: https://github.com/nervosys/AIModelVault  
-**Documentation**: https://aimodelvault.nervosys.ai  
+**Repository**: https://github.com/nervosys/IronVault  
+**Documentation**: https://ironvault.nervosys.ai  
 **Email**: dev@nervosys.ai  
 **Security**: security@nervosys.ai  
 **License**: AGPL-3.0-or-later  
@@ -310,7 +310,7 @@ cd AIModelVault && cargo build --release
 
 ## 🏆 Final Verdict
 
-# ✅ AI Model Vault is 100% READY FOR LAUNCH
+# ✅ IronVault is 100% READY FOR LAUNCH
 
 **All systems operational. All tests passing. All documentation complete.**
 

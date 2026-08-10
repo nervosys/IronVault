@@ -1,4 +1,4 @@
-# 🔐 aimodelvault - Complete Implementation Summary
+# 🔐 ironvault - Complete Implementation Summary
 
 ## ✅ Project Status: **COMPLETE & READY**
 
@@ -33,7 +33,7 @@ A universal, cross-platform, XDG-compliant secure vault for AI model storage and
 ## 📁 Project Structure
 
 ```
-aimodelvault/
+ironvault/
 ├── src/
 │   ├── lib.rs                  # Library entry point
 │   ├── main.rs                 # CLI application  
@@ -124,9 +124,9 @@ cargo test --all-features
 cargo install --path .
 
 # Run CLI
-aim init
-aim store my-model ./model.pt --format pytorch
-aim list
+iv init
+iv store my-model ./model.pt --format pytorch
+iv list
 ```
 
 ### Option 3: Using Makefile (Unix)
@@ -158,7 +158,7 @@ User Passphrase
 
 ### Data Storage
 ```
-~/.local/share/aimodelvault/
+~/.local/share/ironvault/
 └── vaults/
     └── default/
         ├── models/
@@ -195,10 +195,10 @@ User Passphrase
 | **Quick Start**       | Get up and running in 5 minutes     | [QUICKSTART.md](QUICKSTART.md)           |
 | **CLI Reference**     | Complete command-line documentation | [CLI.md](CLI.md)                         |
 | **Utilities Guide**   | Model utilities documentation       | [UTILITIES.md](UTILITIES.md) ⭐           |
-| **Development Guide** | For contributors and developers     | [DEVELOPMENT.md](https://github.com/nervosys/AIModelVault/blob/master/DEVELOPMENT.md) ⭐    |
+| **Development Guide** | For contributors and developers     | [DEVELOPMENT.md](https://github.com/nervosys/IronVault/blob/master/DEVELOPMENT.md) ⭐    |
 | **Implementation**    | Architecture and technical details  | [IMPLEMENTATION.md](IMPLEMENTATION.md) ⭐ |
-| **Security Policy**   | Security standards and reporting    | [SECURITY.md](https://github.com/nervosys/AIModelVault/blob/master/SECURITY.md)            |
-| **Contributing**      | How to contribute                   | [CONTRIBUTING.md](https://github.com/nervosys/AIModelVault/blob/master/CONTRIBUTING.md)    |
+| **Security Policy**   | Security standards and reporting    | [SECURITY.md](https://github.com/nervosys/IronVault/blob/master/SECURITY.md)            |
+| **Contributing**      | How to contribute                   | [CONTRIBUTING.md](https://github.com/nervosys/IronVault/blob/master/CONTRIBUTING.md)    |
 
 ---
 
@@ -241,35 +241,35 @@ cargo clippy -- -D warnings   # Lint code
 ### CLI Usage
 ```bash
 # Initialize a new vault
-aim init --name production
+iv init --name production
 
 # Store a model with metadata
-aim store gpt2-finetuned ./model.pt \
+iv store gpt2-finetuned ./model.pt \
   --format pytorch \
   --description "Fine-tuned GPT-2 on custom dataset" \
   --framework "PyTorch 2.1" \
   --task "text-generation"
 
 # List all models
-aim list
+iv list
 
 # View version history
-aim versions gpt2-finetuned
+iv versions gpt2-finetuned
 
 # Retrieve a specific version
-aim get gpt2-finetuned ./output.pt --version 3
+iv get gpt2-finetuned ./output.pt --version 3
 
 # Check compliance status
-aim compliance
+iv compliance
 
 # View vault statistics
-aim stats
+iv stats
 ```
 
 ### Rust API Usage
 ```rust
-use aimodelvault::{Vault, VaultConfig};
-use aimodelvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::{Vault, VaultConfig};
+use ironvault::formats::{ModelFormat, ModelMetadata};
 
 // Create and unlock vault
 let mut vault = Vault::new(None)?;
@@ -301,8 +301,8 @@ let versions = vault.list_versions("my-model");
 
 ### Setup
 ```bash
-git clone https://github.com/nervosys/AIModelVault.git
-cd AIModelVault
+git clone https://github.com/nervosys/IronVault.git
+cd IronVault
 cargo build
 cargo test
 ```
@@ -325,7 +325,7 @@ cargo test
 cargo doc --open
 ```
 
-See [DEVELOPMENT.md](https://github.com/nervosys/AIModelVault/blob/master/DEVELOPMENT.md) for detailed development guide.
+See [DEVELOPMENT.md](https://github.com/nervosys/IronVault/blob/master/DEVELOPMENT.md) for detailed development guide.
 
 ---
 
@@ -360,7 +360,7 @@ See [DEVELOPMENT.md](https://github.com/nervosys/AIModelVault/blob/master/DEVELO
 ### Build Release Binary
 ```bash
 cargo build --release
-# Binary: target/release/aimodelvault
+# Binary: target/release/ironvault
 ```
 
 ### Install Globally
@@ -387,13 +387,13 @@ cargo build --release --target x86_64-pc-windows-msvc
 
 ## 📝 License
 
-AGPL-3.0-or-later - see [LICENSE](https://github.com/nervosys/AIModelVault/blob/master/LICENSE) file
+AGPL-3.0-or-later - see [LICENSE](https://github.com/nervosys/IronVault/blob/master/LICENSE) file
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](https://github.com/nervosys/AIModelVault/blob/master/CONTRIBUTING.md) for guidelines.
+Contributions are welcome! Please see [CONTRIBUTING.md](https://github.com/nervosys/IronVault/blob/master/CONTRIBUTING.md) for guidelines.
 
 ---
 
@@ -403,15 +403,15 @@ For security issues, please email: **security@nervosys.ai**
 
 Do NOT open public issues for security vulnerabilities.
 
-See [SECURITY.md](https://github.com/nervosys/AIModelVault/blob/master/SECURITY.md) for full security policy.
+See [SECURITY.md](https://github.com/nervosys/IronVault/blob/master/SECURITY.md) for full security policy.
 
 ---
 
 ## 📞 Support
 
-- 📖 [Documentation](https://aimodelvault.nervosys.ai)
-- 💬 [GitHub Discussions](https://github.com/nervosys/AIModelVault/discussions)
-- 🐛 [Issue Tracker](https://github.com/nervosys/AIModelVault/issues)
+- 📖 [Documentation](https://ironvault.nervosys.ai)
+- 💬 [GitHub Discussions](https://github.com/nervosys/IronVault/discussions)
+- 🐛 [Issue Tracker](https://github.com/nervosys/IronVault/issues)
 - 📧 Email: dev@nervosys.ai
 
 ---

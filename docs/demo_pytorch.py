@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-AI Model Vault - PyTorch Integration Demo
+IronVault - PyTorch Integration Demo
 
-This script demonstrates how to use AI Model Vault with PyTorch models:
+This script demonstrates how to use IronVault with PyTorch models:
 - Saving PyTorch models to the vault
 - Loading models from the vault
 - Version control for model checkpoints
@@ -166,22 +166,22 @@ def print_error(message: str):
     print(f"{Colors.RED}{symbol}{Colors.RESET} {message}")
 
 
-class AIModelVault:
-    """Python wrapper for AI Model Vault CLI"""
+class IronVault:
+    """Python wrapper for IronVault CLI"""
     
     def __init__(self, vault_path: Optional[Path] = None):
-        self.vault_path = vault_path or Path.home() / ".aimodelvault"
+        self.vault_path = vault_path or Path.home() / ".ironvault"
         self.cli_path = self._find_cli()
         self.passphrase = b"demo_pytorch_passphrase_2024"
         
     def _find_cli(self) -> Path:
-        """Find the AI Model Vault CLI executable"""
+        """Find the IronVault CLI executable"""
         # Check if built in target/release
         cli_paths = [
-            Path("target/release/aim.exe"),
-            Path("target/release/aim"),
-            Path("aim.exe"),
-            Path("aim"),
+            Path("target/release/iv.exe"),
+            Path("target/release/iv"),
+            Path("iv.exe"),
+            Path("iv"),
         ]
         
         for cli_path in cli_paths:
@@ -189,22 +189,22 @@ class AIModelVault:
                 return cli_path
         
         # Try to build if not found
-        print_info("AI Model Vault CLI not found, building...")
+        print_info("IronVault CLI not found, building...")
         try:
             subprocess.run(
-                ["cargo", "build", "--release", "--bin", "aim"],
+                ["cargo", "build", "--release", "--bin", "iv"],
                 check=True,
                 capture_output=True
             )
-            if Path("target/release/aim.exe").exists():
-                return Path("target/release/aim.exe")
-            elif Path("target/release/aim").exists():
-                return Path("target/release/aim")
+            if Path("target/release/iv.exe").exists():
+                return Path("target/release/iv.exe")
+            elif Path("target/release/iv").exists():
+                return Path("target/release/iv")
         except subprocess.CalledProcessError:
-            print_error("Failed to build AI Model Vault CLI")
+            print_error("Failed to build IronVault CLI")
             sys.exit(1)
         
-        print_error("Could not find or build AI Model Vault CLI")
+        print_error("Could not find or build IronVault CLI")
         sys.exit(1)
     
     def store_model(
@@ -383,7 +383,7 @@ def main():
     print()
     print(f"{Colors.BOLD}{Colors.CYAN}")
     print_box([
-        "AI Model Vault - PyTorch Integration Demo",
+        "IronVault - PyTorch Integration Demo",
         "",
         "Demonstrates secure storage of PyTorch models with",
         "version control, fine-tuning tracking, and quantization"
@@ -391,8 +391,8 @@ def main():
     print(f"{Colors.RESET}")
     
     # Initialize vault
-    print_header("Step 1: Initialize AI Model Vault")
-    vault = AIModelVault()
+    print_header("Step 1: Initialize IronVault")
+    vault = IronVault()
     print_success("Vault initialized")
     print_info(f"Vault path: {vault.vault_path}")
     
@@ -569,15 +569,15 @@ def main():
     print_header("Step 11: Code Example")
     
     print(f"{Colors.YELLOW}")
-    print("Example PyTorch workflow with AI Model Vault:")
+    print("Example PyTorch workflow with IronVault:")
     print(f"{Colors.RESET}")
     print()
     print("```python")
     print("import torch")
-    print("from ai_model_vault import AIModelVault")
+    print("from ironvault import IronVault")
     print()
     print("# Initialize vault")
-    print("vault = AIModelVault()")
+    print("vault = IronVault()")
     print()
     print("# Train your model")
     print("model = YourModel()")

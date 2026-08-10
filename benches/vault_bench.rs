@@ -1,17 +1,17 @@
 //! Vault operation benchmarks — store, retrieve, format detection, model card serialization
 
-use ai_model_vault::crypto::FipsCrypto;
-use ai_model_vault::formats::{ModelFormat, ModelMetadata};
-use ai_model_vault::model_card::{
+use ironvault::crypto::FipsCrypto;
+use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::model_card::{
     Evaluation, IntendedUse, Metric, ModelCard, ModelDetails, TrainingData,
 };
-use ai_model_vault::{Vault, VaultConfig};
+use ironvault::{Vault, VaultConfig};
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use tempfile::tempdir;
 
 fn create_test_vault() -> (tempfile::TempDir, Vault) {
     let tmp = tempdir().unwrap();
-    let dirs = ai_model_vault::config::DirectoryPaths {
+    let dirs = ironvault::config::DirectoryPaths {
         config_dir: tmp.path().join("config"),
         data_dir: tmp.path().join("data"),
         cache_dir: tmp.path().join("cache"),

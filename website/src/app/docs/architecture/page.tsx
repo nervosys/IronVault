@@ -3,7 +3,7 @@ export default function ArchitecturePage() {
     <>
       <h1 className="text-4xl font-bold mb-4">Architecture</h1>
       <p className="text-lg text-[var(--color-text-secondary)] mb-8">
-        AI Model Vault is built with a layered architecture designed for security, extensibility, and performance.
+        IronVault is built with a layered architecture designed for security, extensibility, and performance.
       </p>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="overview">System Overview</h2>
@@ -11,7 +11,7 @@ export default function ArchitecturePage() {
         <pre className="text-[var(--color-text-secondary)]">{`┌─────────────────────────────────────────────────────────┐
 │                    User Interface                        │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐ │
-│  │ CLI (aim)│  │ REST API │  │  Python  │  │   Web   │ │
+│  │ CLI (iv)│  │ REST API │  │  Python  │  │   Web   │ │
 │  └──────────┘  └──────────┘  └──────────┘  │Dashboard│ │
 │                                             └─────────┘ │
 ├─────────────────────────────────────────────────────────┤

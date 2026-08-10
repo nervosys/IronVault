@@ -6,16 +6,16 @@ Download models from HuggingFace Hub, Ollama registry, or HTTPS URLs with SHA-25
 
 ```bash
 # Download from HuggingFace
-aim pull hf://TheBloke/Llama-2-7B-GGUF/llama-2-7b.Q4_K_M.gguf
+iv pull hf://TheBloke/Llama-2-7B-GGUF/llama-2-7b.Q4_K_M.gguf
 
 # Download from Ollama
-aim pull ollama://llama2:7b
+iv pull ollama://llama2:7b
 
 # Download from URL with checksum verification
-aim pull https://example.com/model.safetensors --sha256 abc123...
+iv pull https://example.com/model.safetensors --sha256 abc123...
 
 # Download and auto-store in vault
-aim pull hf://user/repo/model.safetensors --store --name my-model
+iv pull hf://user/repo/model.safetensors --store --name my-model
 ```
 
 ## Source Formats
@@ -29,7 +29,7 @@ aim pull hf://user/repo/model.safetensors --store --name my-model
 ## CLI Reference
 
 ```
-aim pull <SOURCE> [OPTIONS]
+iv pull <SOURCE> [OPTIONS]
 
 Arguments:
   <SOURCE>          Model source URI (hf://, ollama://, https://)
@@ -48,11 +48,11 @@ For private HuggingFace repositories:
 
 ```bash
 # Via CLI flag
-aim pull hf://private/repo/model.safetensors --token hf_xxxxx
+iv pull hf://private/repo/model.safetensors --token hf_xxxxx
 
 # Via environment variable
 export HF_TOKEN=hf_xxxxx
-aim pull hf://private/repo/model.safetensors
+iv pull hf://private/repo/model.safetensors
 ```
 
 ## Security
@@ -65,7 +65,7 @@ aim pull hf://private/repo/model.safetensors
 ## Rust API
 
 ```rust
-use ai_model_vault::download::{ModelDownloader, ModelSource};
+use ironvault::download::{ModelDownloader, ModelSource};
 
 let source = ModelSource::parse("hf://TheBloke/repo/model.gguf")?;
 let downloader = ModelDownloader::new("./models")

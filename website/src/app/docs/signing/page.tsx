@@ -10,16 +10,16 @@ export default function SigningPage() {
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="quick-start">Quick Start</h2>
       <CodeBlock language="bash">{`# Sign a vault model (auto-generates key on first use)
-aim sign my-model
+iv sign my-model
 
 # Sign with identity
-aim sign my-model --identity "ML Team <ml@company.com>"
+iv sign my-model --identity "ML Team <ml@company.com>"
 
 # Verify a signature (--key is required for a real check)
-aim verify my-model --signature my-model.sig --key signing_key.json
+iv verify my-model --signature my-model.sig --key signing_key.json
 
 # Sign a file on disk
-aim sign my-model --file ./model.safetensors`}</CodeBlock>
+iv sign my-model --file ./model.safetensors`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="how-it-works">How It Works</h2>
       <ol className="list-decimal list-inside space-y-2 text-[var(--color-text-secondary)]">
@@ -34,7 +34,7 @@ aim sign my-model --file ./model.safetensors`}</CodeBlock>
       </p>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="sign">sign</h2>
-      <CodeBlock language="bash">{`aim sign <NAME> [OPTIONS]
+      <CodeBlock language="bash">{`iv sign <NAME> [OPTIONS]
 
 Options:
   -v, --version <V>   Model version (default: latest)
@@ -43,7 +43,7 @@ Options:
   --file <PATH>       Sign a file on disk instead of vault model`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="verify">verify</h2>
-      <CodeBlock language="bash">{`aim verify <NAME> --signature <SIG> [OPTIONS]
+      <CodeBlock language="bash">{`iv verify <NAME> --signature <SIG> [OPTIONS]
 
 Options:
   --signature <SIG>   Path to .sig file

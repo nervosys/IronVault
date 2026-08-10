@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# Build script for AI Model Vault on Windows
+# Build script for IronVault on Windows
 
 param(
     [Parameter(Position = 0)]
@@ -18,7 +18,7 @@ function Write-Header {
 }
 
 function Build {
-    Write-Header "Building AI Model Vault"
+    Write-Header "Building IronVault"
     if ($Release) {
         cargo build --release
     }
@@ -46,7 +46,7 @@ function Clean {
 }
 
 function Install {
-    Write-Header "Installing AI Model Vault"
+    Write-Header "Installing IronVault"
     cargo install --path .
 }
 
@@ -91,7 +91,7 @@ function Release-Build {
     cargo build --release --all-features
     
     Write-Host "`n✓ Release build complete!" -ForegroundColor Green
-    Write-Host "Binary location: target\release\aim.exe" -ForegroundColor Green
+    Write-Host "Binary location: target\release\iv.exe" -ForegroundColor Green
 }
 
 function All {

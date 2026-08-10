@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build script for AI Model Vault on Unix systems
+# Build script for IronVault on Unix systems
 
 set -e
 
@@ -31,7 +31,7 @@ header() {
 }
 
 build() {
-    header "Building AI Model Vault"
+    header "Building IronVault"
     if [ "$RELEASE" = true ]; then
         cargo build --release
     else
@@ -55,7 +55,7 @@ clean() {
 }
 
 install() {
-    header "Installing AI Model Vault"
+    header "Installing IronVault"
     cargo install --path .
 }
 
@@ -101,7 +101,7 @@ release_build() {
     
     echo ""
     echo "✓ Release build complete!"
-    echo "Binary location: target/release/aim"
+    echo "Binary location: target/release/iv"
 }
 
 all() {
@@ -152,7 +152,7 @@ case "$COMMAND" in
         echo "  build      - Build the project"
         echo "  test       - Run tests"
         echo "  clean      - Clean build artifacts"
-        echo "  install    - Install aim (AI Model Vault)"
+        echo "  install    - Install iv (IronVault)"
         echo "  format     - Format code"
         echo "  lint       - Run linters"
         echo "  security   - Run security checks"

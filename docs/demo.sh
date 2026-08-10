@@ -1,6 +1,6 @@
 #!/bin/bash
-# AI Model Vault - BASH Demonstration Script
-# This script showcases the key features of AI Model Vault
+# IronVault - BASH Demonstration Script
+# This script showcases the key features of IronVault
 
 set -e  # Exit on error
 
@@ -106,7 +106,7 @@ function test_cargo_installed() {
 }
 
 function build_project() {
-    write_header "Building AI Model Vault"
+    write_header "Building IronVault"
     write_info "Building release version (optimized)..."
     
     if cargo build --release 2>&1; then
@@ -165,7 +165,7 @@ function run_example() {
 echo ""
 echo -e "${COLOR_BOLD}${COLOR_CYAN}"
 echo "╔═══════════════════════════════════════════════════════════════╗"
-echo "║          AI Model Vault - Demonstration Script               ║"
+echo "║          IronVault - Demonstration Script               ║"
 echo "║                                                               ║"
 echo "║  Secure, encrypted storage for AI models with version        ║"
 echo "║  control, compression, and FIPS 140-3 compliance             ║"
@@ -253,5 +253,5 @@ echo "  • View security status: SECURITY_STATUS.md"
 echo "  • Check feature demo: FEATURES_DEMO.md"
 echo "  • Explore examples: examples/"
 echo ""
-echo "For more information: https://github.com/yourusername/ai-model-vault"
+echo "For more information: https://github.com/yourusername/ironvault"
 echo ""

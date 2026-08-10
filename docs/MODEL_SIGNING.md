@@ -6,17 +6,17 @@ HMAC-SHA256 model signing with detached `.sig` JSON files for tamper detection a
 
 ```bash
 # Sign a vault model (auto-generates key on first use)
-aim sign my-model
+iv sign my-model
 
 # Sign with identity
-aim sign my-model --identity "ML Team <ml@company.com>"
+iv sign my-model --identity "ML Team <ml@company.com>"
 
 # Verify a signature. --key is required for a real check; without it the
 # command reports the signature as NOT CHECKED and exits non-zero.
-aim verify my-model --signature my-model.sig --key signing_key.json
+iv verify my-model --signature my-model.sig --key signing_key.json
 
 # Sign a file on disk
-aim sign my-model --file ./model.safetensors
+iv sign my-model --file ./model.safetensors
 ```
 
 ## CLI Reference
@@ -24,7 +24,7 @@ aim sign my-model --file ./model.safetensors
 ### sign
 
 ```
-aim sign <NAME> [OPTIONS]
+iv sign <NAME> [OPTIONS]
 
 Arguments:
   <NAME>              Model name in vault
@@ -39,7 +39,7 @@ Options:
 ### verify
 
 ```
-aim verify <NAME> --signature <SIG> [OPTIONS]
+iv verify <NAME> --signature <SIG> [OPTIONS]
 
 Arguments:
   <NAME>              Model name in vault
@@ -81,7 +81,7 @@ Options:
 ## Rust API
 
 ```rust
-use ai_model_vault::signing::{ModelSigner, SigningKeyPair};
+use ironvault::signing::{ModelSigner, SigningKeyPair};
 
 // Generate keypair
 let keypair = ModelSigner::generate_keypair(Some("ML Team"))?;

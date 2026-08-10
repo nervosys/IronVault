@@ -8,7 +8,7 @@ pub fn openapi_spec() -> serde_json::Value {
     serde_json::json!({
         "openapi": "3.1.0",
         "info": {
-            "title": "AI Model Vault API",
+            "title": "IronVault API",
             "description": "RESTful API for secure AI model storage, versioning, and format conversion.",
             "version": "1.3.0",
             "license": {

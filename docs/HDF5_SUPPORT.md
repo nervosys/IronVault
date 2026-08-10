@@ -4,8 +4,8 @@
 library, no extra setup.
 
 ```bash
-aim store model.h5 --name my-model
-aim get my-model --output restored.h5
+iv store model.h5 --name my-model
+iv get my-model --output restored.h5
 ```
 
 ## Why there is no `hdf5-support` feature
@@ -25,7 +25,7 @@ lookup. Round-tripping is byte-exact.
 
 ## What is not supported
 
-Tensor-level introspection. `aim diff` reports HDF5 differences at the file
+Tensor-level introspection. `iv diff` reports HDF5 differences at the file
 level (size, checksum) rather than per-tensor, because nothing parses the HDF5
 container's group/dataset structure. SafeTensors and GGUF do get tensor-level
 diffs, since their headers can be read without a C library.
@@ -37,4 +37,4 @@ reader) at build time.
 ## Related
 
 - [FEATURE_FLAGS.md](FEATURE_FLAGS.md) — the flags that do exist
-- [`FORMATS.md`](https://github.com/nervosys/AIModelVault/blob/master/FORMATS.md) — every supported format
+- [`FORMATS.md`](https://github.com/nervosys/IronVault/blob/master/FORMATS.md) — every supported format

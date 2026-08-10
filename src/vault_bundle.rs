@@ -31,7 +31,7 @@ const BUNDLE_FORMAT_VERSION: u32 = 2;
 /// Note this is an integrity check, not an authenticity one: the digest lives
 /// in the same archive as the data it covers, so anyone who can rewrite the
 /// blobs can rewrite the digest. It catches truncation and corruption, not a
-/// deliberately crafted bundle. Use `aim sign` / `aim verify` for provenance.
+/// deliberately crafted bundle. Use `iv sign` / `iv verify` for provenance.
 struct BlobDigest(sha2::Sha256);
 
 impl BlobDigest {

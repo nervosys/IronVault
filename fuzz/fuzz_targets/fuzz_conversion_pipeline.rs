@@ -1,8 +1,8 @@
 #![no_main]
 use libfuzzer_sys::fuzz_target;
 
-use ai_model_vault::conversion::ConversionPipeline;
-use ai_model_vault::formats::ModelFormat;
+use ironvault::conversion::ConversionPipeline;
+use ironvault::formats::ModelFormat;
 
 fuzz_target!(|data: &[u8]| {
     if let Ok(s) = std::str::from_utf8(data) {

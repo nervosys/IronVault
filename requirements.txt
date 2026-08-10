@@ -1,4 +1,4 @@
-# AI Model Vault - PyTorch Integration Demo Requirements
+# IronVault - PyTorch Integration Demo Requirements
 # Install with: uv pip install -r requirements.txt
 
 torch>=2.0.0
