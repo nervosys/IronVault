@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/nervosys/IronVault/master/media/banner.png" alt="IronVault — Secure Deployment Hub" width="900">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/nervosys/IronVault/master/media/banner_dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/nervosys/IronVault/master/media/banner_light.png">
+    <img src="https://raw.githubusercontent.com/nervosys/IronVault/master/media/banner_light.png" alt="IronVault" width="360">
+  </picture>
 </p>
 
 > Universal cross-platform encrypted vault for AI/ML model storage, versioning, conversion, and lifecycle management — **agent-first by design**, military-grade security, 23+ formats, 29 production features.
@@ -8,15 +12,39 @@
 [![License](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue.svg)](LICENSE)
 [![Security](https://img.shields.io/badge/crypto-AES--256--GCM%20%2B%20Argon2id-green.svg)](SECURITY.md)
 [![CMMC](https://img.shields.io/badge/CMMC%202.0%20L2-controls%20supported-blue.svg)](docs/SECURITY_HARDENING.md)
-[![Tests](https://img.shields.io/badge/tests-2%2C160%2B%20passing-brightgreen.svg)](reports/)
+[![Tests](https://img.shields.io/badge/tests-2%2C227%20passing-brightgreen.svg)](reports/)
 [![Coverage](https://img.shields.io/badge/coverage-85.4%25-brightgreen.svg)](docs/PERFORMANCE.md)
-[![Version](https://img.shields.io/badge/version-4.3.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.0.0-blue.svg)](CHANGELOG.md)
 [![crates.io](https://img.shields.io/crates/v/ironvault.svg)](https://crates.io/crates/ironvault)
 [![PyPI](https://img.shields.io/pypi/v/ironvault.svg)](https://pypi.org/project/ironvault/)
 [![Clippy](https://img.shields.io/badge/clippy-clean-brightgreen.svg)](validate.ps1)
 [![Agent-ready](https://img.shields.io/badge/agent--ready-AGENTS.md-blueviolet.svg)](AGENTS.md)
 
 A production-ready secure vault, built on FIPS-approved cryptographic algorithms, for storing and managing AI models. Every capability is exposed through **three parallel surfaces — CLI, REST/GraphQL, and MCP** — with a single source of truth (`iv introspect`) and self-describing manifests in [`.well-known/`](.well-known/). Built for autonomous agents, scriptable for CI, friendly for humans.
+
+---
+
+## Coming from AI Model Vault 4.x?
+
+This project was renamed to **IronVault** in 5.0.0. Every identity moved at once:
+
+| | 4.x | 5.0 |
+| --- | --- | --- |
+| crates.io | `ai-model-vault` | `ironvault` |
+| PyPI | `aimodelvault` | `ironvault` |
+| Rust import | `use ai_model_vault::…` | `use ironvault::…` |
+| Python import | `import aimodelvault` | `import ironvault` |
+| Binary | `aim` | `iv` |
+| Environment | `aimodelvault_*`, `AIM_*` | `IRONVAULT_*` |
+
+**Your vault does not move and your data does not need converting.** The Rust
+XDG layout was already name-neutral (`~/.config/ai/models/`), and the encrypted
+formats are read under both their old and new identifiers — objects sealed by
+4.x still decrypt, and stored `aimv://` URIs still parse. The old environment
+variable names still work too, warning once each; they stop being read in 6.0.
+
+The old packages remain installable at 4.6.x and receive no further releases.
+Full details and the systemd migration steps: **[docs/MIGRATION.md](docs/MIGRATION.md)**.
 
 ---
 
@@ -36,10 +64,25 @@ iv introspect --format json          # entire CLI schema, machine-readable
 | ---------------------------------------------------- | ----------------------------------------------------------------- |
 | [`agents.json`](.well-known/agents.json)             | Capability catalog (29 features), taxonomy, interface inventory   |
 | [`mcp-manifest.json`](.well-known/mcp-manifest.json) | **86 MCP tools** with full JSON Schema inputs, resources, prompts |
-| [`openapi.yaml`](.well-known/openapi.yaml)           | OpenAPI 3.1 — **53 REST endpoints** across 20 tag groups          |
+| [`openapi.yaml`](.well-known/openapi.yaml)           | OpenAPI 3.1 spec — see the note below on spec drift          |
 | [`ontology.jsonld`](.well-known/ontology.jsonld)     | JSON-LD ontology — every concept, class, and relationship         |
 | [`ai-plugin.json`](.well-known/ai-plugin.json)       | OpenAI-compatible plugin manifest cross-linking the above         |
 | [`AGENTS.md`](AGENTS.md)                             | Canonical project context — features, CLI cheat sheet, layout     |
+
+> **Known drift — `openapi.yaml` is not currently a reliable contract.** The
+> server registers **44 routes**; the spec documents 53 paths. The two sets are
+> not nested: 14 documented paths have no handler (`/introspect`,
+> `/license-scan`, `/models/diff`, `/models/pull`, `/vault/export`,
+> `/vault/import`, `/telemetry/status`, and the `/models/{name}/` sub-resources
+> `benchmarks`, `card/generate`, `card/validate`, `register`, `scan`, `sign`,
+> `verify`), and 5 registered routes are undocumented (`/`, `/graphql`,
+> `/auth/logout`, and the two `/federation/*` routes, which are only mounted
+> when federation is enabled).
+>
+> An agent that generates a client from this spec will emit calls that 404.
+> Until it is reconciled, treat `iv introspect` and the running server as
+> authoritative and the OpenAPI file as indicative. Tracked for the next patch
+> release; the counts above were measured, not estimated.
 
 ### Canonical agent integration pattern
 
@@ -61,11 +104,19 @@ curl  http://host:8080/api/v1/...     # REST (see openapi.yaml)
 - **Destructive ops gated:** `delete`, `policy apply`, `gc`, `vault-import` accept `--dry-run` (where applicable) or require an explicit name argument.
 - **Self-describing errors:** error JSON includes `code`, `message`, and `hint`; never just a string.
 - **URIs:** Vault resources are addressable via the [`iv://`](docs/UTILITIES.md) scheme — agents can pass `iv://vault/model@version` between tools.
-- **No surprise network:** the CLI never phones home except `iv pull` (explicit), `iv cloud` (explicit), and opt-in telemetry — off by default, honors `DO_NOT_TRACK=1`, and when enabled posts to `https://telemetry.nervosys.ai/v1/events` unless you point `telemetry.endpoint` elsewhere. Two events, no model names or paths: see [docs/TELEMETRY.md](docs/TELEMETRY.md).
+- **No surprise network:** the CLI never phones home except `iv pull` (explicit), `iv cloud` (explicit), and opt-in telemetry — off by default and honors `DO_NOT_TRACK=1`. When enabled it posts to `telemetry.endpoint`, which defaults to `https://telemetry.nervosys.ai/v1/events` — **a host that currently has no DNS record**, so enabling telemetry without setting your own endpoint sends nothing anywhere. Two events, no model names or paths: see [docs/TELEMETRY.md](docs/TELEMETRY.md).
 
 ### Three-surface coverage matrix
 
-Every one of the 29 features in [AGENTS.md](AGENTS.md) is reachable from **all three** of: CLI subcommand, REST endpoint, and MCP tool. See the parity table in [agents.json](.well-known/agents.json) for the precise mapping.
+Every one of the 29 features in [AGENTS.md](AGENTS.md) is reachable from the
+**CLI**, and all are represented as **MCP tools**. REST parity is the goal but
+is **not currently complete**: the drift note above lists the routes the spec
+describes and the server does not serve, which includes `sign`, `scan`,
+`verify`, `diff`, `pull`, `license-scan`, and vault `export` / `import`. Those
+features are CLI- and MCP-reachable today, not REST-reachable.
+
+See the parity table in [agents.json](.well-known/agents.json) for the claimed
+mapping — and note it inherits the same drift until the spec is reconciled.
 
 ---
 
@@ -77,7 +128,7 @@ Every one of the 29 features in [AGENTS.md](AGENTS.md) is reachable from **all t
 | [`.well-known/`](.well-known/) — discovery manifests             | [Installation](#installation)                       | [Build & Validate](#build--validate)           |
 | [`iv introspect`](#for-ai-agents--read-this-first) — CLI schema | [CLI Reference](docs/CLI.md)                        | [Architecture](#architecture)                  |
 | [MCP tools](docs/MCP_TOOLS.md) — 86 tools                        | [Rust API Quickstart](#rust-library-api-quickstart) | [Performance](docs/PERFORMANCE.md)             |
-| [OpenAPI 3.1](.well-known/openapi.yaml) — 53 endpoints           | [Demos](#interactive-demos)                         | [Deployment](#deployment)                      |
+| [OpenAPI 3.1](.well-known/openapi.yaml) — REST spec           | [Demos](#interactive-demos)                         | [Deployment](#deployment)                      |
 |                                                                  | [Telemetry](docs/TELEMETRY.md) — opt-in, disclosed  | [Contributing](CONTRIBUTING.md)                |
 
 ---
@@ -90,7 +141,7 @@ Every one of the 29 features in [AGENTS.md](AGENTS.md) is reachable from **all t
 - **Provenance built-in** — SHA-256 checksums, HMAC signatures, an automatic append-only audit log, license & pickle scanning (plus a Merkle-chained block store available as a library primitive)
 - **Operational** — version control, retention policies, garbage collection, multi-vault, profiles, plugins, scheduled backups
 - **Integrated** — REST + GraphQL APIs, 86 MCP tools, Python bindings, Ollama / LM Studio interop, HuggingFace / Ollama / URL pull
-- **Quality** — 2,160+ Rust + 84 Python tests, 0 clippy warnings, fuzz targets, property-based tests, criterion benchmarks
+- **Quality** — 2,227 Rust + 84 Python tests, 0 clippy warnings, fuzz targets, property-based tests, criterion benchmarks
 
 ---
 
@@ -232,7 +283,7 @@ All features below are fully implemented, tested, and exposed via both CLI and l
 
 | Feature              | Surface               | Notes                                              |
 | -------------------- | --------------------- | -------------------------------------------------- |
-| REST API             | `iv serve`           | Axum + JWT + 41 endpoints, OpenAPI 3.1             |
+| REST API             | `iv serve`           | Axum + JWT + 44 routes, OpenAPI 3.1             |
 | GraphQL API          | `iv serve --graphql` | `async-graphql` with playground                    |
 | MCP tools            | library               | 4 built-in tools + custom registration             |
 | Python bindings      | `pip install` (PyO3)  | `--features python`                                |
@@ -288,7 +339,7 @@ each with a `.sha256` alongside it.
 git clone https://github.com/nervosys/IronVault.git
 cd IronVault
 
-# Default build (Safetensors + ndarray + SQLite)
+# Default build (SQLite)
 cargo build --release
 
 # Storage backends + REST API + GraphQL
@@ -305,7 +356,7 @@ The release binary lives at `target/release/iv` (~17 MB, LTO + stripped).
 
 | Feature     | Description                                                |
 | ----------- | ---------------------------------------------------------- |
-| `default`   | SafeTensors + ndarray + SQLite                             |
+| `default`   | SQLite. Also accepts `safetensors` / `ndarray`, no-ops since 4.6.0 |
 | `full`      | `default` + Sled + Qdrant. **Not** the APIs, cloud, or otel |
 | `sqlite`    | SQLite RAG backend                                         |
 | `kv-store`  | Sled KV backend                                            |
