@@ -4,7 +4,7 @@
   "project": {
     "id": "ironvault",
     "name": "IronVault",
-    "version": "5.0.0",
+    "version": "5.1.0",
     "description": "Encrypted AI/ML model management system with versioning, 23+ format conversion, compliance validation (FIPS 140-3, CMMC 2.0, MITRE ATT&CK), RAG with MCP tools, federation, blockchain audit, model download (HuggingFace/Ollama/URL), HMAC signing & verification, pickle safety scanning, tensor-level diffing, engine interop (Ollama/LM Studio), license scanning, model tags & search, vault export/import, garbage collection, TUI dashboard, webhooks, role-based ACL, KMS integration, model validation, retention policies, cross-model lineage DAG, plugin system, config profiles, quantization pipeline, evaluation harness, backup scheduling, and multi-vault management.",
     "homepage": "https://github.com/nervosys/IronVault",
     "documentation": "https://github.com/nervosys/IronVault/tree/master/docs",
@@ -145,6 +145,12 @@
     "model_cards": {
       "description": "Structured model documentation following Google/HuggingFace standards",
       "commands": ["iv card"],
+      "endpoints": [
+        "GET /api/v1/models/{name}/card",
+        "POST /api/v1/models/{name}/card",
+        "POST /api/v1/models/{name}/card/generate",
+        "POST /api/v1/models/{name}/card/validate"
+      ],
       "export_formats": ["JSON", "YAML", "Markdown"]
     },
     "utilities": {
@@ -207,43 +213,61 @@
     "model_download": {
       "description": "Download models from HuggingFace Hub, Ollama registry, or arbitrary URLs with SHA-256 verification",
       "commands": ["iv pull"],
+      "endpoints": ["POST /api/v1/models/pull"],
       "sources": ["huggingface", "ollama", "url"],
       "integrity": "SHA-256 verification"
     },
     "model_signing": {
       "description": "HMAC-SHA256 signatures with detached .sig files for provenance",
       "commands": ["iv sign", "iv verify"],
-      "algorithm": "HMAC-SHA256"
+      "endpoints": [
+        "POST /api/v1/models/{name}/sign",
+        "POST /api/v1/models/{name}/verify"
+      ],
+      "algorithm": "HMAC-SHA256",
+      "rest_note": "The REST surface signs stored vault bytes and returns the detached signature inline; it does not read or write caller-named filesystem paths."
     },
     "safety_scanning": {
       "description": "Detect dangerous pickle opcodes and patterns in PyTorch/pickle files",
       "commands": ["iv scan"],
+      "endpoints": ["POST /api/v1/models/{name}/scan"],
       "detects": ["REDUCE", "GLOBAL", "INST", "OBJ", "NEWOBJ", "BUILD", "eval/exec patterns"]
     },
     "model_diffing": {
       "description": "Compare model versions at the tensor level (SafeTensors, GGUF, generic byte-level)",
-      "commands": ["iv diff"]
+      "commands": ["iv diff"],
+      "endpoints": ["POST /api/v1/models/diff"],
+      "rest_note": "Operands are `name` or `name@version`, resolved against the vault. Filesystem paths are rejected."
     },
     "engine_interop": {
       "description": "Register models with local inference engines",
       "commands": ["iv register"],
+      "endpoints": ["POST /api/v1/models/{name}/register"],
       "engines": ["ollama", "lm-studio"]
     },
     "benchmarks": {
       "description": "Store and query benchmark results per model version",
-      "commands": ["iv benchmark add", "iv benchmark show"]
+      "commands": ["iv benchmark add", "iv benchmark show"],
+      "endpoints": [
+        "GET /api/v1/models/{name}/benchmarks",
+        "POST /api/v1/models/{name}/benchmarks"
+      ]
     },
     "license_scanning": {
       "description": "Detect licenses from model cards, config.json, GGUF metadata, LICENSE files (SPDX-normalized)",
-      "commands": ["iv license-scan"]
+      "commands": ["iv license-scan"],
+      "endpoints": ["POST /api/v1/license-scan"],
+      "rest_note": "Scans a model held in the vault, addressed by name. The REST surface does not accept a filesystem path."
     },
     "tags_and_search": {
       "description": "Tag models with labels and annotations, search by name/tags/annotations",
       "commands": ["iv tag add", "iv tag remove", "iv tag list", "iv tag annotate", "iv search"]
     },
     "vault_bundle": {
-      "description": "Portable tar.gz vault bundles with selective model export",
-      "commands": ["iv vault-export", "iv vault-import"]
+      "description": "Portable gzipped-tar vault bundles with selective model export",
+      "commands": ["iv vault-export", "iv vault-import"],
+      "endpoints": ["POST /api/v1/vault/export", "POST /api/v1/vault/import"],
+      "rest_note": "Export streams the bundle in the response body and import reads it from the request body; neither takes a server-side path."
     },
     "garbage_collection": {
       "description": "Orphaned blob detection, temp file cleanup, and space reclaim with dry-run support",
@@ -287,8 +311,9 @@
       "commands": ["iv profile create", "iv profile remove", "iv profile list", "iv profile activate", "iv profile deactivate", "iv profile show"]
     },
     "telemetry": {
-      "description": "Anonymous, opt-in telemetry honouring DO_NOT_TRACK and AIM_TELEMETRY_DISABLED",
-      "environment": ["AIM_TELEMETRY_ENABLED", "AIM_TELEMETRY_DISABLED", "DO_NOT_TRACK"]
+      "description": "Anonymous, opt-in telemetry honouring DO_NOT_TRACK and IRONVAULT_TELEMETRY_DISABLED",
+      "endpoints": ["GET /api/v1/telemetry/status"],
+      "environment": ["IRONVAULT_TELEMETRY_ENABLED", "IRONVAULT_TELEMETRY_DISABLED", "DO_NOT_TRACK"]
     }
   },
 

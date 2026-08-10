@@ -7,7 +7,7 @@ info:
     
     Requires the `api` cargo feature: `cargo build --features api`
     Start with: `iv serve --port 8080`
-  version: 5.0.0
+  version: 5.1.0
   license:
     name: AGPL-3.0-or-later
     url: https://www.gnu.org/licenses/agpl-3.0.html
@@ -1279,8 +1279,13 @@ paths:
               schema:
                 type: object
                 properties:
-                  signature_path:
-                    type: string
+                  signature:
+                    type: object
+                    description: >
+                      The detached signature document, returned inline. Pass it
+                      back verbatim to `/verify`. Before 5.1.0 this reported a
+                      `signature_path`, implying a server-side write the caller
+                      steered.
                   algorithm:
                     type: string
                     example: HMAC-SHA256
@@ -1301,12 +1306,19 @@ paths:
           application/json:
             schema:
               type: object
-              required: [signature_path]
+              required: [signature]
               properties:
-                signature_path:
-                  type: string
+                signature:
+                  type: object
+                  description: The document returned by `/sign`, passed back verbatim
+                version:
+                  type: integer
                 key:
                   type: string
+                  description: >
+                    Without it, verification reports `signature_checked: false`
+                    rather than inferring validity from a hash the signature
+                    file supplies about itself.
       responses:
         '200':
           description: Verification result
@@ -1316,6 +1328,10 @@ paths:
                 type: object
                 properties:
                   valid:
+                    type: boolean
+                  signature_checked:
+                    type: boolean
+                  file_hash_match:
                     type: boolean
 
   /api/v1/models/{name}/scan:
@@ -1366,10 +1382,12 @@ paths:
               properties:
                 left:
                   type: string
-                  description: File path or name@version
+                  description: >
+                    `name` or `name@version`, resolved against the vault. A
+                    filesystem path is not accepted.
                 right:
                   type: string
-                  description: File path or name@version
+                  description: '`name` or `name@version`, resolved against the vault'
       responses:
         '200':
           description: Diff report
@@ -1407,7 +1425,12 @@ paths:
 
   /api/v1/license-scan:
     post:
-      summary: Scan a path for model licenses; returns SPDX identifiers
+      summary: Scan a stored model for licenses; returns SPDX identifiers
+      description: >
+        Addresses a model held in the vault by name. This endpoint took a
+        server-side `path` before 5.1.0, which was an arbitrary-file-read
+        primitive available to any token holder; it never had a handler, so no
+        client depended on that shape.
       tags: [License]
       requestBody:
         required: true
@@ -1415,10 +1438,13 @@ paths:
           application/json:
             schema:
               type: object
-              required: [path]
+              required: [model]
               properties:
-                path:
+                model:
                   type: string
+                version:
+                  type: integer
+                  description: Defaults to the latest version
       responses:
         '200':
           description: License findings
@@ -1426,7 +1452,7 @@ paths:
   /api/v1/models/{name}/card/validate:
     post:
       summary: Validate a model card against the schema
-      tags: [Cards]
+      tags: [Model Cards]
       parameters:
         - name: name
           in: path
@@ -1440,7 +1466,7 @@ paths:
   /api/v1/models/{name}/card/generate:
     post:
       summary: Auto-generate a model card from existing metadata
-      tags: [Cards]
+      tags: [Model Cards]
       parameters:
         - name: name
           in: path
@@ -1525,37 +1551,36 @@ paths:
   /api/v1/vault/export:
     post:
       summary: Export the active vault as a tar.gz bundle
+      description: >
+        The bundle is returned in the response body. Before 5.1.0 this took an
+        `output` path on the server, which was an arbitrary file write aimable
+        anywhere the server process could reach; it never had a handler, so no
+        client depended on that shape.
       tags: [Bundle]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [output]
-              properties:
-                output:
-                  type: string
       responses:
         '200':
-          description: Bundle written
+          description: The bundle
+          content:
+            application/gzip:
+              schema:
+                type: string
+                format: binary
 
   /api/v1/vault/import:
     post:
       summary: Import a vault bundle (tar.gz)
+      description: >
+        The bundle is the request body. Before 5.1.0 this took an `archive`
+        path on the server, which let a caller read any file the process could
+        open.
       tags: [Bundle]
       requestBody:
         required: true
         content:
-          application/json:
+          application/gzip:
             schema:
-              type: object
-              required: [archive]
-              properties:
-                archive:
-                  type: string
-                target:
-                  type: string
+              type: string
+              format: binary
       responses:
         '200':
           description: Bundle imported
@@ -1596,6 +1621,100 @@ paths:
       responses:
         '200':
           description: CLI schema
+
+  /api/v1/auth/logout:
+    post:
+      summary: Revoke the presented token
+      description: >
+        Adds the token's `jti` to the revocation store, so it is rejected for
+        the remainder of its lifetime rather than merely discarded by the
+        client.
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token revoked
+
+  /api/v1/federation/manifest:
+    get:
+      summary: Sync manifest advertising this node's models
+      description: >
+        Registered only when `federation.enabled` is true. On a default server
+        this path does not exist and returns 404 rather than 401, so an
+        unauthenticated probe cannot confirm the endpoint is present.
+        Authenticated with a peer key in `X-API-Key`, not a JWT.
+      tags: [Federation]
+      responses:
+        '200':
+          description: Manifest of models and vector clocks
+        '401':
+          description: Missing or unrecognised peer key
+        '404':
+          description: Federation is not enabled on this node
+
+  /api/v1/federation/models/{name}/versions/{checkpoint_id}:
+    get:
+      summary: Fetch a model version from a federated peer
+      description: >
+        Registered only when `federation.enabled` is true. Response bytes are
+        sealed with the IRONSEAL envelope when `federation.seal_transfers` is
+        on, which is the default.
+      tags: [Federation]
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: checkpoint_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Model bytes, sealed unless sealing is disabled
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Missing or unrecognised peer key
+        '404':
+          description: Federation is not enabled, or no such version
+    put:
+      summary: Accept a model version pushed by a federated peer
+      description: >
+        An unsealed body arriving while `seal_transfers` is on is refused
+        rather than stored, so a peer cannot downgrade a transfer to plaintext.
+      tags: [Federation]
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: checkpoint_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Version accepted
+        '400':
+          description: Unsealed body refused while sealing is enabled
+        '401':
+          description: Missing or unrecognised peer key
 
 tags:
   - name: Auth
@@ -1638,3 +1757,27 @@ tags:
     description: Backup scheduling and history
   - name: Multi-Vault
     description: Multi-vault registry and switching
+  - name: Signing
+    description: HMAC-SHA256 detached signatures over stored models
+  - name: Safety
+    description: Pickle opcode and malicious pattern scanning
+  - name: Diffing
+    description: Tensor-level comparison between stored model versions
+  - name: Download
+    description: Pulling models from HuggingFace, Ollama, or a URL
+  - name: License
+    description: License detection with SPDX normalisation
+  - name: Benchmarks
+    description: Benchmark scores attached to model versions
+  - name: Interop
+    description: Registration with local inference engines
+  - name: Bundle
+    description: Whole-vault export and import as a tar.gz bundle
+  - name: Telemetry
+    description: Telemetry configuration status; collection is opt-in
+  - name: Discovery
+    description: Machine-readable CLI schema for agent bootstrapping
+  - name: Federation
+    description: >
+      Peer-to-peer model sync. These paths exist only when federation is
+      enabled, and authenticate with a peer key rather than a JWT.

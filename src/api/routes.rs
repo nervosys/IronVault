@@ -2136,3 +2136,629 @@ mod tests {
         assert!(!a.is_empty());
     }
 }
+
+// ── Reconciliation endpoints (5.1.0) ─────────────────────────────────────────
+//
+// These paths were documented in `.well-known/openapi.yaml` but never had
+// handlers, so every client generated from that spec emitted calls that 404'd.
+//
+// Several are deliberately NOT implemented as the old spec described them. It
+// accepted server-side filesystem paths from the caller: `path` for license
+// scanning, `output` for vault export, `archive` for import, and "file path or
+// name@version" for diff. Honouring those over HTTP would turn an API token
+// into arbitrary file read and write as the server user -- `output` alone is a
+// write primitive aimable anywhere the process can reach. Each is therefore
+// scoped to vault contents or to the request body, and the spec was corrected
+// to match. A model is addressed by name and version, never by path.
+
+/// Resolve `name@version` (or bare `name`) against the vault, returning bytes.
+///
+/// The only way these handlers name a model. There is deliberately no branch
+/// that falls back to treating the input as a filesystem path.
+async fn read_vault_model(
+    state: &Arc<AppState>,
+    reference: &str,
+) -> Result<(String, Option<u32>, String, Vec<u8>), ApiError> {
+    let (name, version) = match reference.split_once('@') {
+        Some((n, v)) => {
+            let parsed = v
+                .parse::<u32>()
+                .map_err(|_| ApiError::bad_request(format!("Invalid version in '{reference}'")))?;
+            (n.to_string(), Some(parsed))
+        }
+        None => (reference.to_string(), None),
+    };
+    validate_model_name(&name)?;
+
+    let vault = state.vault.read().await;
+    let data = vault.get_model(&name, version).map_err(ApiError::from)?;
+
+    // The recorded format, so a diff can report shapes rather than guessing
+    // from bytes. Falls back to empty, which the differ treats as unknown.
+    let versions = vault.list_versions(&name);
+    let format = match version {
+        Some(v) => versions.iter().find(|r| r.version == v),
+        None => versions.last(),
+    }
+    .map(|r| r.format.clone())
+    .unwrap_or_default();
+
+    Ok((name, version, format, data))
+}
+
+/// Write bytes to a temporary file, for library calls that take a path.
+///
+/// The file lives in the OS temp directory and is removed when the handle
+/// drops. The caller never chooses this path.
+fn spill_to_temp(data: &[u8]) -> Result<tempfile::NamedTempFile, ApiError> {
+    use std::io::Write;
+    let mut tmp = tempfile::NamedTempFile::new()
+        .map_err(|e| ApiError::internal(format!("Could not create temp file: {e}")))?;
+    tmp.write_all(data)
+        .map_err(|e| ApiError::internal(format!("Could not write temp file: {e}")))?;
+    tmp.flush()
+        .map_err(|e| ApiError::internal(format!("Could not flush temp file: {e}")))?;
+    Ok(tmp)
+}
+
+#[derive(Deserialize)]
+pub struct SignRequest {
+    pub version: Option<u32>,
+    pub identity: Option<String>,
+    /// HMAC key seed, hex-encoded. Required -- signing without a key is not
+    /// signing.
+    pub key: String,
+}
+
+/// POST /api/v1/models/:name/sign
+///
+/// Signs the stored model bytes and returns the detached signature inline.
+/// The signature is not written to a caller-named path; the old spec's
+/// `signature_path` response implied a server-side write the caller steered.
+pub async fn sign_model(
+    State(state): State<Arc<AppState>>,
+    Path(name): Path<String>,
+    headers: HeaderMap,
+    Json(body): Json<SignRequest>,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let _claims = require_auth(&headers, &state)?;
+    validate_model_name(&name)?;
+    if body.key.trim().is_empty() {
+        return Err(ApiError::bad_request("A signing key is required"));
+    }
+
+    let vault = state.vault.read().await;
+    let data = vault
+        .get_model(&name, body.version)
+        .map_err(ApiError::from)?;
+    drop(vault);
+
+    let keypair =
+        crate::signing::ModelSigner::keypair_from_seed(&body.key, body.identity.as_deref())
+            .map_err(|e| ApiError::bad_request(format!("Invalid signing key: {e}")))?;
+    let tmp = spill_to_temp(&data)?;
+    let signature =
+        crate::signing::ModelSigner::sign(&keypair, tmp.path(), std::collections::HashMap::new())
+            .map_err(|e| ApiError::internal(e.to_string()))?;
+
+    Ok(Json(serde_json::json!({
+        "model": name,
+        "version": body.version,
+        "algorithm": "HMAC-SHA256",
+        "signature": signature,
+    })))
+}
+
+#[derive(Deserialize)]
+pub struct VerifyRequest {
+    pub version: Option<u32>,
+    /// The detached signature document, as returned by `sign`.
+    pub signature: serde_json::Value,
+    /// Key seed. Without it, verification reports `signature_checked: false`
+    /// rather than inferring validity from a self-reported hash.
+    pub key: Option<String>,
+}
+
+/// POST /api/v1/models/:name/verify
+pub async fn verify_model(
+    State(state): State<Arc<AppState>>,
+    Path(name): Path<String>,
+    headers: HeaderMap,
+    Json(body): Json<VerifyRequest>,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let _claims = require_auth(&headers, &state)?;
+    validate_model_name(&name)?;
+
+    let signature: crate::signing::ModelSignature = serde_json::from_value(body.signature)
+        .map_err(|e| ApiError::bad_request(format!("Malformed signature document: {e}")))?;
+
+    let vault = state.vault.read().await;
+    let data = vault
+        .get_model(&name, body.version)
+        .map_err(ApiError::from)?;
+    drop(vault);
+
+    let tmp = spill_to_temp(&data)?;
+    let result = crate::signing::ModelSigner::verify(&signature, tmp.path(), body.key.as_deref())
+        .map_err(|e| ApiError::internal(e.to_string()))?;
+
+    Ok(Json(serde_json::json!({
+        "model": name,
+        "valid": result.valid,
+        "signature_checked": result.signature_checked,
+        "file_hash_match": result.file_hash_match,
+        "signature_match": result.signature_match,
+        "signer": result.signer,
+    })))
+}
+
+#[derive(Deserialize)]
+pub struct ScanRequest {
+    pub version: Option<u32>,
+}
+
+/// POST /api/v1/models/:name/scan
+pub async fn scan_model(
+    State(state): State<Arc<AppState>>,
+    Path(name): Path<String>,
+    headers: HeaderMap,
+    body: Option<Json<ScanRequest>>,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let _claims = require_auth(&headers, &state)?;
+    validate_model_name(&name)?;
+    let version = body.and_then(|Json(b)| b.version);
+
+    let vault = state.vault.read().await;
+    let data = vault.get_model(&name, version).map_err(ApiError::from)?;
+    drop(vault);
+
+    let report = crate::scanning::PickleScanner::scan_bytes(&data, &name);
+    Ok(Json(serde_json::json!({
+        "model": name,
+        "version": version,
+        "safe": report.findings.is_empty(),
+        "findings": report.findings,
+    })))
+}
+
+#[derive(Deserialize)]
+pub struct DiffRequest {
+    /// `name` or `name@version`. A filesystem path is not accepted.
+    pub left: String,
+    pub right: String,
+}
+
+/// POST /api/v1/models/diff
+pub async fn diff_models(
+    State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
+    Json(body): Json<DiffRequest>,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let _claims = require_auth(&headers, &state)?;
+
+    let (left_name, left_ver, left_fmt, left) = read_vault_model(&state, &body.left).await?;
+    let (right_name, right_ver, right_fmt, right) = read_vault_model(&state, &body.right).await?;
+
+    let diff = crate::diff::ModelDiffer::diff_bytes(
+        &left,
+        &right,
+        &left_name,
+        &right_name,
+        &left_fmt,
+        &right_fmt,
+    )
+    .map_err(|e| ApiError::internal(e.to_string()))?;
+
+    Ok(Json(serde_json::json!({
+        "left": { "model": left_name, "version": left_ver },
+        "right": { "model": right_name, "version": right_ver },
+        "diff": diff,
+    })))
+}
+
+#[derive(Deserialize)]
+pub struct LicenseScanRequest {
+    pub model: String,
+    pub version: Option<u32>,
+}
+
+/// POST /api/v1/license-scan
+///
+/// Scans a model held in the vault. The old spec took a `path`, which was an
+/// arbitrary-file-read primitive.
+pub async fn license_scan(
+    State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
+    Json(body): Json<LicenseScanRequest>,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let _claims = require_auth(&headers, &state)?;
+    validate_model_name(&body.model)?;
+
+    let vault = state.vault.read().await;
+    let data = vault
+        .get_model(&body.model, body.version)
+        .map_err(ApiError::from)?;
+    drop(vault);
+
+    let report = crate::license_scan::LicenseScanner::scan_bytes(&data, &body.model);
+    Ok(Json(serde_json::json!({
+        "model": body.model,
+        "version": body.version,
+        "licenses": report.licenses,
+    })))
+}
+
+/// GET /api/v1/models/:name/benchmarks
+pub async fn benchmarks_list(
+    State(state): State<Arc<AppState>>,
+    Path(name): Path<String>,
+    headers: HeaderMap,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let _claims = require_auth(&headers, &state)?;
+    validate_model_name(&name)?;
+
+    let vault = state.vault.read().await;
+    let base = vault.get_config().get_vault_path(None).join("benchmarks");
+    drop(vault);
+
+    let store = crate::benchmark::BenchmarkStore::new(&base)
+        .map_err(|e| ApiError::internal(e.to_string()))?;
+    let records = store
+        .list_for_model(&name)
+        .map_err(|e| ApiError::internal(e.to_string()))?;
+
+    Ok(Json(
+        serde_json::json!({ "model": name, "records": records }),
+    ))
+}
+
+#[derive(Deserialize)]
+pub struct BenchmarkRecordRequest {
+    pub version: u64,
+    pub benchmark: String,
+    pub score: f64,
+    pub unit: String,
+    #[serde(default = "default_higher_is_better")]
+    pub higher_is_better: bool,
+}
+
+fn default_higher_is_better() -> bool {
+    true
+}
+
+/// POST /api/v1/models/:name/benchmarks
+pub async fn benchmarks_record(
+    State(state): State<Arc<AppState>>,
+    Path(name): Path<String>,
+    headers: HeaderMap,
+    Json(body): Json<BenchmarkRecordRequest>,
+) -> Result<(StatusCode, Json<serde_json::Value>), ApiError> {
+    let _claims = require_auth(&headers, &state)?;
+    validate_model_name(&name)?;
+
+    let vault = state.vault.read().await;
+    let base = vault.get_config().get_vault_path(None).join("benchmarks");
+    drop(vault);
+
+    let store = crate::benchmark::BenchmarkStore::new(&base)
+        .map_err(|e| ApiError::internal(e.to_string()))?;
+    let mut record = store
+        .get_or_create(&name, body.version)
+        .map_err(|e| ApiError::internal(e.to_string()))?;
+    record.add_result(
+        &body.benchmark,
+        body.score,
+        &body.unit,
+        body.higher_is_better,
+    );
+    store
+        .save(&record)
+        .map_err(|e| ApiError::internal(e.to_string()))?;
+
+    Ok((
+        StatusCode::CREATED,
+        Json(serde_json::json!({ "model": name, "record": record })),
+    ))
+}
+
+/// POST /api/v1/models/:name/card/validate
+pub async fn card_validate(
+    State(state): State<Arc<AppState>>,
+    Path(name): Path<String>,
+    headers: HeaderMap,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let _claims = require_auth(&headers, &state)?;
+    validate_model_name(&name)?;
+
+    let vault = state.vault.read().await;
+    let card_path = vault
+        .get_config()
+        .get_vault_path(None)
+        .join("cards")
+        .join(format!("{name}.json"));
+    drop(vault);
+
+    if !card_path.exists() {
+        return Err(ApiError::not_found(format!(
+            "No model card stored for '{name}'"
+        )));
+    }
+    let raw = std::fs::read_to_string(&card_path)
+        .map_err(|e| ApiError::internal(format!("Could not read card: {e}")))?;
+
+    match crate::model_card::ModelCard::from_json(&raw) {
+        Ok(card) => Ok(Json(serde_json::json!({
+            "model": name,
+            "valid": true,
+            "card_name": card.model_details.name,
+            "card_version": card.model_details.version,
+        }))),
+        Err(e) => Ok(Json(serde_json::json!({
+            "model": name,
+            "valid": false,
+            "error": e.to_string(),
+        }))),
+    }
+}
+
+/// POST /api/v1/models/:name/card/generate
+///
+/// Builds a card from metadata the vault already holds and returns it rather
+/// than writing it, so generating is not itself a mutation.
+pub async fn card_generate(
+    state: State<Arc<AppState>>,
+    path: Path<String>,
+    headers: HeaderMap,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    // Deliberately delegates rather than reimplementing. `get_model_card`
+    // already synthesises a card from stored version metadata, so a second
+    // copy of that construction would be two sources of truth for one document
+    // and would drift the first time either was edited.
+    get_model_card(state, path, headers).await
+}
+
+#[derive(Deserialize)]
+pub struct RegisterRequest {
+    pub engine: String,
+    pub alias: Option<String>,
+    pub system_prompt: Option<String>,
+    pub version: Option<u32>,
+}
+
+/// POST /api/v1/models/:name/register
+pub async fn register_model(
+    State(state): State<Arc<AppState>>,
+    Path(name): Path<String>,
+    headers: HeaderMap,
+    Json(body): Json<RegisterRequest>,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let _claims = require_auth(&headers, &state)?;
+    validate_model_name(&name)?;
+
+    let vault = state.vault.read().await;
+    let data = vault
+        .get_model(&name, body.version)
+        .map_err(ApiError::from)?;
+    drop(vault);
+
+    // The engines register a path on disk, so the exported copy lives in the
+    // OS temp directory for the duration of the call rather than at a path the
+    // caller chose.
+    let tmp = spill_to_temp(&data)?;
+    let alias = body.alias.unwrap_or_else(|| name.clone());
+
+    let result = match body.engine.as_str() {
+        "ollama" => crate::interop::register_ollama(&crate::interop::OllamaOptions {
+            name: alias.clone(),
+            model_path: tmp.path().to_path_buf(),
+            system_prompt: body.system_prompt.clone(),
+            template: None,
+            parameters: Vec::new(),
+        }),
+        "lm-studio" => crate::interop::register_lm_studio(&crate::interop::LmStudioOptions {
+            name: alias.clone(),
+            model_path: tmp.path().to_path_buf(),
+            models_dir: None,
+        }),
+        other => {
+            return Err(ApiError::bad_request(format!(
+                "Unknown engine {other:?}. Supported: ollama, lm-studio"
+            )))
+        }
+    }
+    .map_err(|e| ApiError::internal(e.to_string()))?;
+
+    Ok(Json(serde_json::json!({
+        "model": name,
+        "engine": body.engine,
+        "alias": alias,
+        "registered": result.success,
+        "detail": result.message,
+    })))
+}
+
+/// POST /api/v1/vault/export
+///
+/// Streams the bundle back in the response body. The old spec took an `output`
+/// path, which was an arbitrary file write aimable anywhere the server user
+/// could reach; the bundle is built in a temp directory and returned instead.
+pub async fn vault_export(
+    State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
+) -> Result<Response, ApiError> {
+    let _claims = require_auth(&headers, &state)?;
+
+    let vault = state.vault.read().await;
+    let vault_path = vault.get_config().get_vault_path(None);
+    drop(vault);
+
+    let dir = tempfile::tempdir()
+        .map_err(|e| ApiError::internal(format!("Could not create temp dir: {e}")))?;
+    let out = dir.path().join("vault-export.tar.gz");
+    crate::vault_bundle::export_vault(&vault_path, &out, None)
+        .map_err(|e| ApiError::internal(e.to_string()))?;
+    let bytes = std::fs::read(&out)
+        .map_err(|e| ApiError::internal(format!("Could not read bundle: {e}")))?;
+
+    Ok((
+        StatusCode::OK,
+        [
+            (header::CONTENT_TYPE, "application/gzip"),
+            (
+                header::CONTENT_DISPOSITION,
+                "attachment; filename=\"vault-export.tar.gz\"",
+            ),
+        ],
+        bytes,
+    )
+        .into_response())
+}
+
+/// POST /api/v1/vault/import
+///
+/// Takes the bundle as the request body. The old spec took an `archive` path
+/// on the server, which let a caller read any file the process could open.
+pub async fn vault_import(
+    State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
+    body: axum::body::Bytes,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let _claims = require_auth(&headers, &state)?;
+    if body.is_empty() {
+        return Err(ApiError::bad_request("Request body is empty"));
+    }
+
+    let vault = state.vault.read().await;
+    let vault_path = vault.get_config().get_vault_path(None);
+    drop(vault);
+
+    let tmp = spill_to_temp(&body)?;
+    let report = crate::vault_bundle::import_vault(&vault_path, tmp.path(), false)
+        .map_err(|e| ApiError::bad_request(e.to_string()))?;
+
+    Ok(Json(serde_json::json!({
+        "models_imported": report.models_imported,
+        "versions_imported": report.versions_imported,
+        "versions_skipped": report.versions_skipped,
+        "checksum_verified": report.checksum_verified,
+    })))
+}
+
+/// GET /api/v1/telemetry/status
+pub async fn telemetry_status(
+    State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let _claims = require_auth(&headers, &state)?;
+
+    let vault = state.vault.read().await;
+    let cfg = vault.get_config().telemetry.clone();
+    drop(vault);
+
+    let do_not_track = std::env::var("DO_NOT_TRACK")
+        .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+        .unwrap_or(false);
+    let env_disabled = crate::env::var("IRONVAULT_TELEMETRY_DISABLED").is_some();
+
+    Ok(Json(serde_json::json!({
+        "enabled": cfg.enabled && !do_not_track && !env_disabled,
+        "configured_enabled": cfg.enabled,
+        "do_not_track": do_not_track,
+        "env_disabled": env_disabled,
+    })))
+}
+
+#[derive(Deserialize)]
+pub struct IntrospectQuery {
+    #[serde(default)]
+    pub compact: bool,
+}
+
+/// GET /api/v1/introspect
+///
+/// The same schema `iv introspect` prints, from the same builder in
+/// [`crate::cli_schema`], so the two surfaces cannot describe different CLIs.
+/// Unauthenticated on purpose: it is a discovery document containing no vault
+/// data, and requiring a token to learn how to obtain one is a loop.
+pub async fn introspect(Query(q): Query<IntrospectQuery>) -> Json<serde_json::Value> {
+    Json(crate::cli_schema::build(q.compact))
+}
+
+#[derive(Deserialize)]
+pub struct PullRequest {
+    /// `huggingface://owner/repo`, `ollama://name`, or an https URL.
+    pub source: String,
+    pub sha256: Option<String>,
+    pub token: Option<String>,
+    /// Store the downloaded bytes in the vault instead of only reporting them.
+    #[serde(default)]
+    pub store: bool,
+    /// Vault name to store under. Defaults to the downloaded file stem.
+    pub name: Option<String>,
+}
+
+/// POST /api/v1/models/pull
+///
+/// Downloads into a temp directory the server controls, then optionally stores
+/// the bytes in the vault. The output location is never caller-chosen.
+///
+/// Note this makes the server fetch a caller-supplied URL, which is inherent to
+/// the feature and matches `iv pull`. It is authenticated, and the response
+/// reports the resolved source and checksum so the caller can tell what was
+/// actually retrieved.
+pub async fn pull_model(
+    State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
+    Json(body): Json<PullRequest>,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let _claims = require_auth(&headers, &state)?;
+
+    let source = crate::download::ModelSource::parse(&body.source)
+        .map_err(|e| ApiError::bad_request(e.to_string()))?;
+
+    let dir = tempfile::tempdir()
+        .map_err(|e| ApiError::internal(format!("Could not create temp dir: {e}")))?;
+    let mut downloader = crate::download::ModelDownloader::new(dir.path());
+    if let Some(token) = body.token {
+        downloader = downloader.with_hf_token(token);
+    }
+
+    let result = downloader
+        .download(&source, body.sha256.as_deref())
+        .map_err(|e| ApiError::bad_request(e.to_string()))?;
+
+    let mut stored = None;
+    if body.store {
+        let name = body
+            .name
+            .or_else(|| {
+                result
+                    .path
+                    .file_stem()
+                    .map(|s| s.to_string_lossy().to_string())
+            })
+            .ok_or_else(|| ApiError::bad_request("Could not derive a model name; pass `name`"))?;
+        validate_model_name(&name)?;
+
+        let data = std::fs::read(&result.path)
+            .map_err(|e| ApiError::internal(format!("Could not read download: {e}")))?;
+        let metadata = crate::formats::ModelMetadata::new(
+            name.clone(),
+            crate::formats::ModelFormat::from_extension(&result.format),
+        );
+
+        let mut vault = state.vault.write().await;
+        let version = vault
+            .store_model(&name, data, metadata, None)
+            .map_err(ApiError::from)?;
+        stored = Some(serde_json::json!({ "model": name, "version": version.version }));
+    }
+
+    Ok(Json(serde_json::json!({
+        "source": result.source,
+        "sha256": result.sha256,
+        "size_bytes": result.size_bytes,
+        "format": result.format,
+        "stored": stored,
+    })))
+}

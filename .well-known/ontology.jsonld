@@ -570,10 +570,10 @@
         "@id": "iv:Telemetry",
         "@type": "rdfs:Class",
         "rdfs:label": "Telemetry",
-        "rdfs:comment": "Anonymous, opt-in telemetry that honours DO_NOT_TRACK and AIM_TELEMETRY_DISABLED.",
+        "rdfs:comment": "Anonymous, opt-in telemetry that honours DO_NOT_TRACK and IRONVAULT_TELEMETRY_DISABLED.",
         "skos:broader": "iv:CoreConcept",
         "iv:optIn": true,
-        "iv:environmentVariables": ["AIM_TELEMETRY_ENABLED", "AIM_TELEMETRY_DISABLED", "DO_NOT_TRACK"]
+        "iv:environmentVariables": ["IRONVAULT_TELEMETRY_ENABLED", "IRONVAULT_TELEMETRY_DISABLED", "DO_NOT_TRACK"]
       }
     ]
   },
@@ -1460,8 +1460,8 @@
     "globalFlags": [
       {"name": "--vault", "short": "-v", "type": "string", "required": false, "description": "Vault name (uses default if not specified)"},
       {"name": "--config", "short": "-c", "type": "path", "required": false, "description": "Config file path"},
-      {"name": "--sqlite-versions", "type": "bool", "required": false, "env": "AIM_SQLITE_VERSIONS", "featureGate": "sqlite", "description": "Use SQLite for version storage (ACID, indexed, concurrent)"},
-      {"name": "--no-telemetry", "type": "bool", "required": false, "env": "AIM_TELEMETRY_DISABLED", "description": "Disable telemetry for this session"}
+      {"name": "--sqlite-versions", "type": "bool", "required": false, "env": "IRONVAULT_SQLITE_VERSIONS", "featureGate": "sqlite", "description": "Use SQLite for version storage (ACID, indexed, concurrent)"},
+      {"name": "--no-telemetry", "type": "bool", "required": false, "env": "IRONVAULT_TELEMETRY_DISABLED", "description": "Disable telemetry for this session"}
     ],
     "commands": [
       {
@@ -1727,18 +1727,18 @@
         "category": "api",
         "featureGate": "api",
         "args": [
-          {"name": "--host", "type": "string", "required": false, "default": "127.0.0.1", "env": "AIM_HOST", "description": "Host address to bind to"},
-          {"name": "--port", "short": "-p", "type": "u16", "required": false, "default": 8080, "env": "AIM_PORT", "description": "Port to listen on"},
-          {"name": "--jwt-secret", "type": "string", "required": true, "env": "AIM_JWT_SECRET", "description": "JWT secret for token signing"},
+          {"name": "--host", "type": "string", "required": false, "default": "127.0.0.1", "env": "IRONVAULT_HOST", "description": "Host address to bind to"},
+          {"name": "--port", "short": "-p", "type": "u16", "required": false, "default": 8080, "env": "IRONVAULT_PORT", "description": "Port to listen on"},
+          {"name": "--jwt-secret", "type": "string", "required": true, "env": "IRONVAULT_JWT_SECRET", "description": "JWT secret for token signing"},
           {"name": "--token-expiry", "type": "u64", "required": false, "default": 3600, "description": "Token expiry in seconds"},
           {"name": "--cors-permissive", "type": "bool", "required": false, "description": "Allow CORS from any origin"},
           {"name": "--no-dashboard", "type": "bool", "required": false, "description": "Disable the embedded web dashboard"},
-          {"name": "--revocation-store", "type": "path", "required": false, "env": "AIM_REVOCATION_STORE", "description": "File to persist the JWT revocation list to. Without it, revoked tokens are re-admitted when the server restarts."}
+          {"name": "--revocation-store", "type": "path", "required": false, "env": "IRONVAULT_REVOCATION_STORE", "description": "File to persist the JWT revocation list to. Without it, revoked tokens are re-admitted when the server restarts."}
         ],
         "examples": [
           "iv serve --jwt-secret mysecret",
-          "iv serve --port 9090 --jwt-secret $AIM_JWT_SECRET --cors-permissive",
-          "iv serve --jwt-secret $AIM_JWT_SECRET --revocation-store /var/lib/iv/revocations.json"
+          "iv serve --port 9090 --jwt-secret $IRONVAULT_JWT_SECRET --cors-permissive",
+          "iv serve --jwt-secret $IRONVAULT_JWT_SECRET --revocation-store /var/lib/ironvault/revocations.json"
         ],
         "exitCodes": {"0": "Server stopped gracefully", "1": "Bind error"},
         "longRunning": true,

@@ -181,6 +181,25 @@ pub fn create_router(state: Arc<AppState>) -> Router {
             get(routes::vault_list).post(routes::vault_register),
         )
         .route("/vaults/:name/activate", post(routes::vault_activate))
+        // 5.1.0 — paths the OpenAPI spec documented from 1.x on but that had
+        // no handler, so generated clients called them and got 404s.
+        .route("/introspect", get(routes::introspect))
+        .route("/telemetry/status", get(routes::telemetry_status))
+        .route("/license-scan", post(routes::license_scan))
+        .route("/models/diff", post(routes::diff_models))
+        .route("/models/pull", post(routes::pull_model))
+        .route("/models/:name/sign", post(routes::sign_model))
+        .route("/models/:name/verify", post(routes::verify_model))
+        .route("/models/:name/scan", post(routes::scan_model))
+        .route("/models/:name/register", post(routes::register_model))
+        .route("/models/:name/card/validate", post(routes::card_validate))
+        .route("/models/:name/card/generate", post(routes::card_generate))
+        .route(
+            "/models/:name/benchmarks",
+            get(routes::benchmarks_list).post(routes::benchmarks_record),
+        )
+        .route("/vault/export", post(routes::vault_export))
+        .route("/vault/import", post(routes::vault_import))
         .with_state(state.clone());
 
     // Registered only when federation is enabled, so a default server does not

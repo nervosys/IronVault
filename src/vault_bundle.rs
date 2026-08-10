@@ -158,9 +158,17 @@ pub fn export_vault(
         .map(|(name, vers)| (name.clone(), vers.iter().map(|v| v.version).collect()))
         .collect();
 
-    // Write tar archive
+    // Write a gzipped tar archive.
+    //
+    // Every document describing this feature -- the CLI help, the OpenAPI
+    // spec, AGENTS.md, docs/VAULT_BUNDLE.md -- called the output a `.tar.gz`,
+    // but through 5.0 it was an uncompressed tar with a `.tar.gz` name. Model
+    // blobs compress, so the label was also costing users real bytes.
+    // `import_vault` sniffs the gzip magic, so bundles written by 5.0 and
+    // earlier still import.
     let out_file = fs::File::create(output)?;
-    let mut tar_builder = tar::Builder::new(out_file);
+    let encoder = flate2::write::GzEncoder::new(out_file, flate2::Compression::default());
+    let mut tar_builder = tar::Builder::new(encoder);
 
     // Write versions.json
     let versions_json = serde_json::to_string_pretty(&version_data)?;
@@ -228,6 +236,9 @@ pub fn export_vault(
     tar_builder.append_data(&mut header, "manifest.json", manifest_bytes)?;
 
     tar_builder.finish()?;
+    // Flush the gzip trailer. Without this the archive is truncated: `finish`
+    // above only completes the tar stream inside the encoder.
+    tar_builder.into_inner()?.finish()?;
 
     Ok(ExportReport {
         output_path: output.to_path_buf(),
@@ -245,13 +256,26 @@ pub fn import_vault(
 ) -> Result<ImportReport> {
     use crate::version::VersionControl;
 
-    let file = fs::File::open(archive_path)?;
-    let mut archive = tar::Archive::new(file);
-
     let temp_dir = tempfile::tempdir().map_err(VaultError::IoError)?;
 
-    // Extract everything to temp dir
-    archive.unpack(temp_dir.path())?;
+    // Sniff the gzip magic rather than trusting the extension. 5.1.0 started
+    // writing gzipped bundles; every bundle written before it is a plain tar
+    // that still carries a `.tar.gz` name, so extension-based dispatch would
+    // reject exactly the archives this compatibility exists for.
+    let mut magic = [0u8; 2];
+    {
+        use std::io::Read;
+        let mut probe = fs::File::open(archive_path)?;
+        // A file shorter than two bytes is not an archive either way; let the
+        // reader below produce the error.
+        let _ = probe.read(&mut magic)?;
+    }
+    let file = fs::File::open(archive_path)?;
+    if magic == [0x1f, 0x8b] {
+        tar::Archive::new(flate2::read::GzDecoder::new(file)).unpack(temp_dir.path())?;
+    } else {
+        tar::Archive::new(file).unpack(temp_dir.path())?;
+    }
 
     // Read manifest
     let manifest_path = temp_dir.path().join("manifest.json");
@@ -669,5 +693,85 @@ mod tests {
         };
         assert_eq!(report.models_exported.len(), 2);
         assert_eq!(report.total_versions, 5);
+    }
+
+    /// A bundle written before 5.1.0 is an uncompressed tar carrying a
+    /// `.tar.gz` name. Import sniffs the magic rather than the extension, so
+    /// those still load.
+    #[test]
+    fn test_plain_tar_bundles_from_before_5_1_still_import() {
+        let tmp = tempfile::tempdir().unwrap();
+        let vault = tmp.path().join("vault");
+        fs::create_dir_all(vault.join("data")).unwrap();
+
+        // `craft_bundle` writes an uncompressed tar, which is exactly what
+        // every bundle produced before 5.1.0 is -- including the `.tar.gz`
+        // name, which was never accurate.
+        let bundle = tmp.path().join("legacy.tar.gz");
+        craft_bundle(
+            &bundle,
+            "blob.vault",
+            &[("blob.vault", b"legacy bytes")],
+            None,
+            2,
+        );
+
+        let raw = fs::read(&bundle).unwrap();
+        assert_ne!(
+            &raw[..2],
+            &[0x1f, 0x8b],
+            "fixture must be a plain tar or this proves nothing"
+        );
+
+        let report = import_vault(&vault, &bundle, true).unwrap();
+        assert!(
+            report.checksum_verified,
+            "a pre-5.1 bundle must still verify, not merely parse"
+        );
+        assert_eq!(report.versions_imported, 1);
+        assert_eq!(
+            fs::read(vault.join("data").join("blob.vault")).unwrap(),
+            b"legacy bytes"
+        );
+    }
+
+    /// The round trip through the new gzip framing.
+    #[test]
+    fn test_gzipped_bundles_round_trip() {
+        let tmp = tempfile::tempdir().unwrap();
+        let vault = tmp.path().join("vault");
+        fs::create_dir_all(vault.join("data")).unwrap();
+
+        // Gzip a crafted plain-tar fixture, which is byte-for-byte what
+        // `export_vault` now produces.
+        let plain = tmp.path().join("plain.tar");
+        craft_bundle(
+            &plain,
+            "blob.vault",
+            &[("blob.vault", b"gzipped bytes")],
+            None,
+            2,
+        );
+
+        let bundle = tmp.path().join("bundle.tar.gz");
+        {
+            use std::io::Write;
+            let mut enc = flate2::write::GzEncoder::new(
+                fs::File::create(&bundle).unwrap(),
+                flate2::Compression::default(),
+            );
+            enc.write_all(&fs::read(&plain).unwrap()).unwrap();
+            enc.finish().unwrap();
+        }
+
+        let raw = fs::read(&bundle).unwrap();
+        assert_eq!(&raw[..2], &[0x1f, 0x8b], "fixture should be gzip");
+
+        let report = import_vault(&vault, &bundle, true).unwrap();
+        assert!(report.checksum_verified);
+        assert_eq!(
+            fs::read(vault.join("data").join("blob.vault")).unwrap(),
+            b"gzipped bytes"
+        );
     }
 }

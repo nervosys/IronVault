@@ -14,6 +14,7 @@ pub mod api;
 pub mod audit;
 pub mod benchmark;
 pub mod blockchain;
+pub mod cli_schema;
 pub mod cloud_envelope;
 pub mod compliance;
 pub mod config;

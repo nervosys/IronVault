@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.0] - 2026-08-10
+
+### Added
+
+- **The 14 REST endpoints the OpenAPI spec had been promising since 1.x.** `.well-known/openapi.yaml` documented 53 paths against 44 registered routes, and the sets were not nested — 14 documented paths had no handler at all. Any client generated from the published spec called them and got a 404. For a project whose premise is machine-readable discovery, a discovery document describing endpoints that do not exist is worse than not shipping one.
+
+  Now implemented: `/introspect`, `/telemetry/status`, `/license-scan`, `/models/diff`, `/models/pull`, `/vault/export`, `/vault/import`, and the `/models/{name}/` sub-resources `sign`, `verify`, `scan`, `register`, `benchmarks` (GET and POST), `card/validate`, and `card/generate`. The server now registers 58 routes and the spec documents all 56 that are REST resources.
+
+- **`GET /api/v1/introspect` serves the same schema as `iv introspect`.** The builder moved from the binary into the library as `ironvault::cli_schema`, which is why the endpoint could not exist before — the schema was unreachable from the API. Both surfaces now call one function, so they cannot describe different CLIs. A test asserts the HTTP response equals `cli_schema::build(false)` exactly. It is unauthenticated on purpose: it holds no vault data, and requiring a token to learn how to obtain a token is a loop.
+
+- **`tests/openapi_drift_test.rs`.** Reconciling the spec once was the easy part; this is the part that keeps it reconciled. Six assertions: every registered route is documented, every documented path has a handler, the spec parses as YAML, its version matches the crate, every tag used is declared and every declared tag used, and the exemption list stays short and real. The only exemptions are `/` (HTML dashboard) and `/graphql` (a different protocol with its own schema).
+
+### Security
+
+- **The documented shapes for four endpoints were arbitrary file read and write, and were not implemented as written.** The spec had `/license-scan` taking a `path`, `/vault/export` taking an `output`, `/vault/import` taking an `archive`, and `/models/diff` taking "file path or name@version" — all server-side filesystem paths supplied by the caller. Over HTTP that turns any API token into read and write access to every file the server user can reach; `output` alone is a write primitive aimable anywhere.
+
+  Each is scoped instead: a model is addressed by `name` or `name@version` and resolved against the vault, `export` streams the bundle in the response body, and `import` takes the bundle as the request body. `sign` returns the detached signature inline rather than reporting a server-side `signature_path`. The spec was corrected to match the implementation. Nothing depended on the old shapes, because nothing implemented them.
+
+  `tests/api_reconciliation_tests.rs` asserts the rejection directly: a `path` body to `/license-scan` and a filesystem path to `/models/diff` must both fail rather than read the file.
+
+### Fixed
+
+- **Vault bundles are now actually gzipped.** The CLI help, the OpenAPI spec, `AGENTS.md`, and `docs/VAULT_BUNDLE.md` all called the export a `.tar.gz`; through 5.0 it was an uncompressed tar wearing that name. Model blobs compress, so the mislabel also cost real bytes on every export.
+
+  `import_vault` sniffs the gzip magic rather than the file extension, so every bundle written by 5.0 and earlier still imports — extension-based dispatch would have rejected exactly the archives the compatibility exists for. Both directions are tested: a pre-5.1 plain tar must still import *and pass its checksum*, and a gzipped bundle must round-trip.
+
+- **`iv introspect` and `.well-known/ontology.jsonld` minted different IRIs for the same terms**, so a consumer joining the two saw two unrelated vocabularies. Carried over from the 5.0.0 notes and now also covered by the tag consistency test.
+
+- **Twelve OpenAPI tags were used but never declared**, including `Cards` and `Model Cards` as two names for one group. Undeclared tags render as bare strings with no description in generated documentation. All tags are now declared, and the drift test fails if that stops being true in either direction.
+
 ## [5.0.0] - 2026-08-10
 
 ### Changed

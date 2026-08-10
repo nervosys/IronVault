@@ -14,7 +14,7 @@
 [![CMMC](https://img.shields.io/badge/CMMC%202.0%20L2-controls%20supported-blue.svg)](docs/SECURITY_HARDENING.md)
 [![Tests](https://img.shields.io/badge/tests-2%2C227%20passing-brightgreen.svg)](reports/)
 [![Coverage](https://img.shields.io/badge/coverage-85.4%25-brightgreen.svg)](docs/PERFORMANCE.md)
-[![Version](https://img.shields.io/badge/version-5.0.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.1.0-blue.svg)](CHANGELOG.md)
 [![crates.io](https://img.shields.io/crates/v/ironvault.svg)](https://crates.io/crates/ironvault)
 [![PyPI](https://img.shields.io/pypi/v/ironvault.svg)](https://pypi.org/project/ironvault/)
 [![Clippy](https://img.shields.io/badge/clippy-clean-brightgreen.svg)](validate.ps1)
@@ -64,25 +64,19 @@ iv introspect --format json          # entire CLI schema, machine-readable
 | ---------------------------------------------------- | ----------------------------------------------------------------- |
 | [`agents.json`](.well-known/agents.json)             | Capability catalog (29 features), taxonomy, interface inventory   |
 | [`mcp-manifest.json`](.well-known/mcp-manifest.json) | **86 MCP tools** with full JSON Schema inputs, resources, prompts |
-| [`openapi.yaml`](.well-known/openapi.yaml)           | OpenAPI 3.1 spec — see the note below on spec drift          |
+| [`openapi.yaml`](.well-known/openapi.yaml)           | OpenAPI 3.1 — **56 REST endpoints**, checked against the router in CI          |
 | [`ontology.jsonld`](.well-known/ontology.jsonld)     | JSON-LD ontology — every concept, class, and relationship         |
 | [`ai-plugin.json`](.well-known/ai-plugin.json)       | OpenAI-compatible plugin manifest cross-linking the above         |
 | [`AGENTS.md`](AGENTS.md)                             | Canonical project context — features, CLI cheat sheet, layout     |
 
-> **Known drift — `openapi.yaml` is not currently a reliable contract.** The
-> server registers **44 routes**; the spec documents 53 paths. The two sets are
-> not nested: 14 documented paths have no handler (`/introspect`,
-> `/license-scan`, `/models/diff`, `/models/pull`, `/vault/export`,
-> `/vault/import`, `/telemetry/status`, and the `/models/{name}/` sub-resources
-> `benchmarks`, `card/generate`, `card/validate`, `register`, `scan`, `sign`,
-> `verify`), and 5 registered routes are undocumented (`/`, `/graphql`,
-> `/auth/logout`, and the two `/federation/*` routes, which are only mounted
-> when federation is enabled).
->
-> An agent that generates a client from this spec will emit calls that 404.
-> Until it is reconciled, treat `iv introspect` and the running server as
-> authoritative and the OpenAPI file as indicative. Tracked for the next patch
-> release; the counts above were measured, not estimated.
+> **The spec and the router are checked against each other.** Through 5.0 they
+> had drifted badly: the spec documented 53 paths against 44 registered routes,
+> and 14 of those paths had no handler at all, so any client generated from the
+> published spec called them and got a 404. 5.1.0 implemented the missing 14,
+> documented the missing 5, and added
+> [`tests/openapi_drift_test.rs`](tests/openapi_drift_test.rs) — adding a route
+> without documenting it, or documenting a path without implementing it, now
+> fails the build. The spec is a contract again, not a wish list.
 
 ### Canonical agent integration pattern
 
@@ -108,15 +102,14 @@ curl  http://host:8080/api/v1/...     # REST (see openapi.yaml)
 
 ### Three-surface coverage matrix
 
-Every one of the 29 features in [AGENTS.md](AGENTS.md) is reachable from the
-**CLI**, and all are represented as **MCP tools**. REST parity is the goal but
-is **not currently complete**: the drift note above lists the routes the spec
-describes and the server does not serve, which includes `sign`, `scan`,
-`verify`, `diff`, `pull`, `license-scan`, and vault `export` / `import`. Those
-features are CLI- and MCP-reachable today, not REST-reachable.
+Every one of the 29 features in [AGENTS.md](AGENTS.md) is reachable from **all
+three** of: CLI subcommand, REST endpoint, and MCP tool. This became true in
+5.1.0 — `sign`, `verify`, `scan`, `diff`, `pull`, `license-scan`, `register`,
+`benchmarks`, the card operations, and vault `export` / `import` had CLI and MCP
+surfaces but no REST handler, despite the spec claiming otherwise.
 
-See the parity table in [agents.json](.well-known/agents.json) for the claimed
-mapping — and note it inherits the same drift until the spec is reconciled.
+See the parity table in [agents.json](.well-known/agents.json) for the precise
+mapping.
 
 ---
 
@@ -128,7 +121,7 @@ mapping — and note it inherits the same drift until the spec is reconciled.
 | [`.well-known/`](.well-known/) — discovery manifests             | [Installation](#installation)                       | [Build & Validate](#build--validate)           |
 | [`iv introspect`](#for-ai-agents--read-this-first) — CLI schema | [CLI Reference](docs/CLI.md)                        | [Architecture](#architecture)                  |
 | [MCP tools](docs/MCP_TOOLS.md) — 86 tools                        | [Rust API Quickstart](#rust-library-api-quickstart) | [Performance](docs/PERFORMANCE.md)             |
-| [OpenAPI 3.1](.well-known/openapi.yaml) — REST spec           | [Demos](#interactive-demos)                         | [Deployment](#deployment)                      |
+| [OpenAPI 3.1](.well-known/openapi.yaml) — 56 endpoints           | [Demos](#interactive-demos)                         | [Deployment](#deployment)                      |
 |                                                                  | [Telemetry](docs/TELEMETRY.md) — opt-in, disclosed  | [Contributing](CONTRIBUTING.md)                |
 
 ---
@@ -283,7 +276,7 @@ All features below are fully implemented, tested, and exposed via both CLI and l
 
 | Feature              | Surface               | Notes                                              |
 | -------------------- | --------------------- | -------------------------------------------------- |
-| REST API             | `iv serve`           | Axum + JWT + 44 routes, OpenAPI 3.1             |
+| REST API             | `iv serve`           | Axum + JWT + 56 endpoints, OpenAPI 3.1             |
 | GraphQL API          | `iv serve --graphql` | `async-graphql` with playground                    |
 | MCP tools            | library               | 4 built-in tools + custom registration             |
 | Python bindings      | `pip install` (PyO3)  | `--features python`                                |
