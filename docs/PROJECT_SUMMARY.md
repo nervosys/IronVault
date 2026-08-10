@@ -409,7 +409,7 @@ See [SECURITY.md](https://github.com/nervosys/IronVault/blob/master/SECURITY.md)
 
 ## 📞 Support
 
-- 📖 [Documentation](https://ironvault.nervosys.ai)
+- 📖 [Documentation](https://github.com/nervosys/IronVault/tree/master/docs)
 - 💬 [GitHub Discussions](https://github.com/nervosys/IronVault/discussions)
 - 🐛 [Issue Tracker](https://github.com/nervosys/IronVault/issues)
 - 📧 Email: dev@nervosys.ai

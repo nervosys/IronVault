@@ -244,7 +244,7 @@ cp -r /backup/ironvault ~/.local/share/
 
 ## Support
 
-- Documentation: https://ironvault.nervosys.ai/docs
+- Documentation: https://github.com/nervosys/IronVault/tree/master/docs
 - Issues: https://github.com/nervosys/IronVault/issues
 - Security: security@nervosys.ai
 

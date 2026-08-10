@@ -688,7 +688,7 @@ Dual-licensed:
 
 ## Support
 
-- 📖 [Documentation site](https://ironvault.nervosys.ai) · [Local website/](website/)
+- 📖 [Documentation site](https://github.com/nervosys/IronVault/tree/master/docs) · [Local website/](website/)
 - 💬 [GitHub Discussions](https://github.com/nervosys/IronVault/discussions)
 - 🐛 [Issue tracker](https://github.com/nervosys/IronVault/issues)
 - 📧 General: dev@nervosys.ai · Security: security@nervosys.ai · Licensing: licensing@nervosys.ai

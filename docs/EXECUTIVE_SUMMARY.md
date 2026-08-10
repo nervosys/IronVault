@@ -301,7 +301,7 @@ cd IronVault && cargo build --release
 ## 📞 Support & Contact
 
 **Repository**: https://github.com/nervosys/IronVault  
-**Documentation**: https://ironvault.nervosys.ai  
+**Documentation**: https://github.com/nervosys/IronVault/tree/master/docs  
 **Email**: dev@nervosys.ai  
 **Security**: security@nervosys.ai  
 **License**: AGPL-3.0-or-later  

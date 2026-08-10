@@ -6,7 +6,13 @@
 site_name: IronVault
 site_description: Universal cross-platform secure vault for AI model storage, versioning, and management
 site_author: NERVOSYS AI Team
-site_url: https://ironvault.nervosys.ai/mkdocs/
+# No canonical host yet: ironvault.nervosys.ai has no DNS record, and neither
+# did the 4.x name it replaced, so every absolute link built from it 404'd.
+# MkDocs output is mounted under the Next.js site at website/public/mkdocs/,
+# which is a relative path, so the build does not need a site_url. Set this
+# once the docs are actually hosted somewhere — a wrong value here is worse
+# than none, since it is what canonical tags and sitemap.xml are built from.
+# site_url: https://<host>/mkdocs/
 repo_url: https://github.com/nervosys/IronVault
 repo_name: nervosys/IronVault
 copyright: "&copy; 2025-2026 NERVOSYS. Licensed under AGPL-3.0-or-later."

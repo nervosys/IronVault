@@ -462,7 +462,7 @@ into a layer, and inject secrets at runtime instead of at build time.
 For security questions or concerns:
 - **Email**: security@nervosys.ai
 - **GitHub**: https://github.com/nervosys/IronVault/security
-- **Documentation**: https://ironvault.nervosys.ai/docs/security
+- **Documentation**: https://github.com/nervosys/IronVault/blob/master/docs/SECURITY_HARDENING.md
 
 **Remember**: Security is a continuous process, not a one-time setup. Regular reviews and updates are essential.
 
