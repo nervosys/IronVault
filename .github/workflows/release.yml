@@ -54,12 +54,23 @@ jobs:
       if: matrix.target == 'x86_64-unknown-linux-musl'
       run: sudo apt-get install -y musl-tools
 
+    # `--features api` on both steps, deliberately.
+    #
+    # Through 5.1.0 these built with default features, so no released binary
+    # ever contained `iv serve` -- `iv serve --help` answered "unrecognized
+    # subcommand" on every download, while the README offered the prebuilt
+    # binary a few lines above the REST API documentation. The 14 endpoints
+    # added in 5.1.0 were unreachable for anyone who had not built from source.
+    #
+    # The test step needs it too: without the feature, `cargo test` skips every
+    # `#![cfg(feature = "api")]` suite, so the release gate was not running the
+    # API, auth, drift, or reconciliation tests it appears to run.
     - name: Run tests
       if: matrix.target != 'aarch64-apple-darwin'
-      run: cargo test --release --target ${{ matrix.target }}
+      run: cargo test --release --features api --target ${{ matrix.target }}
 
     - name: Build
-      run: cargo build --release --target ${{ matrix.target }}
+      run: cargo build --release --features api --target ${{ matrix.target }}
 
     - name: Strip binary (Unix)
       if: runner.os != 'Windows'

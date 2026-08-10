@@ -45,7 +45,7 @@ pub fn build(compact: bool) -> Value {
 }
 
 fn build_commands(compact: bool) -> Value {
-    json!([
+    let mut commands = json!([
         cmd(
             "init",
             "vault",
@@ -947,7 +947,21 @@ fn build_commands(compact: bool) -> Value {
                 ]
             )
         ),
-    ])
+    ]);
+
+    // `serve` exists only in an `api` build -- `Commands::Serve` in
+    // `cli/args.rs` is `#[cfg(feature = "api")]`. Listing it unconditionally
+    // made `iv introspect` advertise a subcommand the running binary would
+    // reject as unrecognised, which is the same failure as documenting a REST
+    // path with no handler: an agent trusts the discovery document and the
+    // call fails. The schema now describes the binary it was compiled into.
+    if !cfg!(feature = "api") {
+        if let Some(list) = commands.as_array_mut() {
+            list.retain(|c| c.get("name").and_then(Value::as_str) != Some("serve"));
+        }
+    }
+
+    commands
 }
 
 // Helper builders
@@ -1055,4 +1069,66 @@ fn subcmd(name: &str, compact: bool, description: &str, args: Vec<Value>) -> Val
         c["description"] = json!(description);
     }
     c
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn command_names(schema: &Value) -> Vec<String> {
+        schema["commands"]
+            .as_array()
+            .expect("commands is an array")
+            .iter()
+            .filter_map(|c| c.get("name").and_then(Value::as_str))
+            .map(str::to_string)
+            .collect()
+    }
+
+    /// The schema must describe the binary it was compiled into.
+    ///
+    /// `serve` is `#[cfg(feature = "api")]` in `cli/args.rs`. Advertising it
+    /// from a build that cannot run it is the CLI equivalent of documenting a
+    /// REST path with no handler: an agent reads the discovery document, issues
+    /// the command, and gets "unrecognized subcommand".
+    #[test]
+    fn serve_is_advertised_only_when_it_exists() {
+        let names = command_names(&build(false));
+        assert_eq!(
+            names.iter().any(|n| n == "serve"),
+            cfg!(feature = "api"),
+            "`serve` presence in the schema must track the `api` feature; \
+             schema listed: {names:?}"
+        );
+    }
+
+    /// Commands that are not feature-gated must always be present, so the
+    /// filter above cannot quietly remove more than it should.
+    #[test]
+    fn ungated_commands_are_always_present() {
+        let names = command_names(&build(false));
+        for expected in ["init", "store", "get", "list", "introspect"] {
+            assert!(
+                names.iter().any(|n| n == expected),
+                "`{expected}` is not feature-gated but is missing from the schema"
+            );
+        }
+    }
+
+    /// Compact mode drops prose, not commands.
+    #[test]
+    fn compact_keeps_every_command() {
+        assert_eq!(
+            command_names(&build(true)).len(),
+            command_names(&build(false)).len()
+        );
+    }
+
+    #[test]
+    fn the_schema_names_the_current_binary_and_version() {
+        let schema = build(false);
+        assert_eq!(schema["binary"], "iv");
+        assert_eq!(schema["version"], env!("CARGO_PKG_VERSION"));
+        assert_eq!(schema["install"], "cargo install ironvault");
+    }
 }

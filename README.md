@@ -14,7 +14,7 @@
 [![CMMC](https://img.shields.io/badge/CMMC%202.0%20L2-controls%20supported-blue.svg)](docs/SECURITY_HARDENING.md)
 [![Tests](https://img.shields.io/badge/tests-2%2C227%20passing-brightgreen.svg)](reports/)
 [![Coverage](https://img.shields.io/badge/coverage-85.4%25-brightgreen.svg)](docs/PERFORMANCE.md)
-[![Version](https://img.shields.io/badge/version-5.1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.1.1-blue.svg)](CHANGELOG.md)
 [![crates.io](https://img.shields.io/crates/v/ironvault.svg)](https://crates.io/crates/ironvault)
 [![PyPI](https://img.shields.io/pypi/v/ironvault.svg)](https://pypi.org/project/ironvault/)
 [![Clippy](https://img.shields.io/badge/clippy-clean-brightgreen.svg)](validate.ps1)
@@ -154,6 +154,10 @@ curl -sSLO https://github.com/nervosys/IronVault/releases/latest/download/iv-lin
 curl -sSLO https://github.com/nervosys/IronVault/releases/latest/download/iv-linux-amd64.sha256
 sha256sum -c iv-linux-amd64.sha256 && chmod +x iv-linux-amd64 && sudo mv iv-linux-amd64 /usr/local/bin/iv
 ```
+
+> Prebuilt binaries include the REST API (`iv serve`) from **5.1.1** onward.
+> Downloads up to and including 5.1.0 were default-feature builds, where
+> `iv serve` answered *"unrecognized subcommand"*.
 
 ```bash
 # Python bindings

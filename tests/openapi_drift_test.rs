@@ -317,6 +317,43 @@ fn manifests_do_not_advertise_pre_5_0_environment_names() {
     }
 }
 
+/// The release workflow must build and test the binaries with `--features api`.
+///
+/// Through 5.1.0 it did neither. Every published binary was a default-feature
+/// build, so `iv serve` answered "unrecognized subcommand" on all five targets
+/// while the README offered the prebuilt binary a few lines above the REST API
+/// documentation — and every endpoint in this file was unreachable to anyone
+/// who had not compiled from source.
+///
+/// The test step matters just as much: without the feature, `cargo test` skips
+/// every `#![cfg(feature = "api")]` suite, so the release gate silently ran
+/// none of the API, auth, or drift tests it appeared to run.
+#[test]
+fn the_release_workflow_builds_the_api_feature() {
+    let workflow = std::fs::read_to_string(manifest_dir().join(".github/workflows/release.yml"))
+        .expect("release workflow is readable");
+
+    let build = workflow
+        .lines()
+        .find(|l| l.contains("cargo build --release"))
+        .expect("release workflow has a cargo build step");
+    assert!(
+        build.contains("--features api"),
+        "release binaries would ship without `iv serve`:\n  {}",
+        build.trim()
+    );
+
+    let test = workflow
+        .lines()
+        .find(|l| l.contains("cargo test --release"))
+        .expect("release workflow has a cargo test step");
+    assert!(
+        test.contains("--features api"),
+        "the release gate would skip every api-gated test suite:\n  {}",
+        test.trim()
+    );
+}
+
 /// The exemption list must not become a dumping ground for undocumented routes.
 #[test]
 fn the_exemption_list_stays_small_and_real() {

@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.1] - 2026-08-10
+
+### Fixed
+
+- **The prebuilt binaries had no REST API.** Every published binary, on all five targets and in every release to date, was a default-feature build — so `iv serve` answered *"unrecognized subcommand"* on any download, while the README offered the prebuilt binary a few lines above the REST API documentation. The 14 endpoints added in 5.1.0 were unreachable to anyone who had not compiled from source with `--features api`.
+
+  Found by running the published 5.1.0 binary rather than trusting the release job names: the workflow reported success because it built and tested exactly what it was told to, which did not include the API.
+
+  The release workflow now passes `--features api` to both `cargo build` and `cargo test`. The test step mattered as much as the build: without the feature, `cargo test` skips every `#![cfg(feature = "api")]` suite, so the release gate silently ran none of the API, auth, drift, or reconciliation tests it appeared to run.
+
+- **`iv introspect` advertised `serve` in builds that did not have it.** `Commands::Serve` is `#[cfg(feature = "api")]`, but the schema listed it unconditionally, so a default build published a discovery document promising a subcommand it would then reject. That is the same failure as documenting a REST path with no handler, one layer up — an agent reads the schema, issues the command, and it fails.
+
+  The schema now describes the binary it was compiled into, pinned by a test that ties `serve`'s presence to `cfg!(feature = "api")` in both directions.
+
+- **A test now guards the release workflow itself**, asserting that both its build and test steps carry `--features api`. Dropping the feature again fails the build rather than shipping five binaries that cannot serve.
+
 ## [5.1.0] - 2026-08-10
 
 ### Added
