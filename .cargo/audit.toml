@@ -6,4 +6,23 @@
 # clear it.
 
 [advisories]
-ignore = []
+ignore = [
+    # RUSTSEC-2023-0071 -- `rsa` 0.9.x, "Marvin Attack: potential key recovery
+    # through timing sidechannels". No fixed upgrade exists.
+    #
+    # Path: ai-model-vault -> jsonwebtoken 11 (`rust_crypto` provider) -> rsa.
+    # The provider feature is all-or-nothing; `rust_crypto` cannot be taken
+    # without `rsa`, and the only alternative provider (`aws_lc_rs`) hard-requires
+    # NASM on Windows, which breaks `cargo install --features api` there.
+    #
+    # Unreachable in this crate: every JWT is signed and verified with HMAC.
+    # `src/api/auth.rs` uses `Header::default()` and `Validation::default()`
+    # (both HS256) with `EncodingKey::from_secret` / `DecodingKey::from_secret`.
+    # No RSA key is ever constructed, so no RSA decryption runs and the timing
+    # sidechannel has nothing to leak. `tests/jwt_algorithm_test.rs` pins this,
+    # and will fail if any RSA algorithm is ever introduced.
+    #
+    # Clears when: `rsa` ships a fix, or jsonwebtoken lets the RSA algorithms be
+    # compiled out of the `rust_crypto` provider.
+    "RUSTSEC-2023-0071",
+]

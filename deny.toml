@@ -2,10 +2,18 @@
 [advisories]
 db-path = "~/.cargo/advisory-db"
 db-urls = ["https://github.com/rustsec/advisory-db"]
-# No suppressions. Every advisory this project once ignored is now genuinely
-# fixed, so the list is empty — add an entry only with the crate, the path that
-# pulls it in, and what would clear it.
-ignore = []
+# One suppression. Add an entry only with the crate, the path that pulls it in,
+# and what would clear it. Keep this list in sync with `.cargo/audit.toml`,
+# which CI reads separately.
+ignore = [
+    # RUSTSEC-2023-0071 -- `rsa` 0.9.x Marvin timing sidechannel, no fix available.
+    # Path: jsonwebtoken 11 (`rust_crypto` provider) -> rsa. Unreachable: this
+    # crate signs and verifies only with HS256/HMAC (`src/api/auth.rs`), so no
+    # RSA key is ever constructed. Pinned by `tests/jwt_algorithm_test.rs`.
+    # Clears when `rsa` is fixed, or jsonwebtoken makes RSA optional within
+    # `rust_crypto`. Full rationale in `.cargo/audit.toml`.
+    "RUSTSEC-2023-0071",
+]
 
 # Previously ignored, now actually resolved — recorded so they are not re-added
 # by reflex if an old config resurfaces:

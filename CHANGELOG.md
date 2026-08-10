@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.6.1] - 2026-08-07
+## [4.6.1] - 2026-08-10
 
 ### Changed
 
@@ -15,9 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   Verified by doing it: in an isolated worktree the bare bump passed `cargo check`, then failed 6 of 10 auth tests, including basic token creation. With `default-features = false, features = ["rust_crypto"]` all 10 pass — including expired-token rejection and invalid-secret rejection, which confirms `Validation::default()` still validates `exp` and the signature.
 
-  `rust_crypto` over `aws_lc_rs`: it matches the pure-Rust posture of the rest of the crypto stack (`aes-gcm`, `argon2`) and avoids requiring a C toolchain and cmake on all five release targets.
+  `rust_crypto` over `aws_lc_rs`: it matches the pure-Rust posture of the rest of the crypto stack (`aes-gcm`, `argon2`) and keeps the build toolchain-free. `aws_lc_rs` was tried and rejected — `aws-lc-sys` hard-requires NASM on `x86_64-pc-windows-msvc` and panics the build without it, so it would break `cargo install ai-model-vault --features api` for every Windows user.
 
   This is the case for reading a major bump rather than trusting a green check — the compiler had nothing to say about it.
+
+### Security
+
+- **RUSTSEC-2023-0071 (`rsa` 0.9.10) is now suppressed, with a test holding the justification in place.** The `rust_crypto` provider above is all-or-nothing: it cannot be selected without `rsa`, which carries an unfixed timing sidechannel (Marvin attack) and no upgrade path. Taking the jsonwebtoken bump therefore turned the Security Audit red — a regression this release introduced and is closing here.
+
+  The advisory is unreachable in this crate. Every JWT is signed and verified with HMAC: `src/api/auth.rs` uses `Header::default()` and `Validation::default()` (HS256) with `EncodingKey::from_secret` / `DecodingKey::from_secret`. No RSA key is ever constructed, so the RSA decryption path that leaks timing never runs.
+
+  "Unreachable" is a claim that rots, so it is now pinned rather than asserted: `tests/jwt_algorithm_test.rs` fails if issued tokens stop being HS256, and fails if a token whose header advertises `RS256` is ever accepted. Introducing an RSA algorithm breaks the build and forces the suppression to be revisited. Both `.cargo/audit.toml` and `deny.toml` carry the crate, the path that pulls it in, and what clears it.
 
 ## [4.6.0] - 2026-08-07
 

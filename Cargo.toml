@@ -149,8 +149,15 @@ tower-http = { version = "0.6", features = [
 # determine the process-level CryptoProvider"). A bare version bump therefore
 # builds green and ships an API whose every authenticated request crashes.
 # `rust_crypto` matches the pure-Rust posture of the rest of the crypto stack
-# (`aes-gcm`, `argon2`) and avoids requiring a C toolchain on all five release
-# targets; `aws_lc_rs` would pull in AWS-LC and cmake.
+# (`aes-gcm`, `argon2`) and keeps the build toolchain-free. `aws_lc_rs` was
+# tried and rejected: aws-lc-sys hard-requires NASM on x86_64-pc-windows-msvc
+# and a C compiler everywhere else, so it fails outright for anyone running
+# `cargo install ai-model-vault --features api` on Windows.
+#
+# The cost of `rust_crypto` is that it pulls in `rsa`, which carries
+# RUSTSEC-2023-0071 with no fixed release. That advisory is suppressed in
+# `.cargo/audit.toml` and `deny.toml`; see those files for why it is
+# unreachable here.
 jsonwebtoken = { version = "11.0", optional = true, default-features = false, features = [
     "rust_crypto",
 ] }
