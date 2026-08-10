@@ -197,7 +197,7 @@ opentelemetry-otlp = { version = "0.32", optional = true, default-features = fal
 # lancedb removed: v0.4 depends on arrow-arith v51 which is incompatible with Rust 1.93+
 
 [dev-dependencies]
-criterion = "0.5"
+criterion = "0.8"
 proptest = "1.4"
 assert_cmd = "2.1.2"
 predicates = "3.1.4"
