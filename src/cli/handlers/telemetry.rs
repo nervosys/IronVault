@@ -109,10 +109,12 @@ fn reset_device_id(config: &mut VaultConfig) -> Result<()> {
 }
 
 fn is_env_disabled() -> bool {
-    ironvault::env::var("IRONVAULT_TELEMETRY_ENABLED").ok_or(())
+    ironvault::env::var("IRONVAULT_TELEMETRY_ENABLED")
+        .ok_or(())
         .map(|v| v.to_lowercase() == "false" || v == "0")
         .unwrap_or(false)
-        || ironvault::env::var("IRONVAULT_TELEMETRY_DISABLED").ok_or(())
+        || ironvault::env::var("IRONVAULT_TELEMETRY_DISABLED")
+            .ok_or(())
             .map(|v| v == "1" || v.to_lowercase() == "true")
             .unwrap_or(false)
         || std::env::var("DO_NOT_TRACK")

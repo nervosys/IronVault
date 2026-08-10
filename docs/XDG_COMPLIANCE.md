@@ -294,10 +294,10 @@ let config = VaultConfig::with_dirs(dirs)?;
 
 ```bash
 # Development
-export XDG_DATA_HOME=$HOME/dev/IRONVAULT_DEV
+export XDG_DATA_HOME=$HOME/dev/ironvault-dev
 
 # Staging
-export XDG_DATA_HOME=$HOME/staging/IRONVAULT_STAGING
+export XDG_DATA_HOME=$HOME/staging/ironvault-staging
 
 # Production
 export XDG_DATA_HOME=/mnt/production/ironvault

@@ -61,7 +61,7 @@ $env:XDG_CACHE_HOME = "C:\custom\cache"
 
 ### Development Environment
 ```bash
-export XDG_DATA_HOME=$HOME/dev/IRONVAULT_DEV
+export XDG_DATA_HOME=$HOME/dev/ironvault-dev
 ```
 
 ### Network Storage

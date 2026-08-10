@@ -348,10 +348,12 @@ impl TelemetryClient {
 
     /// Check if telemetry is disabled via environment variable
     fn is_disabled_by_env() -> bool {
-        crate::env::var("IRONVAULT_TELEMETRY_ENABLED").ok_or(())
+        crate::env::var("IRONVAULT_TELEMETRY_ENABLED")
+            .ok_or(())
             .map(|v| v.to_lowercase() == "false" || v == "0")
             .unwrap_or(false)
-            || crate::env::var("IRONVAULT_TELEMETRY_DISABLED").ok_or(())
+            || crate::env::var("IRONVAULT_TELEMETRY_DISABLED")
+                .ok_or(())
                 .map(|v| v == "1" || v.to_lowercase() == "true")
                 .unwrap_or(false)
             || std::env::var("DO_NOT_TRACK")

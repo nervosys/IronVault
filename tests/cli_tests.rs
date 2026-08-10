@@ -19,8 +19,7 @@ fn iv() -> Command {
 
 #[test]
 fn test_cli_help() {
-    iv()
-        .arg("--help")
+    iv().arg("--help")
         .assert()
         .success()
         .stdout(predicate::str::contains("secure vault"))
@@ -29,8 +28,7 @@ fn test_cli_help() {
 
 #[test]
 fn test_cli_version() {
-    iv()
-        .arg("--version")
+    iv().arg("--version")
         .assert()
         .success()
         .stdout(predicate::str::contains("1.2.1").or(predicate::str::contains("iv")));
@@ -50,8 +48,7 @@ fn test_cli_no_args_shows_help() {
 
 #[test]
 fn test_cli_init_help() {
-    iv()
-        .args(["init", "--help"])
+    iv().args(["init", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("init").or(predicate::str::contains("vault")));
@@ -59,8 +56,7 @@ fn test_cli_init_help() {
 
 #[test]
 fn test_cli_store_help() {
-    iv()
-        .args(["store", "--help"])
+    iv().args(["store", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("store").or(predicate::str::contains("model")));
@@ -73,8 +69,7 @@ fn test_cli_list_help() {
 
 #[test]
 fn test_cli_convert_help() {
-    iv()
-        .args(["convert", "--help"])
+    iv().args(["convert", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("convert"));
@@ -82,8 +77,7 @@ fn test_cli_convert_help() {
 
 #[test]
 fn test_cli_compliance_help() {
-    iv()
-        .args(["compliance", "--help"])
+    iv().args(["compliance", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("compliance"));
@@ -113,14 +107,12 @@ fn test_cli_init_vault() {
 fn test_cli_list_without_passphrase_source() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["list"])
+    iv().args(["list"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .env_remove("IRONVAULT_PASSPHRASE")
         .timeout(std::time::Duration::from_secs(10))
@@ -138,14 +130,12 @@ fn test_cli_list_without_passphrase_source() {
 fn test_cli_empty_passphrase_env_is_rejected() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["list"])
+    iv().args(["list"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .env("IRONVAULT_PASSPHRASE", "")
         .timeout(std::time::Duration::from_secs(10))
@@ -167,14 +157,12 @@ fn test_cli_list_conversions() {
 fn test_cli_stats_on_vault() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["stats"])
+    iv().args(["stats"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -191,8 +179,7 @@ fn test_cli_unknown_subcommand() {
 
 #[test]
 fn test_cli_store_missing_args() {
-    iv()
-        .args(["store"])
+    iv().args(["store"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -200,8 +187,7 @@ fn test_cli_store_missing_args() {
 
 #[test]
 fn test_cli_get_missing_args() {
-    iv()
-        .args(["get"])
+    iv().args(["get"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -216,8 +202,7 @@ fn test_cli_sqlite_versions_flag_accepted() {
     // The --sqlite-versions flag should be accepted without error
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["--sqlite-versions", "init"])
+    iv().args(["--sqlite-versions", "init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -227,14 +212,12 @@ fn test_cli_sqlite_versions_flag_accepted() {
 fn test_cli_compliance_runs() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["compliance"])
+    iv().args(["compliance"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -246,8 +229,7 @@ fn test_cli_compliance_runs() {
 
 #[test]
 fn test_cli_versions_help() {
-    iv()
-        .args(["versions", "--help"])
+    iv().args(["versions", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("version").or(predicate::str::contains("Version")));
@@ -255,8 +237,7 @@ fn test_cli_versions_help() {
 
 #[test]
 fn test_cli_lineage_help() {
-    iv()
-        .args(["lineage", "--help"])
+    iv().args(["lineage", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("lineage").or(predicate::str::contains("history")));
@@ -264,8 +245,7 @@ fn test_cli_lineage_help() {
 
 #[test]
 fn test_cli_delete_help() {
-    iv()
-        .args(["delete", "--help"])
+    iv().args(["delete", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("delete").or(predicate::str::contains("Delete")));
@@ -273,8 +253,7 @@ fn test_cli_delete_help() {
 
 #[test]
 fn test_cli_archive_help() {
-    iv()
-        .args(["archive", "--help"])
+    iv().args(["archive", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("archive").or(predicate::str::contains("Archive")));
@@ -282,8 +261,7 @@ fn test_cli_archive_help() {
 
 #[test]
 fn test_cli_extract_help() {
-    iv()
-        .args(["extract", "--help"])
+    iv().args(["extract", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("extract").or(predicate::str::contains("Extract")));
@@ -291,8 +269,7 @@ fn test_cli_extract_help() {
 
 #[test]
 fn test_cli_analyze_help() {
-    iv()
-        .args(["analyze", "--help"])
+    iv().args(["analyze", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("analyze").or(predicate::str::contains("Analyze")));
@@ -300,8 +277,7 @@ fn test_cli_analyze_help() {
 
 #[test]
 fn test_cli_deduplicate_help() {
-    iv()
-        .args(["deduplicate", "--help"])
+    iv().args(["deduplicate", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("deduplicate").or(predicate::str::contains("duplicate")));
@@ -309,8 +285,7 @@ fn test_cli_deduplicate_help() {
 
 #[test]
 fn test_cli_export_help() {
-    iv()
-        .args(["export", "--help"])
+    iv().args(["export", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("export").or(predicate::str::contains("Export")));
@@ -318,8 +293,7 @@ fn test_cli_export_help() {
 
 #[test]
 fn test_cli_cache_help() {
-    iv()
-        .args(["cache", "--help"])
+    iv().args(["cache", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("cache").or(predicate::str::contains("Cache")));
@@ -327,8 +301,7 @@ fn test_cli_cache_help() {
 
 #[test]
 fn test_cli_change_passphrase_help() {
-    iv()
-        .args(["change-passphrase", "--help"])
+    iv().args(["change-passphrase", "--help"])
         .assert()
         .success()
         .stdout(
@@ -340,8 +313,7 @@ fn test_cli_change_passphrase_help() {
 
 #[test]
 fn test_cli_cloud_help() {
-    iv()
-        .args(["cloud", "--help"])
+    iv().args(["cloud", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("cloud").or(predicate::str::contains("Cloud")));
@@ -349,8 +321,7 @@ fn test_cli_cloud_help() {
 
 #[test]
 fn test_cli_database_help() {
-    iv()
-        .args(["database", "--help"])
+    iv().args(["database", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("database").or(predicate::str::contains("Database")));
@@ -358,8 +329,7 @@ fn test_cli_database_help() {
 
 #[test]
 fn test_cli_card_help() {
-    iv()
-        .args(["card", "--help"])
+    iv().args(["card", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("card").or(predicate::str::contains("Card")));
@@ -367,8 +337,7 @@ fn test_cli_card_help() {
 
 #[test]
 fn test_cli_telemetry_help() {
-    iv()
-        .args(["telemetry", "--help"])
+    iv().args(["telemetry", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("telemetry").or(predicate::str::contains("Telemetry")));
@@ -380,8 +349,7 @@ fn test_cli_telemetry_help() {
 
 #[test]
 fn test_cli_telemetry_status() {
-    iv()
-        .args(["telemetry", "status"])
+    iv().args(["telemetry", "status"])
         .assert()
         .success()
         .stdout(
@@ -395,14 +363,12 @@ fn test_cli_telemetry_status() {
 #[test]
 fn test_cli_telemetry_disable_then_status() {
     // Disable telemetry, then check status reports disabled
-    iv()
-        .args(["telemetry", "disable"])
+    iv().args(["telemetry", "disable"])
         .env("DO_NOT_TRACK", "1")
         .assert()
         .success();
 
-    iv()
-        .args(["telemetry", "status"])
+    iv().args(["telemetry", "status"])
         .env("DO_NOT_TRACK", "1")
         .assert()
         .success();
@@ -417,20 +383,18 @@ fn test_cli_database_init_and_stats() {
     let dir = tempdir().unwrap();
     let db_path = dir.path().join("test.db");
 
-    iv()
-        .args([
-            "database",
-            "init",
-            "--path",
-            db_path.to_str().unwrap(),
-            "--db-type",
-            "sqlite",
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "database",
+        "init",
+        "--path",
+        db_path.to_str().unwrap(),
+        "--db-type",
+        "sqlite",
+    ])
+    .assert()
+    .success();
 
-    iv()
-        .args(["database", "stats", "--path", db_path.to_str().unwrap()])
+    iv().args(["database", "stats", "--path", db_path.to_str().unwrap()])
         .assert()
         .success();
 }
@@ -440,20 +404,18 @@ fn test_cli_database_list_empty() {
     let dir = tempdir().unwrap();
     let db_path = dir.path().join("test.db");
 
-    iv()
-        .args([
-            "database",
-            "init",
-            "--path",
-            db_path.to_str().unwrap(),
-            "--db-type",
-            "sqlite",
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "database",
+        "init",
+        "--path",
+        db_path.to_str().unwrap(),
+        "--db-type",
+        "sqlite",
+    ])
+    .assert()
+    .success();
 
-    iv()
-        .args(["database", "list", "--path", db_path.to_str().unwrap()])
+    iv().args(["database", "list", "--path", db_path.to_str().unwrap()])
         .assert()
         .success();
 }
@@ -469,40 +431,37 @@ fn test_cli_database_store_and_search() {
     )
     .unwrap();
 
-    iv()
-        .args([
-            "database",
-            "init",
-            "--path",
-            db_path.to_str().unwrap(),
-            "--db-type",
-            "sqlite",
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "database",
+        "init",
+        "--path",
+        db_path.to_str().unwrap(),
+        "--db-type",
+        "sqlite",
+    ])
+    .assert()
+    .success();
 
-    iv()
-        .args([
-            "database",
-            "store",
-            "--path",
-            db_path.to_str().unwrap(),
-            "--input",
-            doc_path.to_str().unwrap(),
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "database",
+        "store",
+        "--path",
+        db_path.to_str().unwrap(),
+        "--input",
+        doc_path.to_str().unwrap(),
+    ])
+    .assert()
+    .success();
 
-    iv()
-        .args([
-            "database",
-            "search",
-            "--path",
-            db_path.to_str().unwrap(),
-            "transformer",
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "database",
+        "search",
+        "--path",
+        db_path.to_str().unwrap(),
+        "transformer",
+    ])
+    .assert()
+    .success();
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -514,17 +473,16 @@ fn test_cli_card_template_basic() {
     let dir = tempdir().unwrap();
     let output = dir.path().join("card.json");
 
-    iv()
-        .args([
-            "card",
-            "template",
-            "--template-type",
-            "basic",
-            "--output",
-            output.to_str().unwrap(),
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "card",
+        "template",
+        "--template-type",
+        "basic",
+        "--output",
+        output.to_str().unwrap(),
+    ])
+    .assert()
+    .success();
 
     // Verify the template file was created
     assert!(output.exists());
@@ -535,29 +493,27 @@ fn test_cli_card_create_and_validate() {
     let dir = tempdir().unwrap();
     let output = dir.path().join("card.json");
 
-    iv()
-        .args([
-            "card",
-            "create",
-            "test-model",
-            "--version",
-            "1.0",
-            "--description",
-            "A test model",
-            "--model-type",
-            "classifier",
-            "--architecture",
-            "ResNet-50",
-            "--output",
-            output.to_str().unwrap(),
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "card",
+        "create",
+        "test-model",
+        "--version",
+        "1.0",
+        "--description",
+        "A test model",
+        "--model-type",
+        "classifier",
+        "--architecture",
+        "ResNet-50",
+        "--output",
+        output.to_str().unwrap(),
+    ])
+    .assert()
+    .success();
 
     assert!(output.exists());
 
-    iv()
-        .args(["card", "validate", output.to_str().unwrap()])
+    iv().args(["card", "validate", output.to_str().unwrap()])
         .assert()
         .success();
 }
@@ -567,36 +523,34 @@ fn test_cli_card_create_and_show() {
     let dir = tempdir().unwrap();
     let output = dir.path().join("card.yaml");
 
-    iv()
-        .args([
-            "card",
-            "create",
-            "my-llm",
-            "--version",
-            "2.0",
-            "--description",
-            "A language model",
-            "--model-type",
-            "LLM",
-            "--architecture",
-            "Transformer",
-            "--output",
-            output.to_str().unwrap(),
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "card",
+        "create",
+        "my-llm",
+        "--version",
+        "2.0",
+        "--description",
+        "A language model",
+        "--model-type",
+        "LLM",
+        "--architecture",
+        "Transformer",
+        "--output",
+        output.to_str().unwrap(),
+    ])
+    .assert()
+    .success();
 
-    iv()
-        .args([
-            "card",
-            "show",
-            output.to_str().unwrap(),
-            "--format",
-            "markdown",
-        ])
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("my-llm").or(predicate::str::contains("language model")));
+    iv().args([
+        "card",
+        "show",
+        output.to_str().unwrap(),
+        "--format",
+        "markdown",
+    ])
+    .assert()
+    .success()
+    .stdout(predicate::str::contains("my-llm").or(predicate::str::contains("language model")));
 }
 
 #[test]
@@ -605,34 +559,32 @@ fn test_cli_card_convert_json_to_yaml() {
     let json_out = dir.path().join("card.json");
     let yaml_out = dir.path().join("card.yaml");
 
-    iv()
-        .args([
-            "card",
-            "create",
-            "conv-model",
-            "--version",
-            "1.0",
-            "--description",
-            "For conversion test",
-            "--model-type",
-            "classifier",
-            "--architecture",
-            "CNN",
-            "--output",
-            json_out.to_str().unwrap(),
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "card",
+        "create",
+        "conv-model",
+        "--version",
+        "1.0",
+        "--description",
+        "For conversion test",
+        "--model-type",
+        "classifier",
+        "--architecture",
+        "CNN",
+        "--output",
+        json_out.to_str().unwrap(),
+    ])
+    .assert()
+    .success();
 
-    iv()
-        .args([
-            "card",
-            "convert",
-            json_out.to_str().unwrap(),
-            yaml_out.to_str().unwrap(),
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "card",
+        "convert",
+        json_out.to_str().unwrap(),
+        yaml_out.to_str().unwrap(),
+    ])
+    .assert()
+    .success();
 
     assert!(yaml_out.exists());
 }
@@ -643,8 +595,7 @@ fn test_cli_card_convert_json_to_yaml() {
 
 #[test]
 fn test_cli_delete_missing_args() {
-    iv()
-        .args(["delete"])
+    iv().args(["delete"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -652,8 +603,7 @@ fn test_cli_delete_missing_args() {
 
 #[test]
 fn test_cli_archive_missing_args() {
-    iv()
-        .args(["archive"])
+    iv().args(["archive"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -661,8 +611,7 @@ fn test_cli_archive_missing_args() {
 
 #[test]
 fn test_cli_versions_missing_args() {
-    iv()
-        .args(["versions"])
+    iv().args(["versions"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -670,8 +619,7 @@ fn test_cli_versions_missing_args() {
 
 #[test]
 fn test_cli_lineage_missing_args() {
-    iv()
-        .args(["lineage"])
+    iv().args(["lineage"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -679,8 +627,7 @@ fn test_cli_lineage_missing_args() {
 
 #[test]
 fn test_cli_export_missing_args() {
-    iv()
-        .args(["export"])
+    iv().args(["export"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -694,14 +641,12 @@ fn test_cli_export_missing_args() {
 fn test_cli_cache_on_vault() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["cache"])
+    iv().args(["cache"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -710,8 +655,7 @@ fn test_cli_cache_on_vault() {
 #[test]
 fn test_cli_list_conversions_contains_formats() {
     // Validate that list-conversions includes expected format names
-    iv()
-        .args(["list-conversions"])
+    iv().args(["list-conversions"])
         .assert()
         .success()
         .stdout(predicate::str::contains("ONNX").or(predicate::str::contains("onnx")))
@@ -726,8 +670,7 @@ fn test_cli_list_conversions_contains_formats() {
 fn test_cli_init_custom_name() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init", "--name", "my-custom-vault"])
+    iv().args(["init", "--name", "my-custom-vault"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
@@ -742,14 +685,12 @@ fn test_cli_init_custom_name() {
 fn test_cli_sqlite_versions_with_stats() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["--sqlite-versions", "init"])
+    iv().args(["--sqlite-versions", "init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["--sqlite-versions", "stats"])
+    iv().args(["--sqlite-versions", "stats"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -759,14 +700,12 @@ fn test_cli_sqlite_versions_with_stats() {
 fn test_cli_sqlite_versions_with_compliance() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["--sqlite-versions", "init"])
+    iv().args(["--sqlite-versions", "init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["--sqlite-versions", "compliance"])
+    iv().args(["--sqlite-versions", "compliance"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -780,8 +719,7 @@ fn test_cli_sqlite_versions_with_compliance() {
 fn test_cli_no_telemetry_flag_with_init() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["--no-telemetry", "init"])
+    iv().args(["--no-telemetry", "init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -789,8 +727,7 @@ fn test_cli_no_telemetry_flag_with_init() {
 
 #[test]
 fn test_cli_do_not_track_env() {
-    iv()
-        .args(["compliance"])
+    iv().args(["compliance"])
         .env("DO_NOT_TRACK", "1")
         .assert()
         .success();
@@ -802,8 +739,7 @@ fn test_cli_do_not_track_env() {
 
 #[test]
 fn test_cli_convert_missing_args() {
-    iv()
-        .args(["convert"])
+    iv().args(["convert"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -815,8 +751,7 @@ fn test_cli_convert_missing_args() {
 
 #[test]
 fn test_cli_cloud_push_missing_args() {
-    iv()
-        .args(["cloud", "push"])
+    iv().args(["cloud", "push"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -824,8 +759,7 @@ fn test_cli_cloud_push_missing_args() {
 
 #[test]
 fn test_cli_cloud_pull_missing_args() {
-    iv()
-        .args(["cloud", "pull"])
+    iv().args(["cloud", "pull"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -833,8 +767,7 @@ fn test_cli_cloud_pull_missing_args() {
 
 #[test]
 fn test_cli_cloud_list_missing_args() {
-    iv()
-        .args(["cloud", "list"])
+    iv().args(["cloud", "list"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -846,10 +779,7 @@ fn test_cli_cloud_list_missing_args() {
 
 #[test]
 fn test_cli_extract_nonexistent_archive() {
-    iv()
-        .args(["extract", "nonexistent.tar"])
-        .assert()
-        .failure();
+    iv().args(["extract", "nonexistent.tar"]).assert().failure();
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -861,28 +791,26 @@ fn test_cli_database_search_no_results() {
     let dir = tempdir().unwrap();
     let db_path = dir.path().join("empty.db");
 
-    iv()
-        .args([
-            "database",
-            "init",
-            "--path",
-            db_path.to_str().unwrap(),
-            "--db-type",
-            "sqlite",
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "database",
+        "init",
+        "--path",
+        db_path.to_str().unwrap(),
+        "--db-type",
+        "sqlite",
+    ])
+    .assert()
+    .success();
 
-    iv()
-        .args([
-            "database",
-            "search",
-            "--path",
-            db_path.to_str().unwrap(),
-            "nonexistent query",
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "database",
+        "search",
+        "--path",
+        db_path.to_str().unwrap(),
+        "nonexistent query",
+    ])
+    .assert()
+    .success();
 }
 
 #[test]
@@ -890,29 +818,27 @@ fn test_cli_database_store_nonexistent_file() {
     let dir = tempdir().unwrap();
     let db_path = dir.path().join("test.db");
 
-    iv()
-        .args([
-            "database",
-            "init",
-            "--path",
-            db_path.to_str().unwrap(),
-            "--db-type",
-            "sqlite",
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "database",
+        "init",
+        "--path",
+        db_path.to_str().unwrap(),
+        "--db-type",
+        "sqlite",
+    ])
+    .assert()
+    .success();
 
-    iv()
-        .args([
-            "database",
-            "store",
-            "--path",
-            db_path.to_str().unwrap(),
-            "--input",
-            "nonexistent_file.txt",
-        ])
-        .assert()
-        .failure();
+    iv().args([
+        "database",
+        "store",
+        "--path",
+        db_path.to_str().unwrap(),
+        "--input",
+        "nonexistent_file.txt",
+    ])
+    .assert()
+    .failure();
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -921,16 +847,14 @@ fn test_cli_database_store_nonexistent_file() {
 
 #[test]
 fn test_cli_card_validate_nonexistent_file() {
-    iv()
-        .args(["card", "validate", "no-such-card.json"])
+    iv().args(["card", "validate", "no-such-card.json"])
         .assert()
         .failure();
 }
 
 #[test]
 fn test_cli_card_show_nonexistent_file() {
-    iv()
-        .args(["card", "show", "no-such-card.json"])
+    iv().args(["card", "show", "no-such-card.json"])
         .assert()
         .failure();
 }
@@ -943,14 +867,12 @@ fn test_cli_card_show_nonexistent_file() {
 fn test_cli_sqlite_versions_with_cache() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["--sqlite-versions", "init"])
+    iv().args(["--sqlite-versions", "init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["--sqlite-versions", "cache"])
+    iv().args(["--sqlite-versions", "cache"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -960,14 +882,12 @@ fn test_cli_sqlite_versions_with_cache() {
 fn test_cli_init_twice_same_dir() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -979,8 +899,7 @@ fn test_cli_init_twice_same_dir() {
 
 #[test]
 fn test_cli_tag_help() {
-    iv()
-        .args(["tag", "--help"])
+    iv().args(["tag", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("tag").or(predicate::str::contains("Tag")));
@@ -988,8 +907,7 @@ fn test_cli_tag_help() {
 
 #[test]
 fn test_cli_search_help() {
-    iv()
-        .args(["search", "--help"])
+    iv().args(["search", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("search").or(predicate::str::contains("Search")));
@@ -997,8 +915,7 @@ fn test_cli_search_help() {
 
 #[test]
 fn test_cli_vault_export_help() {
-    iv()
-        .args(["vault-export", "--help"])
+    iv().args(["vault-export", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("export").or(predicate::str::contains("Export")));
@@ -1006,8 +923,7 @@ fn test_cli_vault_export_help() {
 
 #[test]
 fn test_cli_vault_import_help() {
-    iv()
-        .args(["vault-import", "--help"])
+    iv().args(["vault-import", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("import").or(predicate::str::contains("Import")));
@@ -1023,8 +939,7 @@ fn test_cli_gc_help() {
 
 #[test]
 fn test_cli_browse_help() {
-    iv()
-        .args(["browse", "--help"])
+    iv().args(["browse", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("browse").or(predicate::str::contains("Browse")));
@@ -1032,8 +947,7 @@ fn test_cli_browse_help() {
 
 #[test]
 fn test_cli_webhook_help() {
-    iv()
-        .args(["webhook", "--help"])
+    iv().args(["webhook", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("webhook").or(predicate::str::contains("Webhook")));
@@ -1041,8 +955,7 @@ fn test_cli_webhook_help() {
 
 #[test]
 fn test_cli_acl_help() {
-    iv()
-        .args(["acl", "--help"])
+    iv().args(["acl", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("acl").or(predicate::str::contains("access")));
@@ -1050,8 +963,7 @@ fn test_cli_acl_help() {
 
 #[test]
 fn test_cli_validate_help() {
-    iv()
-        .args(["validate", "--help"])
+    iv().args(["validate", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("validate").or(predicate::str::contains("Validate")));
@@ -1059,8 +971,7 @@ fn test_cli_validate_help() {
 
 #[test]
 fn test_cli_policy_help() {
-    iv()
-        .args(["policy", "--help"])
+    iv().args(["policy", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("policy").or(predicate::str::contains("Policy")));
@@ -1068,8 +979,7 @@ fn test_cli_policy_help() {
 
 #[test]
 fn test_cli_lineage_graph_help() {
-    iv()
-        .args(["lineage-graph", "--help"])
+    iv().args(["lineage-graph", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("lineage").or(predicate::str::contains("Lineage")));
@@ -1077,8 +987,7 @@ fn test_cli_lineage_graph_help() {
 
 #[test]
 fn test_cli_plugin_help() {
-    iv()
-        .args(["plugin", "--help"])
+    iv().args(["plugin", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("plugin").or(predicate::str::contains("Plugin")));
@@ -1086,8 +995,7 @@ fn test_cli_plugin_help() {
 
 #[test]
 fn test_cli_profile_help() {
-    iv()
-        .args(["profile", "--help"])
+    iv().args(["profile", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("profile").or(predicate::str::contains("Profile")));
@@ -1101,14 +1009,12 @@ fn test_cli_profile_help() {
 fn test_cli_gc_dry_run_on_vault() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["gc", "--dry-run"])
+    iv().args(["gc", "--dry-run"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -1118,27 +1024,23 @@ fn test_cli_gc_dry_run_on_vault() {
 fn test_cli_acl_grant_list_revoke() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["acl", "grant", "alice", "writer"])
+    iv().args(["acl", "grant", "alice", "writer"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["acl", "list"])
+    iv().args(["acl", "list"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("alice"));
 
-    iv()
-        .args(["acl", "revoke", "alice"])
+    iv().args(["acl", "revoke", "alice"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -1149,20 +1051,17 @@ fn test_cli_webhook_add_list_remove() {
     let dir = tempdir().unwrap();
     let id = format!("hook-{}", std::process::id());
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["webhook", "add", &id, "https://example.com/hook"])
+    iv().args(["webhook", "add", &id, "https://example.com/hook"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["webhook", "list"])
+    iv().args(["webhook", "list"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
@@ -1173,20 +1072,17 @@ fn test_cli_webhook_add_list_remove() {
 fn test_cli_policy_set_show() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["policy", "set", "test-model", "--max-versions", "5"])
+    iv().args(["policy", "set", "test-model", "--max-versions", "5"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["policy", "show", "test-model"])
+    iv().args(["policy", "show", "test-model"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
@@ -1197,27 +1093,23 @@ fn test_cli_policy_set_show() {
 fn test_cli_profile_create_list_activate() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["profile", "create", "dev"])
+    iv().args(["profile", "create", "dev"])
         .env("IRONVAULT_CONFIG", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["profile", "list"])
+    iv().args(["profile", "list"])
         .env("IRONVAULT_CONFIG", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("dev"));
 
-    iv()
-        .args(["profile", "activate", "dev"])
+    iv().args(["profile", "activate", "dev"])
         .env("IRONVAULT_CONFIG", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["profile", "show", "dev"])
+    iv().args(["profile", "show", "dev"])
         .env("IRONVAULT_CONFIG", dir.path().to_str().unwrap())
         .assert()
         .success()
@@ -1228,14 +1120,12 @@ fn test_cli_profile_create_list_activate() {
 fn test_cli_lineage_graph_show_empty() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["lineage-graph", "show", "any-model"])
+    iv().args(["lineage-graph", "show", "any-model"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -1245,14 +1135,12 @@ fn test_cli_lineage_graph_show_empty() {
 fn test_cli_plugin_list_empty() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["plugin", "list"])
+    iv().args(["plugin", "list"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -1262,20 +1150,17 @@ fn test_cli_plugin_list_empty() {
 fn test_cli_tag_add_list_on_vault() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["tag", "add", "my-model", "llm", "production"])
+    iv().args(["tag", "add", "my-model", "llm", "production"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["tag", "list", "my-model"])
+    iv().args(["tag", "list", "my-model"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
@@ -1288,8 +1173,7 @@ fn test_cli_tag_add_list_on_vault() {
 
 #[test]
 fn test_cli_validate_missing_args() {
-    iv()
-        .args(["validate"])
+    iv().args(["validate"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -1297,8 +1181,7 @@ fn test_cli_validate_missing_args() {
 
 #[test]
 fn test_cli_vault_export_missing_args() {
-    iv()
-        .args(["vault-export"])
+    iv().args(["vault-export"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -1306,8 +1189,7 @@ fn test_cli_vault_export_missing_args() {
 
 #[test]
 fn test_cli_vault_import_missing_args() {
-    iv()
-        .args(["vault-import"])
+    iv().args(["vault-import"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -1315,8 +1197,7 @@ fn test_cli_vault_import_missing_args() {
 
 #[test]
 fn test_cli_tag_add_missing_args() {
-    iv()
-        .args(["tag", "add"])
+    iv().args(["tag", "add"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -1326,14 +1207,12 @@ fn test_cli_tag_add_missing_args() {
 fn test_cli_search_empty_query() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["search"])
+    iv().args(["search"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -1345,21 +1224,15 @@ fn test_cli_search_empty_query() {
 
 #[test]
 fn test_cli_quantize_help() {
-    iv()
-        .args(["quantize", "--help"])
-        .assert()
-        .success()
-        .stdout(
-            predicate::str::contains("quantize")
-                .or(predicate::str::contains("Quantize")
-                    .or(predicate::str::contains("quantization"))),
-        );
+    iv().args(["quantize", "--help"]).assert().success().stdout(
+        predicate::str::contains("quantize")
+            .or(predicate::str::contains("Quantize").or(predicate::str::contains("quantization"))),
+    );
 }
 
 #[test]
 fn test_cli_eval_help() {
-    iv()
-        .args(["eval", "--help"])
+    iv().args(["eval", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("eval").or(predicate::str::contains("Eval")));
@@ -1367,8 +1240,7 @@ fn test_cli_eval_help() {
 
 #[test]
 fn test_cli_backup_help() {
-    iv()
-        .args(["backup", "--help"])
+    iv().args(["backup", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("backup").or(predicate::str::contains("Backup")));
@@ -1390,35 +1262,31 @@ fn test_cli_vaults_help() {
 fn test_cli_quantize_set_list_remove() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args([
-            "quantize",
-            "set",
-            "fast-q4",
-            "--method",
-            "q4_k_m",
-            "--description",
-            "Fast 4-bit",
-        ])
-        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
-        .assert()
-        .success();
+    iv().args([
+        "quantize",
+        "set",
+        "fast-q4",
+        "--method",
+        "q4_k_m",
+        "--description",
+        "Fast 4-bit",
+    ])
+    .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+    .assert()
+    .success();
 
-    iv()
-        .args(["quantize", "list"])
+    iv().args(["quantize", "list"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("fast-q4"));
 
-    iv()
-        .args(["quantize", "remove", "fast-q4"])
+    iv().args(["quantize", "remove", "fast-q4"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -1428,63 +1296,57 @@ fn test_cli_quantize_set_list_remove() {
 fn test_cli_quantize_estimate() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args([
-            "quantize",
-            "estimate",
-            "--size",
-            "1000000000",
-            "--to",
-            "q4_k_m",
-        ])
-        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
-        .assert()
-        .success();
+    iv().args([
+        "quantize",
+        "estimate",
+        "--size",
+        "1000000000",
+        "--to",
+        "q4_k_m",
+    ])
+    .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+    .assert()
+    .success();
 }
 
 #[test]
 fn test_cli_eval_record_list_suites() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args([
-            "eval",
-            "record",
-            "my-model",
-            "--version",
-            "1",
-            "--suite",
-            "mmlu",
-            "--metric",
-            "accuracy=0.85",
-            "--unit",
-            "score",
-        ])
-        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
-        .assert()
-        .success();
+    iv().args([
+        "eval",
+        "record",
+        "my-model",
+        "--version",
+        "1",
+        "--suite",
+        "mmlu",
+        "--metric",
+        "accuracy=0.85",
+        "--unit",
+        "score",
+    ])
+    .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+    .assert()
+    .success();
 
-    iv()
-        .args(["eval", "list", "my-model"])
+    iv().args(["eval", "list", "my-model"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("mmlu").or(predicate::str::contains("my-model")));
 
-    iv()
-        .args(["eval", "suites"])
+    iv().args(["eval", "suites"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
@@ -1496,37 +1358,33 @@ fn test_cli_backup_set_list_remove() {
     let dir = tempdir().unwrap();
     let backup_dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args([
-            "backup",
-            "set",
-            "nightly",
-            "--frequency",
-            "daily",
-            "--max-backups",
-            "5",
-            "--output-dir",
-            backup_dir.path().to_str().unwrap(),
-        ])
-        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
-        .assert()
-        .success();
+    iv().args([
+        "backup",
+        "set",
+        "nightly",
+        "--frequency",
+        "daily",
+        "--max-backups",
+        "5",
+        "--output-dir",
+        backup_dir.path().to_str().unwrap(),
+    ])
+    .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+    .assert()
+    .success();
 
-    iv()
-        .args(["backup", "list"])
+    iv().args(["backup", "list"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("nightly"));
 
-    iv()
-        .args(["backup", "remove", "nightly"])
+    iv().args(["backup", "remove", "nightly"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -1536,14 +1394,12 @@ fn test_cli_backup_set_list_remove() {
 fn test_cli_backup_history_empty() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["backup", "history"])
+    iv().args(["backup", "history"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -1554,46 +1410,40 @@ fn test_cli_vaults_register_list_activate_deactivate() {
     let dir = tempdir().unwrap();
     let vault_dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args([
-            "vaults",
-            "register",
-            "prod",
-            vault_dir.path().to_str().unwrap(),
-            "--description",
-            "Production vault",
-        ])
-        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
-        .assert()
-        .success();
+    iv().args([
+        "vaults",
+        "register",
+        "prod",
+        vault_dir.path().to_str().unwrap(),
+        "--description",
+        "Production vault",
+    ])
+    .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+    .assert()
+    .success();
 
-    iv()
-        .args(["vaults", "list"])
+    iv().args(["vaults", "list"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success()
         .stdout(predicate::str::contains("prod"));
 
-    iv()
-        .args(["vaults", "activate", "prod"])
+    iv().args(["vaults", "activate", "prod"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["vaults", "deactivate"])
+    iv().args(["vaults", "deactivate"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["vaults", "unregister", "prod"])
+    iv().args(["vaults", "unregister", "prod"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
@@ -1605,8 +1455,7 @@ fn test_cli_vaults_register_list_activate_deactivate() {
 
 #[test]
 fn test_cli_quantize_set_missing_method() {
-    iv()
-        .args(["quantize", "set", "test-profile"])
+    iv().args(["quantize", "set", "test-profile"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -1614,8 +1463,7 @@ fn test_cli_quantize_set_missing_method() {
 
 #[test]
 fn test_cli_eval_record_missing_args() {
-    iv()
-        .args(["eval", "record"])
+    iv().args(["eval", "record"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -1623,8 +1471,7 @@ fn test_cli_eval_record_missing_args() {
 
 #[test]
 fn test_cli_backup_set_missing_args() {
-    iv()
-        .args(["backup", "set"])
+    iv().args(["backup", "set"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -1632,8 +1479,7 @@ fn test_cli_backup_set_missing_args() {
 
 #[test]
 fn test_cli_vaults_register_missing_path() {
-    iv()
-        .args(["vaults", "register", "test-vault"])
+    iv().args(["vaults", "register", "test-vault"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -1641,8 +1487,7 @@ fn test_cli_vaults_register_missing_path() {
 
 #[test]
 fn test_cli_eval_compare_missing_suite() {
-    iv()
-        .args(["eval", "compare", "a@1", "b@1"])
+    iv().args(["eval", "compare", "a@1", "b@1"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("required").or(predicate::str::contains("error")));
@@ -1666,22 +1511,19 @@ fn test_cli_roundtrip_with_passphrase_env() {
     let model = dir.path().join("model.safetensors");
     std::fs::write(&model, b"fake-safetensors-payload").unwrap();
 
-    iv()
-        .args(["init", "--name", "roundtrip"])
+    iv().args(["init", "--name", "roundtrip"])
         .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    iv()
-        .args(["store", "demo", model.to_str().unwrap()])
+    iv().args(["store", "demo", model.to_str().unwrap()])
         .env("IRONVAULT_HOME", vault_dir)
         .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
         .success()
         .stdout(predicate::str::contains("stored successfully"));
 
-    iv()
-        .args(["list"])
+    iv().args(["list"])
         .env("IRONVAULT_HOME", vault_dir)
         .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
@@ -1689,8 +1531,7 @@ fn test_cli_roundtrip_with_passphrase_env() {
         .stdout(predicate::str::contains("demo"));
 
     let out = dir.path().join("retrieved.safetensors");
-    iv()
-        .args(["get", "demo", out.to_str().unwrap()])
+    iv().args(["get", "demo", out.to_str().unwrap()])
         .env("IRONVAULT_HOME", vault_dir)
         .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
@@ -1711,22 +1552,19 @@ fn test_cli_wrong_passphrase_fails() {
     let model = dir.path().join("m.bin");
     std::fs::write(&model, b"payload").unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    iv()
-        .args(["store", "m", model.to_str().unwrap()])
+    iv().args(["store", "m", model.to_str().unwrap()])
         .env("IRONVAULT_HOME", vault_dir)
         .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
         .success();
 
     let out = dir.path().join("out.bin");
-    iv()
-        .args(["get", "m", out.to_str().unwrap()])
+    iv().args(["get", "m", out.to_str().unwrap()])
         .env("IRONVAULT_HOME", vault_dir)
         .env("IRONVAULT_PASSPHRASE", "not-the-right-passphrase")
         .assert()
@@ -1739,14 +1577,12 @@ fn test_cli_passphrase_via_kms_env_uri() {
     let dir = tempdir().unwrap();
     let vault_dir = dir.path().to_str().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    iv()
-        .args(["list"])
+    iv().args(["list"])
         .env("IRONVAULT_HOME", vault_dir)
         .env("IRONVAULT_PASSPHRASE", "env://IRONVAULT_CLI_TEST_SECRET")
         .env("IRONVAULT_CLI_TEST_SECRET", TEST_PASS)
@@ -1768,14 +1604,12 @@ fn test_cli_passphrase_via_kms_file_uri() {
         std::fs::set_permissions(&secret, std::fs::Permissions::from_mode(0o600)).unwrap();
     }
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    iv()
-        .args(["list"])
+    iv().args(["list"])
         .env("IRONVAULT_HOME", vault_dir)
         .env(
             "IRONVAULT_PASSPHRASE",
@@ -1791,16 +1625,17 @@ fn test_cli_unresolvable_kms_uri_fails() {
     let dir = tempdir().unwrap();
     let vault_dir = dir.path().to_str().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    iv()
-        .args(["list"])
+    iv().args(["list"])
         .env("IRONVAULT_HOME", vault_dir)
-        .env("IRONVAULT_PASSPHRASE", "env://IRONVAULT_NOT_SET_ANYWHERE_42")
+        .env(
+            "IRONVAULT_PASSPHRASE",
+            "env://IRONVAULT_NOT_SET_ANYWHERE_42",
+        )
         .assert()
         .failure();
 }
@@ -1811,14 +1646,12 @@ fn test_cli_passphrase_via_stdin() {
     let dir = tempdir().unwrap();
     let vault_dir = dir.path().to_str().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    iv()
-        .args(["list"])
+    iv().args(["list"])
         .env("IRONVAULT_HOME", vault_dir)
         .env_remove("IRONVAULT_PASSPHRASE")
         .write_stdin(format!("{TEST_PASS}\n"))
@@ -1833,14 +1666,12 @@ fn test_cli_list_empty_vault_non_interactive() {
     let dir = tempdir().unwrap();
     let vault_dir = dir.path().to_str().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    iv()
-        .args(["list"])
+    iv().args(["list"])
         .env("IRONVAULT_HOME", vault_dir)
         .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
@@ -1860,20 +1691,19 @@ fn test_cli_sign_verify_with_kms_key_uri() {
     // A 32-byte seed, hex-encoded, as `iv sign` would have generated.
     let seed = "a".repeat(64);
 
-    iv()
-        .args([
-            "sign",
-            "ignored",
-            "--file",
-            model.to_str().unwrap(),
-            "--key",
-            "env://IRONVAULT_TEST_SIGN_KEY",
-        ])
-        .env("IRONVAULT_HOME", vault_dir)
-        .env("IRONVAULT_TEST_SIGN_KEY", &seed)
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("KMS"));
+    iv().args([
+        "sign",
+        "ignored",
+        "--file",
+        model.to_str().unwrap(),
+        "--key",
+        "env://IRONVAULT_TEST_SIGN_KEY",
+    ])
+    .env("IRONVAULT_HOME", vault_dir)
+    .env("IRONVAULT_TEST_SIGN_KEY", &seed)
+    .assert()
+    .success()
+    .stdout(predicate::str::contains("KMS"));
 
     let sig = model.with_extension("sig");
     assert!(
@@ -1881,22 +1711,21 @@ fn test_cli_sign_verify_with_kms_key_uri() {
         "detached signature should be written next to the file"
     );
 
-    iv()
-        .args([
-            "verify",
-            "ignored",
-            "--file",
-            model.to_str().unwrap(),
-            "--signature",
-            sig.to_str().unwrap(),
-            "--key",
-            "env://IRONVAULT_TEST_SIGN_KEY",
-        ])
-        .env("IRONVAULT_HOME", vault_dir)
-        .env("IRONVAULT_TEST_SIGN_KEY", &seed)
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("Verification PASSED"));
+    iv().args([
+        "verify",
+        "ignored",
+        "--file",
+        model.to_str().unwrap(),
+        "--signature",
+        sig.to_str().unwrap(),
+        "--key",
+        "env://IRONVAULT_TEST_SIGN_KEY",
+    ])
+    .env("IRONVAULT_HOME", vault_dir)
+    .env("IRONVAULT_TEST_SIGN_KEY", &seed)
+    .assert()
+    .success()
+    .stdout(predicate::str::contains("Verification PASSED"));
 }
 
 /// A malformed KMS-sourced signing key must fail loudly.
@@ -1906,19 +1735,18 @@ fn test_cli_sign_rejects_bad_kms_key() {
     let model = dir.path().join("m.bin");
     std::fs::write(&model, b"data").unwrap();
 
-    iv()
-        .args([
-            "sign",
-            "ignored",
-            "--file",
-            model.to_str().unwrap(),
-            "--key",
-            "env://IRONVAULT_TEST_BAD_KEY",
-        ])
-        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
-        .env("IRONVAULT_TEST_BAD_KEY", "not-a-valid-seed")
-        .assert()
-        .failure();
+    iv().args([
+        "sign",
+        "ignored",
+        "--file",
+        model.to_str().unwrap(),
+        "--key",
+        "env://IRONVAULT_TEST_BAD_KEY",
+    ])
+    .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+    .env("IRONVAULT_TEST_BAD_KEY", "not-a-valid-seed")
+    .assert()
+    .failure();
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -1940,14 +1768,12 @@ fn test_cli_convert_resolves_stored_format() {
     bytes.extend_from_slice(&[0u8; 60]);
     std::fs::write(&model, &bytes).unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
 
-    iv()
-        .args(["store", "demo", model.to_str().unwrap()])
+    iv().args(["store", "demo", model.to_str().unwrap()])
         .env("IRONVAULT_HOME", vault_dir)
         .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
@@ -1956,8 +1782,7 @@ fn test_cli_convert_resolves_stored_format() {
     let work = dir.path().join("work");
     std::fs::create_dir_all(&work).unwrap();
 
-    iv()
-        .args(["convert", "demo", "--to-format", "onnx"])
+    iv().args(["convert", "demo", "--to-format", "onnx"])
         .current_dir(&work)
         .env("IRONVAULT_HOME", vault_dir)
         .env("IRONVAULT_PASSPHRASE", TEST_PASS)
@@ -1979,13 +1804,11 @@ fn test_cli_convert_writes_plan_not_fake_target_file() {
     bytes.extend_from_slice(&[0u8; 60]);
     std::fs::write(&model, &bytes).unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", vault_dir)
         .assert()
         .success();
-    iv()
-        .args(["store", "demo", model.to_str().unwrap()])
+    iv().args(["store", "demo", model.to_str().unwrap()])
         .env("IRONVAULT_HOME", vault_dir)
         .env("IRONVAULT_PASSPHRASE", TEST_PASS)
         .assert()
@@ -1994,8 +1817,7 @@ fn test_cli_convert_writes_plan_not_fake_target_file() {
     let work = dir.path().join("work");
     std::fs::create_dir_all(&work).unwrap();
 
-    iv()
-        .args(["convert", "demo", "--to-format", "onnx"])
+    iv().args(["convert", "demo", "--to-format", "onnx"])
         .current_dir(&work)
         .env("IRONVAULT_HOME", vault_dir)
         .env("IRONVAULT_PASSPHRASE", TEST_PASS)
@@ -2085,8 +1907,7 @@ fn test_cli_diff_gguf_reports_real_tensor_changes() {
         ],
     );
 
-    iv()
-        .args(["diff", left.to_str().unwrap(), right.to_str().unwrap()])
+    iv().args(["diff", left.to_str().unwrap(), right.to_str().unwrap()])
         .assert()
         .success()
         .stdout(predicate::str::contains("added: 1"))
@@ -2109,8 +1930,7 @@ fn test_cli_diff_truncated_gguf_is_handled() {
     let cut = dir.path().join("cut.gguf");
     std::fs::write(&cut, &bytes[..bytes.len() - 12]).unwrap();
 
-    iv()
-        .args(["diff", full.to_str().unwrap(), cut.to_str().unwrap()])
+    iv().args(["diff", full.to_str().unwrap(), cut.to_str().unwrap()])
         .assert()
         .success();
 }
@@ -2128,8 +1948,7 @@ fn test_cli_diff_truncated_gguf_is_handled() {
 /// generic failure, and it must not exit 1.
 #[test]
 fn test_cli_exit_code_invalid_input() {
-    iv()
-        .args(["introspect", "--format", "not-a-format"])
+    iv().args(["introspect", "--format", "not-a-format"])
         .assert()
         .code(6)
         .stderr(predicate::str::contains("Unknown format"));
@@ -2141,14 +1960,12 @@ fn test_cli_exit_code_invalid_input() {
 fn test_cli_exit_code_not_found() {
     let dir = tempdir().unwrap();
 
-    iv()
-        .args(["init"])
+    iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .assert()
         .success();
 
-    iv()
-        .args(["versions", "no-such-model"])
+    iv().args(["versions", "no-such-model"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .env("IRONVAULT_PASSPHRASE", "correct horse battery staple")
         .timeout(std::time::Duration::from_secs(30))
@@ -2162,8 +1979,7 @@ fn test_cli_exit_code_not_found() {
 /// input (6).
 #[test]
 fn test_cli_exit_code_usage_error_is_not_confused_with_auth_failure() {
-    iv()
-        .args(["no-such-subcommand"])
+    iv().args(["no-such-subcommand"])
         .assert()
         .code(6)
         .stderr(predicate::str::contains("unrecognized subcommand"));
@@ -2195,8 +2011,7 @@ fn test_cli_exit_code_config_error() {
     // Tab indentation is invalid YAML.
     std::fs::write(&bad, "dirs:\n\t data_dir: /tmp\n").unwrap();
 
-    iv()
-        .args(["--config", bad.to_str().unwrap(), "list"])
+    iv().args(["--config", bad.to_str().unwrap(), "list"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
         .timeout(std::time::Duration::from_secs(30))
         .assert()
@@ -2204,16 +2019,15 @@ fn test_cli_exit_code_config_error() {
 
     // A `--config` path that does not exist is also a config error, not a
     // generic I/O failure.
-    iv()
-        .args([
-            "--config",
-            dir.path().join("absent.yaml").to_str().unwrap(),
-            "list",
-        ])
-        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
-        .timeout(std::time::Duration::from_secs(30))
-        .assert()
-        .code(7);
+    iv().args([
+        "--config",
+        dir.path().join("absent.yaml").to_str().unwrap(),
+        "list",
+    ])
+    .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+    .timeout(std::time::Duration::from_secs(30))
+    .assert()
+    .code(7);
 }
 
 /// Exit 5 — integrity/verification failure. `iv verify` is what a pipeline
@@ -2225,17 +2039,16 @@ fn test_cli_exit_code_verify_failure() {
     std::fs::write(&model, b"the real payload").unwrap();
     let key = dir.path().join("signing_key.json");
 
-    iv()
-        .args([
-            "sign",
-            "model",
-            "--file",
-            model.to_str().unwrap(),
-            "--key",
-            key.to_str().unwrap(),
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "sign",
+        "model",
+        "--file",
+        model.to_str().unwrap(),
+        "--key",
+        key.to_str().unwrap(),
+    ])
+    .assert()
+    .success();
 
     let sig = dir.path().join("model.sig");
     assert!(sig.exists(), "expected a detached signature at {sig:?}");
@@ -2243,20 +2056,19 @@ fn test_cli_exit_code_verify_failure() {
     // Tamper with the payload, leaving the signature alone.
     std::fs::write(&model, b"the WRONG payload").unwrap();
 
-    iv()
-        .args([
-            "verify",
-            "model",
-            "--signature",
-            sig.to_str().unwrap(),
-            "--file",
-            model.to_str().unwrap(),
-            "--key",
-            key.to_str().unwrap(),
-        ])
-        .assert()
-        .code(5)
-        .stdout(predicate::str::contains("FAILED"));
+    iv().args([
+        "verify",
+        "model",
+        "--signature",
+        sig.to_str().unwrap(),
+        "--file",
+        model.to_str().unwrap(),
+        "--key",
+        key.to_str().unwrap(),
+    ])
+    .assert()
+    .code(5)
+    .stdout(predicate::str::contains("FAILED"));
 }
 
 /// Verification with no `--key` must also fail, and for the same reason: it
@@ -2268,40 +2080,37 @@ fn test_cli_exit_code_verify_without_key_is_not_success() {
     std::fs::write(&model, b"payload").unwrap();
     let key = dir.path().join("signing_key.json");
 
-    iv()
-        .args([
-            "sign",
-            "model",
-            "--file",
-            model.to_str().unwrap(),
-            "--key",
-            key.to_str().unwrap(),
-        ])
-        .assert()
-        .success();
+    iv().args([
+        "sign",
+        "model",
+        "--file",
+        model.to_str().unwrap(),
+        "--key",
+        key.to_str().unwrap(),
+    ])
+    .assert()
+    .success();
 
     let sig = dir.path().join("model.sig");
 
-    iv()
-        .args([
-            "verify",
-            "model",
-            "--signature",
-            sig.to_str().unwrap(),
-            "--file",
-            model.to_str().unwrap(),
-        ])
-        .assert()
-        .code(5)
-        .stdout(predicate::str::contains("NOT CHECKED"));
+    iv().args([
+        "verify",
+        "model",
+        "--signature",
+        sig.to_str().unwrap(),
+        "--file",
+        model.to_str().unwrap(),
+    ])
+    .assert()
+    .code(5)
+    .stdout(predicate::str::contains("NOT CHECKED"));
 }
 
 /// Success must stay 0 — the mapping must not make ordinary runs look failed.
 #[test]
 fn test_cli_exit_code_success_is_zero() {
     iv().args(["--version"]).assert().code(0);
-    iv()
-        .args(["introspect", "--format", "json"])
+    iv().args(["introspect", "--format", "json"])
         .assert()
         .code(0);
 }

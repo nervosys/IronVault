@@ -68,11 +68,8 @@ async fn get_token(state: &Arc<AppState>) -> String {
             .unwrap();
     }
 
-    ironvault::api::auth::create_token(
-        &state.config.jwt_secret,
-        state.config.token_expiry_secs,
-    )
-    .unwrap()
+    ironvault::api::auth::create_token(&state.config.jwt_secret, state.config.token_expiry_secs)
+        .unwrap()
 }
 
 // ── Health ───────────────────────────────────────────────────────────────────

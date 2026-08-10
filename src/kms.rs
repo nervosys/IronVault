@@ -707,7 +707,10 @@ mod tests {
     #[test]
     fn test_resolve_follows_uri() {
         std::env::set_var("IRONVAULT_TEST_RESOLVE", "from-env");
-        assert_eq!(&*resolve("env://IRONVAULT_TEST_RESOLVE").unwrap(), "from-env");
+        assert_eq!(
+            &*resolve("env://IRONVAULT_TEST_RESOLVE").unwrap(),
+            "from-env"
+        );
         std::env::remove_var("IRONVAULT_TEST_RESOLVE");
     }
 

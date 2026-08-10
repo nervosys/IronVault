@@ -1262,9 +1262,9 @@ mod coverage_boost_tests {
     // BLOCKCHAIN — BlockchainAudit verify_chain, verify_proof, search
     // ============================================================================
     mod blockchain_coverage {
+        use chrono::Utc;
         use ironvault::audit::{AuditEntry, AuditEventType};
         use ironvault::BlockchainAudit;
-        use chrono::Utc;
 
         fn make_audit() -> (BlockchainAudit, tempfile::TempDir) {
             let tmp = tempfile::tempdir().unwrap();
@@ -2042,8 +2042,8 @@ mod coverage_boost_tests {
     // AUDIT — remaining lines
     // ============================================================================
     mod audit_extra_coverage {
-        use ironvault::audit::{AuditEntry, AuditEventType, AuditLogger};
         use chrono::Utc;
+        use ironvault::audit::{AuditEntry, AuditEventType, AuditLogger};
 
         #[test]
         fn audit_logger_read_entries() {
@@ -3091,10 +3091,8 @@ mod coverage_final_push_tests {
     // TRAITS — MetricsSubscriber on_event for all event types
     // ============================================================================
     mod metrics_subscriber_coverage {
-        use ironvault::traits::{
-            EventSubscriber, MetricsSubscriber, VaultEvent, VaultMetrics,
-        };
         use chrono::Utc;
+        use ironvault::traits::{EventSubscriber, MetricsSubscriber, VaultEvent, VaultMetrics};
         use std::sync::atomic::Ordering::Relaxed;
         use std::sync::Arc;
 
@@ -3325,9 +3323,9 @@ mod coverage_final_push_tests {
     // BLOCKCHAIN — deeper verify_chain and proof paths
     // ============================================================================
     mod blockchain_deep_coverage {
+        use chrono::Utc;
         use ironvault::audit::{AuditEntry, AuditEventType};
         use ironvault::BlockchainAudit;
-        use chrono::Utc;
 
         fn make_entry(event_type: AuditEventType) -> AuditEntry {
             AuditEntry {
@@ -4686,6 +4684,7 @@ mod coverage_maximizer_tests {
     // Covers: version_sqlite, blockchain, conversion, compliance, database, formats,
     // compression, error, config, traits, utils, crypto
 
+    use chrono::Utc;
     use ironvault::{
         // Audit
         audit::{AuditEntry, AuditEventType},
@@ -4722,7 +4721,6 @@ mod coverage_maximizer_tests {
         VaultState,
         VersionRepo,
     };
-    use chrono::Utc;
     use std::collections::HashMap;
     use tempfile::TempDir;
 
@@ -5716,6 +5714,7 @@ mod coverage_ultimate_tests {
     //! - storage/local.rs: download nonexistent, list after upload
     //! - error.rs: From<serde_yaml_ng::Error>
 
+    use chrono::Utc;
     use ironvault::audit::{AuditEntry, AuditEventType, AuditLogger};
     use ironvault::config::DirectoryPaths;
     use ironvault::crypto::compression::{
@@ -5725,7 +5724,6 @@ mod coverage_ultimate_tests {
     use ironvault::formats::ModelFormat;
     use ironvault::rag::{ChunkInfo, Document, SQLiteDatabase};
     use ironvault::*;
-    use chrono::Utc;
     use std::collections::HashMap;
     use tempfile::tempdir;
 
@@ -6493,9 +6491,7 @@ mod coverage_ultimate_tests {
 
     mod streaming_crypto_tests {
         use super::*;
-        use ironvault::crypto::streaming::{
-            decrypt_chunked, encrypt_chunked, is_chunked_format,
-        };
+        use ironvault::crypto::streaming::{decrypt_chunked, encrypt_chunked, is_chunked_format};
 
         #[test]
         fn test_encrypt_decrypt_chunked_roundtrip() {
@@ -6966,9 +6962,9 @@ mod deep_coverage_tests {
     // FEDERATION MANAGER — new, accessors, add/remove peer, manifest, delta, status
     // ============================================================================
     mod federation_manager_coverage {
+        use chrono::Utc;
         use ironvault::federation::*;
         use ironvault::version::ModelVersion;
-        use chrono::Utc;
         use std::collections::HashMap;
 
         fn make_config() -> FederationConfig {
@@ -7559,8 +7555,8 @@ mod deep_coverage_tests {
     // TRAITS — VaultState Display, VaultEvent accessors/Display, AuditLogSubscriber, NullAuditSink
     // ============================================================================
     mod traits_deep_coverage {
-        use ironvault::traits::*;
         use chrono::Utc;
+        use ironvault::traits::*;
 
         // --- VaultState Display ---
         #[test]
@@ -10328,11 +10324,11 @@ mod final_coverage_tests {
 
             let count1 = vault.event_bus().subscriber_count();
             // After adding a subscriber, count should increase
-            vault.event_bus_mut().subscribe(Box::new(
-                ironvault::traits::MetricsSubscriber::new(std::sync::Arc::new(
-                    ironvault::traits::VaultMetrics::new(),
-                )),
-            ));
+            vault
+                .event_bus_mut()
+                .subscribe(Box::new(ironvault::traits::MetricsSubscriber::new(
+                    std::sync::Arc::new(ironvault::traits::VaultMetrics::new()),
+                )));
             let count2 = vault.event_bus().subscriber_count();
             assert_eq!(count2, count1 + 1);
         }
@@ -11386,9 +11382,9 @@ mod full_coverage_tests {
     //          MetricsSubscriber, NullAuditSink, AsyncBlobStoreAdapter
     // ============================================================================
     mod traits_coverage {
+        use chrono::Utc;
         use ironvault::audit::{AuditEntry, AuditEventType};
         use ironvault::traits::*;
-        use chrono::Utc;
         use std::sync::{Arc, Mutex};
 
         #[test]
@@ -12056,9 +12052,9 @@ mod full_coverage_tests {
     // BLOCKCHAIN — search, proof generation/verification, edge cases
     // ============================================================================
     mod blockchain_coverage {
+        use chrono::Utc;
         use ironvault::audit::{AuditEntry, AuditEventType};
         use ironvault::blockchain::*;
-        use chrono::Utc;
         use tempfile::tempdir;
 
         fn entry(desc: &str, model: Option<&str>, event: AuditEventType) -> AuditEntry {

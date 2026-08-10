@@ -1,10 +1,10 @@
 //! Cryptography benchmarks
 
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use ironvault::crypto::{
     compression::{compress, CompressionAlgorithm, CompressionLevel},
     FipsCrypto,
 };
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
 fn bench_encryption(c: &mut Criterion) {
     let crypto = FipsCrypto::new().unwrap();

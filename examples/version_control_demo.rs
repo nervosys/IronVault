@@ -9,9 +9,9 @@
 //! - Checksum verification
 //! - Metadata tracking across versions
 
+use chrono::Utc;
 use ironvault::formats::{ModelFormat, ModelMetadata};
 use ironvault::VaultConfig;
-use chrono::Utc;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     print_header();

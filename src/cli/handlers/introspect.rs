@@ -529,10 +529,7 @@ fn build_commands(compact: bool) -> Value {
                     desc(compact, "Show plan only")
                 ),
             ],
-            ex(
-                compact,
-                &["iv convert my-llm -t gguf -q q4_k_m --validate"]
-            )
+            ex(compact, &["iv convert my-llm -t gguf -q q4_k_m --validate"])
         ),
         cmd(
             "list-conversions",

@@ -1281,7 +1281,7 @@ impl PyVaultRegistry {
 /// The `ironvault._native` extension module.
 #[pymodule]
 #[pyo3(name = "_native")]
-fn IRONVAULT_NATIVE(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn ironvault_native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyModelFormat>()?;
     m.add_class::<PyModelMetadata>()?;
     m.add_class::<PyModelVersion>()?;

@@ -12,8 +12,8 @@
 
 #![cfg(feature = "api")]
 
-use ironvault::api::auth::{create_token, verify_token};
 use base64::Engine;
+use ironvault::api::auth::{create_token, verify_token};
 
 /// Decode the `alg` field out of a token's JOSE header without trusting the
 /// signature — we only care what algorithm was chosen.
@@ -25,8 +25,7 @@ fn header_alg(token: &str) -> String {
     let raw = base64::engine::general_purpose::URL_SAFE_NO_PAD
         .decode(header_b64)
         .expect("JOSE header is base64url");
-    let header: serde_json::Value =
-        serde_json::from_slice(&raw).expect("JOSE header is JSON");
+    let header: serde_json::Value = serde_json::from_slice(&raw).expect("JOSE header is JSON");
     header["alg"]
         .as_str()
         .expect("JOSE header carries an `alg`")
@@ -56,8 +55,8 @@ fn verification_rejects_a_swapped_algorithm() {
         parts.next().unwrap(),
     );
 
-    let forged_header = base64::engine::general_purpose::URL_SAFE_NO_PAD
-        .encode(br#"{"alg":"RS256","typ":"JWT"}"#);
+    let forged_header =
+        base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(br#"{"alg":"RS256","typ":"JWT"}"#);
     let forged = format!("{forged_header}.{payload}.{sig}");
 
     assert!(
