@@ -730,13 +730,13 @@ Apple Ecosystem:         MLX > Core ML > GGUF+Metal > ONNX
 cargo run --example providers_formats_demo
 
 # Store model with metadata
-aimv store model.safetensors --name "llama-2-7b" --format safetensors
+iv store model.safetensors --name "llama-2-7b" --format safetensors
 
 # Convert format (when implemented)
-aimv convert model.safetensors --to gguf --quant q4_k_m
+iv convert model.safetensors --to gguf --quant q4_k_m
 
 # List formats
-aimv formats list
+iv formats list
 ```
 
 ---

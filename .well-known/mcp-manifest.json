@@ -1083,43 +1083,43 @@
   ],
   "resources": [
     {
-      "uri": "aimv://vault/models",
+      "uri": "iv://vault/models",
       "name": "Vault Models",
       "description": "List of all models in the current vault with versions and metadata",
       "mimeType": "application/json"
     },
     {
-      "uri": "aimv://vault/stats",
+      "uri": "iv://vault/stats",
       "name": "Vault Statistics",
       "description": "Aggregate statistics about vault contents, storage, and formats",
       "mimeType": "application/json"
     },
     {
-      "uri": "aimv://vault/compliance",
+      "uri": "iv://vault/compliance",
       "name": "Compliance Report",
       "description": "FIPS/CMMC/MITRE compliance status for the current vault",
       "mimeType": "application/json"
     },
     {
-      "uri": "aimv://model/{name}/card",
+      "uri": "iv://model/{name}/card",
       "name": "Model Card",
       "description": "Model card documentation for a specific model",
       "mimeType": "application/json"
     },
     {
-      "uri": "aimv://model/{name}/versions",
+      "uri": "iv://model/{name}/versions",
       "name": "Model Versions",
       "description": "Version history and lineage for a specific model",
       "mimeType": "application/json"
     },
     {
-      "uri": "aimv://rag/documents",
+      "uri": "iv://rag/documents",
       "name": "RAG Documents",
       "description": "List of documents in the RAG knowledge base",
       "mimeType": "application/json"
     },
     {
-      "uri": "aimv://conversions",
+      "uri": "iv://conversions",
       "name": "Conversion Paths",
       "description": "Supported format conversion paths and quantization schemes",
       "mimeType": "application/json"

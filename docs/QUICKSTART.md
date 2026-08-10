@@ -10,7 +10,7 @@
 - **VaultBuilder** — Fluent builder pattern: `.config()`, `.sqlite_versions()`, `.subscriber()`, `.no_default_subscribers()`
 - **SQLite Version Backend** — ACID-compliant version storage with WAL mode; auto-migration from JSON; enable with `--sqlite-versions` or `IRONVAULT_SQLITE_VERSIONS=1`
 - **Streaming Encryption** — Chunked AES-256-GCM for large models with constant 8 MiB memory budget
-- **Agent-Addressable URIs** — `aimv://vault/model@version/resource?query` scheme
+- **Agent-Addressable URIs** — `iv://vault/model@version/resource?query` scheme
 - **Domain Error Types** — `CryptoError`, `StorageError`, `ConversionError` with `From` into `VaultError`
 
 ## Installation

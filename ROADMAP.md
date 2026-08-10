@@ -167,7 +167,7 @@ All fixes identified by audit. No new features.
 - [x] **Fix deprecated GitHub Actions in CI**
   - Replaced `actions-rs/toolchain@v1` → `dtolnay/rust-toolchain@stable`
   - Replaced `actions/create-release@v1` → `softprops/action-gh-release@v2`
-  - Fixed binary name `aimv` → `iv` in release.yml
+  - Fixed binary name `iv` → `iv` in release.yml
   - Updated all 3 workflows: ci.yml, security.yml, release.yml
 
 - [x] **Document Rust/Python crypto mismatch**
@@ -452,8 +452,8 @@ Domain event infrastructure for audit, metrics, and agent observability.
 
 ### Phase 3: Agent-Addressable URIs ✅
 
-- [x] **`AimvUri` struct + parser** — full `aimv://` URI scheme
-  - Format: `aimv://{vault}/{model}@{version}/{resource}?{query}`
+- [x] **`IvUri` struct + parser** — full `iv://` URI scheme
+  - Format: `iv://{vault}/{model}@{version}/{resource}?{query}`
   - Supports: root, vault, model, model@version, resource, query params
   - Roundtrip serialization (`Display` + `parse`)
   - 9 unit tests covering all URI forms
@@ -464,7 +464,7 @@ Chunked encryption for large models — constant 8 MiB memory budget regardless 
 
 - [x] **`src/crypto/streaming.rs`** — `encrypt_chunked` / `decrypt_chunked` / `is_chunked_format`
 - [x] **Wire format** — `[header: 32B][chunk_0: nonce(12)+ciphertext+tag(16)]...[stream_mac: 32B]`
-- [x] **`StreamHeader`** — magic bytes `AIMV`, version, chunk size, total chunks, original size
+- [x] **`StreamHeader`** — magic bytes `IronVault`, version, chunk size, total chunks, original size
   - Roundtrip serialization (`to_bytes` / `from_bytes`)
 - [x] **Stream MAC** — SHA-256 over all chunk auth tags + chunk count (prevents truncation/reordering)
 - [x] **Default chunk size** — 4 MiB (tuned for SSD page alignment)
@@ -543,7 +543,7 @@ Fixed critical wiring bugs and added comprehensive test coverage for v2 componen
   - Event emission validation (custom subscriber receives ModelStored/Retrieved/Deleted)
   - Streaming API round-trip (`store_model_streamed`, `get_model_chunked`)
   - SQLite backend parity (CRUD, versioning, list, delete)
-  - AimvUri parsing and validation
+  - IvUri parsing and validation
   - Audit log file written via EventBus subscriber pipeline
 - [x] **17 CLI integration tests** (`tests/cli_tests.rs`) using `assert_cmd`:
   - Help/version output, subcommand help for 5 commands

@@ -59,7 +59,7 @@ reference aborts the server rather than failing the first sync at 3am.
 
 ## Transit encryption
 
-`seal_transfers` (default **true**) wraps model bytes in the same `AIMVSEAL`
+`seal_transfers` (default **true**) wraps model bytes in the same `IRONSEAL`
 envelope used for cloud uploads, keyed by a passphrase both nodes share:
 
 ```bash

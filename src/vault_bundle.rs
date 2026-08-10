@@ -1,7 +1,7 @@
 //! Vault export/import — portable encrypted vault bundles.
 //!
 //! Exports selected models (with all versions and metadata) to a self-contained
-//! `.aimvault` archive. Imports merge models back into a vault.
+//! `.ivault` archive. Imports merge models back into a vault.
 
 use std::collections::HashMap;
 use std::fs;
@@ -553,7 +553,7 @@ mod tests {
         let canary = vault.join("versions.json");
         fs::write(&canary, b"ORIGINAL").unwrap();
 
-        let bundle = tmp.path().join("evil.aimvault");
+        let bundle = tmp.path().join("evil.ivault");
         craft_bundle(&bundle, "../versions.json", &[], None, 2);
 
         let err = import_vault(&vault, &bundle, true).unwrap_err();
@@ -574,7 +574,7 @@ mod tests {
         let vault = tmp.path().join("vault");
         fs::create_dir_all(vault.join("data")).unwrap();
 
-        let bundle = tmp.path().join("corrupt.aimvault");
+        let bundle = tmp.path().join("corrupt.ivault");
         craft_bundle(
             &bundle,
             "blob.vault",
@@ -600,7 +600,7 @@ mod tests {
         let vault = tmp.path().join("vault");
         fs::create_dir_all(vault.join("data")).unwrap();
 
-        let bundle = tmp.path().join("good.aimvault");
+        let bundle = tmp.path().join("good.ivault");
         craft_bundle(
             &bundle,
             "blob.vault",
@@ -626,7 +626,7 @@ mod tests {
         let vault = tmp.path().join("vault");
         fs::create_dir_all(vault.join("data")).unwrap();
 
-        let bundle = tmp.path().join("legacy.aimvault");
+        let bundle = tmp.path().join("legacy.ivault");
         craft_bundle(
             &bundle,
             "blob.vault",
@@ -662,7 +662,7 @@ mod tests {
     #[test]
     fn test_export_report_fields() {
         let report = ExportReport {
-            output_path: PathBuf::from("/tmp/test.aimvault"),
+            output_path: PathBuf::from("/tmp/test.ivault"),
             models_exported: vec!["m1".into(), "m2".into()],
             total_versions: 5,
             total_blobs: 5,

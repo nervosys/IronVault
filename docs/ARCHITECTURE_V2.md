@@ -24,7 +24,7 @@ These properties must hold at ALL times, in ALL code paths:
 | I2  | **Integrity**: Every retrieval verifies SHA-256 checksum             | Checksum computed pre-encryption, verified post-decryption |
 | I3  | **Auditability**: Every state-changing operation emits an event      | Event bus with guaranteed delivery to audit sink           |
 | I4  | **Immutability**: Stored versions are never mutated in-place         | Append-only version log; deletes produce tombstones        |
-| I5  | **Addressability**: Every entity has a stable URI                    | `aimv://{vault}/{model}@{version}`                         |
+| I5  | **Addressability**: Every entity has a stable URI                    | `iv://{vault}/{model}@{version}`                         |
 | I6  | **Recoverability**: Vault state is reconstructable from on-disk data | Version manifest + encrypted blobs = complete state        |
 
 ### 1.3 Domain Concepts (from primitives)
@@ -291,23 +291,23 @@ pub enum VaultState {
 Every entity has a URI. Agents use URIs to refer to any object.
 
 ```
-aimv://                                  — root (list vaults)
-aimv://default/                          — vault "default"
-aimv://default/llama-3                   — model "llama-3" (latest version)
-aimv://default/llama-3@3                 — model "llama-3" version 3
-aimv://default/llama-3@3/card            — model card for version 3
-aimv://default/llama-3@3/lineage         — version lineage graph
-aimv://default/_compliance               — compliance report
-aimv://default/_stats                    — vault statistics
-aimv://default/_events?since=2026-01-01  — event log (filtered)
-aimv://rag/{kb_name}/documents           — RAG document list
-aimv://rag/{kb_name}/search?q=attention  — RAG search
+iv://                                  — root (list vaults)
+iv://default/                          — vault "default"
+iv://default/llama-3                   — model "llama-3" (latest version)
+iv://default/llama-3@3                 — model "llama-3" version 3
+iv://default/llama-3@3/card            — model card for version 3
+iv://default/llama-3@3/lineage         — version lineage graph
+iv://default/_compliance               — compliance report
+iv://default/_stats                    — vault statistics
+iv://default/_events?since=2026-01-01  — event log (filtered)
+iv://rag/{kb_name}/documents           — RAG document list
+iv://rag/{kb_name}/search?q=attention  — RAG search
 ```
 
 ```rust
-/// Parsed AIMV URI with typed components.
+/// Parsed IronVault URI with typed components.
 #[derive(Debug, Clone, PartialEq)]
-pub struct AimvUri {
+pub struct IvUri {
     pub vault: Option<String>,
     pub model: Option<String>,
     pub version: Option<u32>,
@@ -315,7 +315,7 @@ pub struct AimvUri {
     pub query: HashMap<String, String>,
 }
 
-impl AimvUri {
+impl IvUri {
     pub fn parse(uri: &str) -> Result<Self> { /* ... */ }
 }
 ```
@@ -470,7 +470,7 @@ pub struct VaultMetrics {
 
 ### 4.5 Agent Integration Architecture
 
-Agents interact with AIMV through four surfaces:
+Agents interact with IronVault through four surfaces:
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -496,7 +496,7 @@ Agents interact with AIMV through four surfaces:
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Key principle**: An agent can fully understand AIMV without reading source code — the ontology describes what exists, what state it's in, what actions are possible, and what effects those actions have.
+**Key principle**: An agent can fully understand IronVault without reading source code — the ontology describes what exists, what state it's in, what actions are possible, and what effects those actions have.
 
 ---
 
@@ -512,7 +512,7 @@ src/
 ├── domain/                   # Layer 3: Pure domain logic (no I/O)
 │   ├── mod.rs
 │   ├── artifact.rs           # Artifact, Hash, content addressing
-│   ├── identity.rs           # ModelId, AimvUri, resource addressing
+│   ├── identity.rs           # ModelId, IvUri, resource addressing
 │   ├── version.rs            # ModelVersion, LineageGraph (value objects)
 │   ├── format.rs             # ModelFormat enum + detection
 │   ├── metadata.rs           # ModelMetadata, ModelCard
@@ -646,7 +646,7 @@ interface → service → domain ← infra
 1. Implement `SqliteVersionRepo`
 2. Auto-migrate from `versions.json` on first access
 3. Add `/metrics`, `/health`, `/events` API endpoints
-4. Implement `AimvUri` parser
+4. Implement `IvUri` parser
 5. Publish comprehensive ontology
 
 ---
@@ -701,7 +701,7 @@ This separation allows:
 | Version DB     | SQLite                   | ACID, indexed, battle-tested, already a dependency (`rusqlite`)       |
 | Chunk size     | 4 MiB                    | Aligns with SSD page sizes, good compression ratio, reasonable memory |
 | Event delivery | Best-effort (log errors) | Audit subscribers must not block crypto operations                    |
-| URI scheme     | `aimv://`                | Short, unique, follows RFC 3986                                       |
+| URI scheme     | `iv://`                | Short, unique, follows RFC 3986                                       |
 | State machine  | Enum-based               | Compile-time safety, exhaustive matching, serializable                |
 
 ## Appendix B: Ontology Reference

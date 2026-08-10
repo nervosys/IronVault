@@ -253,17 +253,17 @@ if converter.can_convert(from, to) {
 cargo run --example providers_formats_demo --release
 
 # Detect format (when CLI implemented)
-aimv format detect model.safetensors
+iv format detect model.safetensors
 
 # Show format info
-aimv format info safetensors
+iv format info safetensors
 
 # List all formats
-aimv format list
+iv format list
 
 # Convert (when implemented)
-aimv convert model.pt --to safetensors
-aimv convert model.safetensors --to gguf --quant q4_k_m
+iv convert model.pt --to safetensors
+iv convert model.safetensors --to gguf --quant q4_k_m
 ```
 
 ---

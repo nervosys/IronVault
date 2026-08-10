@@ -88,10 +88,9 @@ pub use rag::{
     ToolExecutor, ToolResult,
 };
 pub use traits::{
-    AimvUri, AsyncBlobStore, AsyncBlobStoreAdapter, AuditLogSubscriber, AuditSink, BlobInfo,
-    BlobReceipt, BlobStore, BlobStoreStats, CryptoProvider, EventBus, EventSubscriber,
-    MetricsSnapshot, MetricsSubscriber, NullAuditSink, VaultEvent, VaultMetrics, VaultState,
-    VersionRepo,
+    AsyncBlobStore, AsyncBlobStoreAdapter, AuditLogSubscriber, AuditSink, BlobInfo, BlobReceipt,
+    BlobStore, BlobStoreStats, CryptoProvider, EventBus, EventSubscriber, IvUri, MetricsSnapshot,
+    MetricsSubscriber, NullAuditSink, VaultEvent, VaultMetrics, VaultState, VersionRepo,
 };
 pub use utils::{
     CompressionAnalyzer, CompressionReport, ModelAnalysis, ModelAnalyzer, ModelArchive,

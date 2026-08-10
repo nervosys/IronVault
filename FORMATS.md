@@ -52,19 +52,19 @@
 
 ```bash
 # Format automatically detected from extension
-aimv store my-llm model.safetensors
-aimv store quantized-model model.gguf
-aimv store mobile-model model.tflite
-aimv store apple-model model.mlmodel
+iv store my-llm model.safetensors
+iv store quantized-model model.gguf
+iv store mobile-model model.tflite
+iv store apple-model model.mlmodel
 ```
 
 ### Explicit Format Specification
 
 ```bash
 # Explicitly specify format
-aimv store my-model model.bin --format pytorch
-aimv store my-model model.bin --format onnx
-aimv store my-model model.bin --format tensorrt
+iv store my-model model.bin --format pytorch
+iv store my-model model.bin --format onnx
+iv store my-model model.bin --format tensorrt
 ```
 
 ### Supported Format Names

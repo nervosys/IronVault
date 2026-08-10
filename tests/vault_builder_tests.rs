@@ -635,37 +635,37 @@ fn test_sqlite_backend_delete() {
 }
 
 // ──────────────────────────────────────────────────────────────
-// AimvUri Tests
+// IvUri Tests
 // ──────────────────────────────────────────────────────────────
 
 #[test]
-fn test_aimv_uri_parse_roundtrip() {
-    use ironvault::AimvUri;
+fn test_iv_uri_parse_roundtrip() {
+    use ironvault::IvUri;
 
-    let uri = AimvUri::parse("aimv://my-vault/llama-3@2").unwrap();
+    let uri = IvUri::parse("iv://my-vault/llama-3@2").unwrap();
     assert_eq!(uri.vault, Some("my-vault".to_string()));
     assert_eq!(uri.model, Some("llama-3".to_string()));
     assert_eq!(uri.version, Some(2));
 }
 
 #[test]
-fn test_aimv_uri_no_version() {
-    use ironvault::AimvUri;
+fn test_iv_uri_no_version() {
+    use ironvault::IvUri;
 
-    let uri = AimvUri::parse("aimv://default/my-model").unwrap();
+    let uri = IvUri::parse("iv://default/my-model").unwrap();
     assert_eq!(uri.vault, Some("default".to_string()));
     assert_eq!(uri.model, Some("my-model".to_string()));
     assert_eq!(uri.version, None);
 }
 
 #[test]
-fn test_aimv_uri_invalid() {
-    use ironvault::AimvUri;
+fn test_iv_uri_invalid() {
+    use ironvault::IvUri;
 
-    assert!(AimvUri::parse("http://wrong").is_err());
-    assert!(AimvUri::parse("").is_err());
-    // aimv:// with no path segments is valid (root URI with all None fields)
-    // assert!(AimvUri::parse("aimv://").is_err());
+    assert!(IvUri::parse("http://wrong").is_err());
+    assert!(IvUri::parse("").is_err());
+    // iv:// with no path segments is valid (root URI with all None fields)
+    // assert!(IvUri::parse("iv://").is_err());
 }
 
 // ──────────────────────────────────────────────────────────────

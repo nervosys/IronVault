@@ -41,7 +41,7 @@ models.
 Each object is self-contained:
 
 ```
-magic "AIMVSEAL" | version | KDF id | salt length | salt | nonce ‖ ciphertext ‖ tag
+magic "IRONSEAL" | version | KDF id | salt length | salt | nonce ‖ ciphertext ‖ tag
 ```
 
 The salt travels with the object rather than living in the vault, which is

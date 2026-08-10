@@ -758,7 +758,7 @@ mod coverage_boost_tests {
     //! - version_sqlite.rs: full VersionRepo trait via SqliteVersionRepo::in_memory()
     //! - database.rs: SQLiteDatabase CRUD, Database trait
     //! - blockchain.rs: BlockchainAudit verify_chain, verify_proof, search
-    //! - traits.rs: AimvUri with query params, display
+    //! - traits.rs: IvUri with query params, display
     //! - config.rs: save/load, custom dirs
     //! - compliance.rs: check_cve, check_mitre_attack, check_cmmc, run_all_checks
     //! - formats.rs: remaining extension/name branches
@@ -1409,14 +1409,14 @@ mod coverage_boost_tests {
     }
 
     // ============================================================================
-    // TRAITS — AimvUri with query params, Display
+    // TRAITS — IvUri with query params, Display
     // ============================================================================
-    mod aimv_uri_coverage {
-        use ironvault::traits::AimvUri;
+    mod iv_uri_coverage {
+        use ironvault::traits::IvUri;
 
         #[test]
         fn uri_with_query_params() {
-            let uri = AimvUri::parse("aimv://myvault/mymodel?format=onnx&version=latest").unwrap();
+            let uri = IvUri::parse("iv://myvault/mymodel?format=onnx&version=latest").unwrap();
             assert_eq!(uri.vault, Some("myvault".to_string()));
             assert_eq!(uri.model, Some("mymodel".to_string()));
             assert_eq!(uri.query.get("format").unwrap(), "onnx");
@@ -1425,15 +1425,15 @@ mod coverage_boost_tests {
 
         #[test]
         fn uri_with_empty_value_query() {
-            let uri = AimvUri::parse("aimv://vault/model?compressed").unwrap();
+            let uri = IvUri::parse("iv://vault/model?compressed").unwrap();
             assert_eq!(uri.query.get("compressed").unwrap(), "");
         }
 
         #[test]
         fn uri_roundtrip_with_query() {
-            let uri = AimvUri::parse("aimv://vault/model@3?format=pt&raw").unwrap();
+            let uri = IvUri::parse("iv://vault/model@3?format=pt&raw").unwrap();
             let s = uri.to_string();
-            assert!(s.starts_with("aimv://"));
+            assert!(s.starts_with("iv://"));
             assert!(s.contains("vault"));
             assert!(s.contains("model@3"));
             assert!(s.contains("format=pt"));
@@ -1441,22 +1441,22 @@ mod coverage_boost_tests {
 
         #[test]
         fn uri_display_impl() {
-            let uri = AimvUri::parse("aimv://v/m@1/weights").unwrap();
+            let uri = IvUri::parse("iv://v/m@1/weights").unwrap();
             let display = format!("{}", uri);
-            assert!(display.starts_with("aimv://"));
+            assert!(display.starts_with("iv://"));
             assert!(display.contains("v/m@1/weights"));
         }
 
         #[test]
         fn uri_vault_only() {
-            let uri = AimvUri::parse("aimv://myvault").unwrap();
+            let uri = IvUri::parse("iv://myvault").unwrap();
             let s = uri.to_string();
-            assert_eq!(s, "aimv://myvault");
+            assert_eq!(s, "iv://myvault");
         }
 
         #[test]
         fn uri_with_version_and_resource() {
-            let uri = AimvUri::parse("aimv://v/m@5/config").unwrap();
+            let uri = IvUri::parse("iv://v/m@5/config").unwrap();
             assert_eq!(uri.version, Some(5));
             assert_eq!(uri.resource, Some("config".to_string()));
             let s = uri.to_string();
@@ -3545,15 +3545,14 @@ mod coverage_final_push_tests {
     }
 
     // ============================================================================
-    // TRAITS — AimvUri to_string with query params
+    // TRAITS — IvUri to_string with query params
     // ============================================================================
-    mod aimv_uri_deep_coverage {
-        use ironvault::traits::AimvUri;
+    mod iv_uri_deep_coverage {
+        use ironvault::traits::IvUri;
 
         #[test]
         fn uri_to_string_with_multiple_query_params() {
-            let uri =
-                AimvUri::parse("aimv://vault/model?format=onnx&version=2&compressed").unwrap();
+            let uri = IvUri::parse("iv://vault/model?format=onnx&version=2&compressed").unwrap();
             let s = uri.to_string();
             assert!(s.contains("format=onnx"));
             assert!(s.contains("version=2"));
@@ -3564,7 +3563,7 @@ mod coverage_final_push_tests {
 
         #[test]
         fn uri_to_string_no_query() {
-            let uri = AimvUri::parse("aimv://vault/model@1/weights").unwrap();
+            let uri = IvUri::parse("iv://vault/model@1/weights").unwrap();
             let s = uri.to_string();
             assert!(!s.contains("?"));
             assert!(s.contains("model@1"));
@@ -3573,7 +3572,7 @@ mod coverage_final_push_tests {
 
         #[test]
         fn uri_model_version_resource_all_present() {
-            let uri = AimvUri::parse("aimv://myvault/mymodel@42/checkpoint").unwrap();
+            let uri = IvUri::parse("iv://myvault/mymodel@42/checkpoint").unwrap();
             assert_eq!(uri.vault, Some("myvault".to_string()));
             assert_eq!(uri.model, Some("mymodel".to_string()));
             assert_eq!(uri.version, Some(42));
@@ -4700,8 +4699,6 @@ mod coverage_maximizer_tests {
         // Formats
         formats::ModelFormat,
         rag::{ChunkInfo, SQLiteDatabase},
-        // Traits
-        AimvUri,
         // Blockchain
         BlockchainAudit,
         ConversionOptions,
@@ -4710,6 +4707,8 @@ mod coverage_maximizer_tests {
         Database,
         // RAG
         Document,
+        // Traits
+        IvUri,
         // Version control
         SqliteVersionRepo,
         ValidationCheck,
@@ -5649,18 +5648,18 @@ mod coverage_maximizer_tests {
         }
 
         #[test]
-        fn aimv_uri_various_forms() {
+        fn iv_uri_various_forms() {
             // Full URI with all components
-            let uri = AimvUri::parse("aimv://vault/model@2/resource?key=val").unwrap();
+            let uri = IvUri::parse("iv://vault/model@2/resource?key=val").unwrap();
             assert!(!format!("{}", uri).is_empty());
 
             // URI with just model
-            let uri2 = AimvUri::parse("aimv://vault/model").unwrap();
+            let uri2 = IvUri::parse("iv://vault/model").unwrap();
             let s = uri2.to_string();
             assert!(s.contains("model"));
 
             // URI with empty query value
-            let uri3 = AimvUri::parse("aimv://vault/model?key=");
+            let uri3 = IvUri::parse("iv://vault/model?key=");
             if let Ok(u) = uri3 {
                 let _ = u.to_string();
             }
@@ -5698,7 +5697,7 @@ mod coverage_ultimate_tests {
     //! - database.rs: Database trait methods (insert/update/delete/query), store_document+get_document+search_documents
     //! - conversion.rs: individual shim converters (GGUF, SafeTensors↔PyTorch, PyTorch→ONNX, ONNX→TensorRT/CoreML, SafeTensors→GGUF), ValidationCheck::pass/fail, validate default
     //! - mcp.rs: builtin tool execution (search_documents, add_document, chunk_text, execute_rule), ToolResult::failure, with_metadata/with_data
-    //! - traits.rs: AimvUri with version+query, AsyncBlobStoreAdapter, MetricsSubscriber, EventSubscriber::accepts
+    //! - traits.rs: IvUri with version+query, AsyncBlobStoreAdapter, MetricsSubscriber, EventSubscriber::accepts
     //! - vault.rs: store_model_chunked/get_model_chunked, VaultBuilder::no_default_subscribers
     //! - audit.rs: AuditSink trait impl (emit/query)
     //! - model_card.rs: to_json/to_yaml
@@ -6256,14 +6255,14 @@ mod coverage_ultimate_tests {
         }
     }
 
-    // ── Traits: AimvUri, AsyncBlobStoreAdapter, Metrics ──────────
+    // ── Traits: IvUri, AsyncBlobStoreAdapter, Metrics ──────────
 
     mod traits_coverage {
         use super::*;
 
         #[test]
-        fn test_aimv_uri_with_version_and_query() {
-            let uri = AimvUri {
+        fn test_iv_uri_with_version_and_query() {
+            let uri = IvUri {
                 vault: Some("my_vault".to_string()),
                 model: Some("llama".to_string()),
                 version: Some(3),
@@ -6285,12 +6284,12 @@ mod coverage_ultimate_tests {
 
             // Also test Display
             let display_str = format!("{}", uri);
-            assert!(display_str.contains("aimv"));
+            assert!(display_str.contains("iv"));
         }
 
         #[test]
-        fn test_aimv_uri_with_empty_query_value() {
-            let uri = AimvUri {
+        fn test_iv_uri_with_empty_query_value() {
+            let uri = IvUri {
                 vault: Some("v".to_string()),
                 model: Some("m".to_string()),
                 version: None,
@@ -7874,42 +7873,42 @@ mod deep_coverage_tests {
             assert!(!collected[0].success);
         }
 
-        // --- AimvUri to_string with query params ---
+        // --- IvUri to_string with query params ---
         #[test]
-        fn aimv_uri_to_string_with_query() {
-            let uri = AimvUri::parse("aimv://default/_events?since=2026-01-01").unwrap();
+        fn iv_uri_to_string_with_query() {
+            let uri = IvUri::parse("iv://default/_events?since=2026-01-01").unwrap();
             let s = uri.to_string();
-            assert!(s.starts_with("aimv://"));
+            assert!(s.starts_with("iv://"));
             assert!(s.contains("default"));
             assert!(s.contains("_events"));
             assert!(s.contains("since=2026-01-01"));
         }
 
         #[test]
-        fn aimv_uri_display_impl() {
-            let uri = AimvUri::parse("aimv://myvault/model@2/card").unwrap();
+        fn iv_uri_display_impl() {
+            let uri = IvUri::parse("iv://myvault/model@2/card").unwrap();
             let display = format!("{}", uri);
-            assert_eq!(display, "aimv://myvault/model@2/card");
+            assert_eq!(display, "iv://myvault/model@2/card");
         }
 
         #[test]
-        fn aimv_uri_to_string_vault_only() {
-            let uri = AimvUri::parse("aimv://default/").unwrap();
+        fn iv_uri_to_string_vault_only() {
+            let uri = IvUri::parse("iv://default/").unwrap();
             let s = uri.to_string();
-            assert_eq!(s, "aimv://default");
+            assert_eq!(s, "iv://default");
         }
 
         #[test]
-        fn aimv_uri_to_string_model_no_version() {
-            let uri = AimvUri::parse("aimv://default/mymodel").unwrap();
+        fn iv_uri_to_string_model_no_version() {
+            let uri = IvUri::parse("iv://default/mymodel").unwrap();
             let s = uri.to_string();
-            assert_eq!(s, "aimv://default/mymodel");
+            assert_eq!(s, "iv://default/mymodel");
         }
 
         #[test]
-        fn aimv_uri_to_string_empty_value_query() {
+        fn iv_uri_to_string_empty_value_query() {
             use std::collections::HashMap;
-            let uri = AimvUri {
+            let uri = IvUri {
                 vault: Some("v".to_string()),
                 model: Some("m".to_string()),
                 version: None,
@@ -11378,7 +11377,7 @@ mod full_coverage_tests {
     }
 
     // ============================================================================
-    // TRAITS — VaultState Display, AimvUri, EventBus, AuditLogSubscriber,
+    // TRAITS — VaultState Display, IvUri, EventBus, AuditLogSubscriber,
     //          MetricsSubscriber, NullAuditSink, AsyncBlobStoreAdapter
     // ============================================================================
     mod traits_coverage {
@@ -11421,66 +11420,66 @@ mod full_coverage_tests {
             assert!(format!("{}", state).contains("broken"));
         }
 
-        // AimvUri::to_string — all branches
+        // IvUri::to_string — all branches
         #[test]
         fn uri_to_string_root() {
-            let uri = AimvUri::parse("aimv://").unwrap();
-            assert_eq!(uri.to_string(), "aimv://");
+            let uri = IvUri::parse("iv://").unwrap();
+            assert_eq!(uri.to_string(), "iv://");
         }
 
         #[test]
         fn uri_to_string_vault_only() {
-            let uri = AimvUri::parse("aimv://myvault").unwrap();
-            assert_eq!(uri.to_string(), "aimv://myvault");
+            let uri = IvUri::parse("iv://myvault").unwrap();
+            assert_eq!(uri.to_string(), "iv://myvault");
         }
 
         #[test]
         fn uri_to_string_vault_model() {
-            let uri = AimvUri::parse("aimv://v/m").unwrap();
-            assert_eq!(uri.to_string(), "aimv://v/m");
+            let uri = IvUri::parse("iv://v/m").unwrap();
+            assert_eq!(uri.to_string(), "iv://v/m");
         }
 
         #[test]
         fn uri_to_string_with_version() {
-            let uri = AimvUri::parse("aimv://v/m@5").unwrap();
-            assert_eq!(uri.to_string(), "aimv://v/m@5");
+            let uri = IvUri::parse("iv://v/m@5").unwrap();
+            assert_eq!(uri.to_string(), "iv://v/m@5");
         }
 
         #[test]
         fn uri_to_string_with_resource() {
-            let uri = AimvUri::parse("aimv://v/m@1/card").unwrap();
-            assert_eq!(uri.to_string(), "aimv://v/m@1/card");
+            let uri = IvUri::parse("iv://v/m@1/card").unwrap();
+            assert_eq!(uri.to_string(), "iv://v/m@1/card");
         }
 
         #[test]
         fn uri_to_string_with_query() {
-            let uri = AimvUri::parse("aimv://v/m?key=val").unwrap();
+            let uri = IvUri::parse("iv://v/m?key=val").unwrap();
             let s = uri.to_string();
             assert!(s.contains("key=val"));
         }
 
         #[test]
         fn uri_to_string_with_empty_query_value() {
-            let uri = AimvUri::parse("aimv://v/m?flag").unwrap();
+            let uri = IvUri::parse("iv://v/m?flag").unwrap();
             let s = uri.to_string();
             assert!(s.contains("flag"));
         }
 
         #[test]
         fn uri_display_trait() {
-            let uri = AimvUri::parse("aimv://v/m@1").unwrap();
+            let uri = IvUri::parse("iv://v/m@1").unwrap();
             let display = format!("{}", uri);
-            assert_eq!(display, "aimv://v/m@1");
+            assert_eq!(display, "iv://v/m@1");
         }
 
         #[test]
         fn uri_too_many_segments() {
-            assert!(AimvUri::parse("aimv://a/b/c/d").is_err());
+            assert!(IvUri::parse("iv://a/b/c/d").is_err());
         }
 
         #[test]
         fn uri_invalid_version_number() {
-            assert!(AimvUri::parse("aimv://v/m@abc").is_err());
+            assert!(IvUri::parse("iv://v/m@abc").is_err());
         }
 
         // EventBus

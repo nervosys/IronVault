@@ -57,7 +57,7 @@ passphrase. See [docs/KMS.md](docs/KMS.md) for the URI table and backend setup.
 | Destructive gates | `delete`, `policy apply`, `gc`, `vault-import` either require explicit names or accept `--dry-run`                                      |
 | Error envelope    | Errors emit JSON `{ "code": "...", "message": "...", "hint": "..." }` on stderr; never bare strings                                     |
 | No surprise I/O   | The CLI never makes network calls except `iv pull`, `iv cloud *`, and opt-in telemetry (off by default; honors `DO_NOT_TRACK=1`)      |
-| URI scheme        | `aimv://vault/model@version` resolves through any of the three surfaces                                                                 |
+| URI scheme        | `iv://vault/model@version` resolves through any of the three surfaces                                                                 |
 | Conversion honesty | `iv convert` and `POST /api/v1/convert` never emit a file or payload in the target format unless the bytes really are that format. When external tooling is required the REST response sets `converted: false` and carries a `plan`; the CLI writes `<output>.plan.json` and produces no target-format file |
 
 ## Project Identity

@@ -385,22 +385,22 @@ for v in versions {
 
 ```bash
 # List versions
-aimv list llama-2-7b-chat
+iv list llama-2-7b-chat
 
 # Get version info
-aimv info llama-2-7b-chat --version 3
+iv info llama-2-7b-chat --version 3
 
 # Get lineage
-aimv lineage llama-2-7b-chat --version 5
+iv lineage llama-2-7b-chat --version 5
 
 # Compare versions
-aimv compare llama-2-7b-chat --versions 3,5
+iv compare llama-2-7b-chat --versions 3,5
 
 # Cleanup
-aimv cleanup llama-2-7b-chat --keep 5
+iv cleanup llama-2-7b-chat --keep 5
 
 # Verify
-aimv verify llama-2-7b-chat --version 3
+iv verify llama-2-7b-chat --version 3
 ```
 
 ---

@@ -2172,9 +2172,9 @@ fn test_published_exit_code_tables_match_the_implementation() {
         &std::fs::read_to_string(root.join(".well-known/ontology.jsonld")).unwrap(),
     )
     .unwrap();
-    let contract = ontology["aimv:errors"]["@exitCodeContract"]
+    let contract = ontology["iv:errors"]["@exitCodeContract"]
         .as_object()
-        .expect("ontology.jsonld must publish aimv:errors.@exitCodeContract");
+        .expect("ontology.jsonld must publish iv:errors.@exitCodeContract");
     for (key, _) in &expected {
         assert!(
             contract.contains_key(key),
@@ -2184,9 +2184,9 @@ fn test_published_exit_code_tables_match_the_implementation() {
 
     // Every error type in the taxonomy must claim a code the implementation
     // can actually produce.
-    let taxonomy = ontology["aimv:errors"]["errorTypes"]
+    let taxonomy = ontology["iv:errors"]["errorTypes"]
         .as_array()
-        .expect("ontology.jsonld must list aimv:errors.errorTypes");
+        .expect("ontology.jsonld must list iv:errors.errorTypes");
     let valid: Vec<u8> = expected.iter().map(|(_, c)| *c).collect();
     for entry in taxonomy {
         let code = u8::try_from(entry["exit_code"].as_u64().unwrap()).unwrap();

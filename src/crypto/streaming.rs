@@ -9,7 +9,7 @@
 //!
 //! ```text
 //! [header: 32 bytes]
-//!   - magic: b"AIMV" (4 bytes)
+//!   - magic: b"IRNV" (4 bytes; 4.x wrote b"AIMV", still read)
 //!   - version: u8 (1 byte, currently 1)
 //!   - chunk_size: u32 LE (4 bytes)
 //!   - total_chunks: u64 LE (8 bytes)
@@ -37,14 +37,17 @@ use crate::error::{Result, VaultError};
 /// Default chunk size: 4 MiB (tuned for SSD page alignment).
 pub const DEFAULT_CHUNK_SIZE: usize = 4 * 1024 * 1024;
 
-/// Stream header magic bytes.
+/// Stream header magic bytes, written from 5.0 on.
+pub const STREAM_MAGIC: &[u8; 4] = b"IRNV";
+
+/// The 4.x stream magic, still accepted on read.
 ///
-/// Deliberately **not** renamed for IronVault, for the same reason as
-/// [`crate::cloud_envelope::MAGIC`]: this is the first four bytes of every
-/// chunked model already encrypted on disk. Renaming it orphans them —
-/// [`is_chunked_format`] would stop recognising them and decryption would
-/// reject them as corrupt.
-pub const STREAM_MAGIC: &[u8; 4] = b"AIMV";
+/// This is the first four bytes of every chunked model already encrypted on
+/// disk — including inside vaults that will never be rewritten, since nothing
+/// re-encrypts a stored model. [`StreamHeader::from_bytes`] and
+/// [`is_chunked_format`] accept both; only [`StreamHeader::to_bytes`] is
+/// one-way.
+pub const LEGACY_STREAM_MAGIC: &[u8; 4] = b"AIMV";
 
 /// Current wire format version.
 pub const STREAM_VERSION: u8 = 1;
@@ -84,9 +87,11 @@ impl StreamHeader {
             )));
         }
 
-        if &buf[0..4] != STREAM_MAGIC {
+        // Both spellings: a model encrypted before the 5.0 rename carries the
+        // legacy magic and must still decrypt.
+        if &buf[0..4] != STREAM_MAGIC && &buf[0..4] != LEGACY_STREAM_MAGIC {
             return Err(VaultError::CryptoError(
-                "Invalid stream magic bytes — not an AIMV chunked file".to_string(),
+                "Invalid stream magic bytes — not an IRNV chunked file".to_string(),
             ));
         }
 
@@ -239,7 +244,7 @@ pub fn decrypt_chunked(crypto: &FipsCrypto, encrypted: &[u8], key: &SecureKey) -
 
 /// Check if data starts with the AIMV chunked stream header.
 pub fn is_chunked_format(data: &[u8]) -> bool {
-    data.len() >= HEADER_SIZE && &data[0..4] == STREAM_MAGIC
+    data.len() >= HEADER_SIZE && (&data[0..4] == STREAM_MAGIC || &data[0..4] == LEGACY_STREAM_MAGIC)
 }
 
 #[cfg(test)]
@@ -260,6 +265,45 @@ mod tests {
         assert_eq!(parsed.chunk_size, header.chunk_size);
         assert_eq!(parsed.total_chunks, header.total_chunks);
         assert_eq!(parsed.original_size, header.original_size);
+    }
+
+    /// The 5.0 rename changed the stream magic. Models encrypted before it are
+    /// sitting in vaults that nothing will ever rewrite, so reading must accept
+    /// the old spelling or those models become permanently undecryptable.
+    #[test]
+    fn test_models_encrypted_before_the_rename_still_decrypt() {
+        let crypto = FipsCrypto::new().unwrap();
+        let passphrase = b"test_passphrase_with_sufficient_entropy".to_vec();
+        let (key, _) = crypto.derive_key(passphrase, None).unwrap();
+
+        let plaintext = b"weights encrypted by 4.x".repeat(200);
+        let mut encrypted = encrypt_chunked(&crypto, &plaintext, &key, 1024).unwrap();
+
+        // Downgrade the header to exactly what 4.6.x wrote. Only the four
+        // magic bytes differed; the rest of the format is unchanged.
+        encrypted[0..4].copy_from_slice(LEGACY_STREAM_MAGIC);
+
+        assert!(
+            is_chunked_format(&encrypted),
+            "a 4.x chunked model must still be recognised as chunked"
+        );
+        assert_eq!(
+            decrypt_chunked(&crypto, &encrypted, &key).unwrap(),
+            plaintext,
+            "a 4.x chunked model must still decrypt under 5.0"
+        );
+    }
+
+    /// The compatibility above is read-only: new writes use the new magic.
+    #[test]
+    fn test_encrypt_writes_the_current_magic() {
+        let crypto = FipsCrypto::new().unwrap();
+        let (key, _) = crypto
+            .derive_key(b"test_passphrase_with_sufficient_entropy".to_vec(), None)
+            .unwrap();
+        let encrypted = encrypt_chunked(&crypto, b"payload", &key, 1024).unwrap();
+        assert_eq!(&encrypted[0..4], STREAM_MAGIC);
+        assert_ne!(&encrypted[0..4], LEGACY_STREAM_MAGIC);
     }
 
     #[test]

@@ -21,7 +21,7 @@
 //!
 //! ```text
 //! offset  size  field
-//! 0       8     magic "AIMVSEAL"
+//! 0       8     magic "IRONSEAL" (4.x wrote "AIMVSEAL"; both are read)
 //! 8       1     format version (currently 1)
 //! 9       1     KDF id (1 = Argon2id, the vault's parameters)
 //! 10      2     salt length, big-endian u16
@@ -41,13 +41,18 @@ use crate::error::{Result, VaultError};
 /// a file so [`is_sealed`] can distinguish a sealed upload from one made by an
 /// older version, which wrote plaintext.
 ///
-/// Deliberately **not** renamed for IronVault. This is an on-disk and on-wire
-/// identifier, not branding: it is the first eight bytes of every object
-/// already sitting in a customer's S3 bucket and of every federation transfer
-/// in flight. Changing it would make all of them unreadable — [`is_sealed`]
-/// would report plaintext, and `open` would refuse them. A rename here is a
-/// data migration, not a find-and-replace.
-pub const MAGIC: &[u8; 8] = b"AIMVSEAL";
+/// Written by [`seal`] from 5.0 on.
+pub const MAGIC: &[u8; 8] = b"IRONSEAL";
+
+/// The 4.x magic, still accepted on read.
+///
+/// Renaming the constant does not rename the bytes already written: every
+/// object sealed before 5.0 — in an S3 bucket, in an Azure container, in a
+/// federation transfer — begins with these eight. [`is_sealed`] and [`open`]
+/// accept both spellings so those objects keep opening; only [`seal`] is
+/// one-way. Nothing re-writes an existing object, so a bucket may hold a mix
+/// indefinitely and both are readable.
+pub const LEGACY_MAGIC: &[u8; 8] = b"AIMVSEAL";
 
 /// Envelope format version.
 pub const FORMAT_VERSION: u8 = 1;
@@ -58,13 +63,17 @@ const KDF_ARGON2ID: u8 = 1;
 /// Bytes before the salt: magic, version, KDF id, salt length.
 const HEADER_PREFIX_LEN: usize = 8 + 1 + 1 + 2;
 
-/// True if `data` starts with the envelope magic.
+/// True if `data` starts with either envelope magic.
 ///
 /// Used on the download path so objects pushed by a version that uploaded
 /// plaintext still open, rather than failing with a confusing crypto error.
+/// Accepts [`LEGACY_MAGIC`] as well as [`MAGIC`]: an object sealed before 5.0
+/// is still a sealed object, and reporting it as plaintext would hand the
+/// caller ciphertext and call it a model.
 #[must_use]
 pub fn is_sealed(data: &[u8]) -> bool {
-    data.len() >= MAGIC.len() && &data[..MAGIC.len()] == MAGIC
+    data.len() >= MAGIC.len()
+        && (&data[..MAGIC.len()] == MAGIC || &data[..LEGACY_MAGIC.len()] == LEGACY_MAGIC)
 }
 
 /// Encrypt `plaintext` under `passphrase`, returning a self-contained object.
@@ -100,7 +109,7 @@ pub fn seal(plaintext: &[u8], passphrase: Vec<u8>) -> Result<Vec<u8>> {
 pub fn open(sealed: &[u8], passphrase: Vec<u8>) -> Result<Vec<u8>> {
     if !is_sealed(sealed) {
         return Err(VaultError::CryptoError(
-            "Not an AIMVSEAL object: missing magic. An object uploaded by \
+            "Not an IRONSEAL object: missing magic. An object uploaded by \
              a version before 4.3.0 is stored as plaintext and needs no key."
                 .to_string(),
         ));
@@ -230,6 +239,38 @@ mod tests {
         assert_eq!(open(&sealed, pass()).unwrap(), b"shared model");
     }
 
+    /// The 5.0 rename changed the magic. Every object already in a bucket
+    /// still carries the 4.x one, so reading must accept both — otherwise the
+    /// rename silently orphans them, and `is_sealed` reporting `false` would
+    /// hand the caller raw ciphertext as if it were a model.
+    #[test]
+    fn test_objects_sealed_before_the_rename_still_open() {
+        let sealed = seal(b"sealed by 4.x", pass()).unwrap();
+
+        // Rewrite the header to exactly what 4.6.x wrote. Only the magic
+        // differed; everything after it is byte-identical.
+        let mut legacy = sealed.clone();
+        legacy[..LEGACY_MAGIC.len()].copy_from_slice(LEGACY_MAGIC);
+
+        assert!(
+            is_sealed(&legacy),
+            "a 4.x object must not read as plaintext"
+        );
+        assert_eq!(
+            open(&legacy, pass()).unwrap(),
+            b"sealed by 4.x",
+            "a 4.x sealed object must still decrypt under 5.0"
+        );
+    }
+
+    /// New objects carry the new magic — the compatibility above is read-only.
+    #[test]
+    fn test_seal_writes_the_current_magic() {
+        let sealed = seal(b"payload", pass()).unwrap();
+        assert_eq!(&sealed[..MAGIC.len()], MAGIC);
+        assert_ne!(&sealed[..LEGACY_MAGIC.len()], LEGACY_MAGIC);
+    }
+
     #[test]
     fn test_is_sealed_discriminates_legacy_plaintext() {
         assert!(is_sealed(&seal(b"x", pass()).unwrap()));
@@ -242,7 +283,7 @@ mod tests {
     fn test_legacy_plaintext_gets_an_actionable_error() {
         let err = open(b"raw plaintext model bytes", pass()).unwrap_err();
         let msg = err.to_string();
-        assert!(msg.contains("AIMVSEAL"), "unhelpful message: {msg}");
+        assert!(msg.contains("IRONSEAL"), "unhelpful message: {msg}");
     }
 
     #[test]

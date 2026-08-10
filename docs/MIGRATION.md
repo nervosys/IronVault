@@ -97,16 +97,36 @@ exactly where they were. No export/import step, no re-encryption.
 
 ### Your encrypted files still open
 
-The on-disk and on-wire format identifiers are deliberately **not** renamed:
+The format identifiers are renamed, but 5.0 reads both spellings:
 
-- `AIMVSEAL` — the 8-byte magic on every sealed cloud object and federation transfer
-- `AIMV` — the 4-byte magic on every chunked-encrypted model
-- `aimv://` — the URI scheme, and `aimv:` the JSON-LD term prefix
+| | 4.x | 5.0 writes | 5.0 reads |
+| --- | --- | --- | --- |
+| Envelope magic | `AIMVSEAL` | `IRONSEAL` | both |
+| Stream magic | `AIMV` | `IRNV` | both |
+| URI scheme | `aimv://` | `iv://` | both |
+| Bundle extension | `.aimvault` | `.ivault` | any |
 
-Renaming these would not rename the bytes already written to your bucket and
-your disk; it would just stop 5.0 from recognising them. Sealed objects would
-read as plaintext and encrypted models would be rejected as corrupt. Any
-`aimv://` URI you have stored remains valid.
+Nothing rewrites an existing object, so your bucket and your vault will hold a
+mix of old and new magic indefinitely — and every object in them opens. There
+is no conversion step and nothing to run. Objects you sealed with 4.x keep
+decrypting; models encrypted with 4.x keep decrypting; `aimv://` URIs you have
+stored in manifests or notebooks keep parsing.
+
+The only one-way part is what 5.0 *writes*. New objects carry `IRONSEAL`, new
+chunked models carry `IRNV`, and `Display` emits `iv://`. **A 4.x binary cannot
+read a 5.0 object** — compatibility runs forward only. If some machines are
+still on 4.x, upgrade the readers before the writers.
+
+This matters most for **federation**, where the two ends are separate
+installs. A 5.0 node syncing to a 4.x peer sends `IRONSEAL`, which the 4.x peer
+does not recognise; with `seal_transfers` on it refuses the transfer as an
+attempted downgrade rather than storing anything, so the failure is safe but
+the error message will point at sealing rather than at the version skew.
+Upgrade every peer in a federation before syncing between them. The reverse
+direction — a 4.x node sending to a 5.0 peer — works, because 5.0 reads both.
+
+The JSON-LD term prefix changes from `aimv:` to `iv:` with no compatibility
+shim, since it is regenerated on every request rather than stored.
 
 ## systemd deployments
 

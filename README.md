@@ -60,7 +60,7 @@ curl  http://host:8080/api/v1/...     # REST (see openapi.yaml)
 - **Idempotent reads:** `list`, `get`, `search`, `versions`, `lineage`, `stats`, `compliance`, `introspect`, `*/show`, `*/list` are side-effect free.
 - **Destructive ops gated:** `delete`, `policy apply`, `gc`, `vault-import` accept `--dry-run` (where applicable) or require an explicit name argument.
 - **Self-describing errors:** error JSON includes `code`, `message`, and `hint`; never just a string.
-- **URIs:** Vault resources are addressable via the [`aimv://`](docs/UTILITIES.md) scheme — agents can pass `aimv://vault/model@version` between tools.
+- **URIs:** Vault resources are addressable via the [`iv://`](docs/UTILITIES.md) scheme — agents can pass `iv://vault/model@version` between tools.
 - **No surprise network:** the CLI never phones home except `iv pull` (explicit), `iv cloud` (explicit), and opt-in telemetry — off by default, honors `DO_NOT_TRACK=1`, and when enabled posts to `https://telemetry.nervosys.ai/v1/events` unless you point `telemetry.endpoint` elsewhere. Two events, no model names or paths: see [docs/TELEMETRY.md](docs/TELEMETRY.md).
 
 ### Three-surface coverage matrix
@@ -240,7 +240,7 @@ All features below are fully implemented, tested, and exposed via both CLI and l
 | Model download       | `iv pull`            | HuggingFace, Ollama, URLs (+ SHA-256 verification) |
 | Federation           | `iv federation`      | Vector-clock peer sync; opt-in, sealed in transit  |
 | RAG / Knowledge base | `iv database`        | SQLite / Sled / Qdrant backends                    |
-| `aimv://` URI scheme | library               | Agent-addressable vault resources                  |
+| `iv://` URI scheme | library               | Agent-addressable vault resources                  |
 | Agent introspection  | `iv introspect`      | JSON / YAML / JSON-LD CLI schema                   |
 
 > Full machine-readable surface (29 features, all CLI subcommands, ontology, OpenAPI, MCP manifest) is in [`.well-known/`](.well-known/) and [`AGENTS.md`](AGENTS.md).

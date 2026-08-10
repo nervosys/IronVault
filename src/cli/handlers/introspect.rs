@@ -31,21 +31,21 @@ pub fn handle_introspect(format: String, compact: bool) -> Result<()> {
             ld.insert(
                 "@context".to_string(),
                 json!({
-                    // Must match the `aimv` term in `.well-known/ontology.jsonld`.
+                    // Must match the `iv` term in `.well-known/ontology.jsonld`.
                     // It previously pointed at a different host, so the CLI's
                     // JSON-LD and the published ontology minted distinct IRIs
                     // for the same terms — consumers that joined them saw two
                     // unrelated vocabularies.
-                    "aimv": "https://nervosys.com/ontology/aimv#",
+                    "iv": "https://nervosys.com/ontology/iv#",
                     "schema": "https://schema.org/",
                     "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
                 }),
             );
-            ld.insert("@type".to_string(), json!("aimv:CLISchema"));
-            ld.insert("@id".to_string(), json!("aimv://cli/introspect"));
+            ld.insert("@type".to_string(), json!("iv:CLISchema"));
+            ld.insert("@id".to_string(), json!("iv://cli/introspect"));
             if let Value::Object(map) = schema {
                 for (k, v) in map {
-                    ld.insert(format!("aimv:{k}"), v);
+                    ld.insert(format!("iv:{k}"), v);
                 }
             }
             let output = serde_json::to_string_pretty(&Value::Object(ld))

@@ -31,15 +31,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **systemd installs use `ironvault`, not `iv`.** The unit is `ironvault-server.service`, the service user and group are `ironvault`, state lives in `/var/lib/ironvault`, and credentials in `/etc/ironvault/server.env`. Only the executable is `iv` — a two-letter system user and a `/etc/iv` are needlessly collision-prone for no readability gain. Existing installs are not migrated in place; see `docs/MIGRATION.md`.
 
-### Unchanged, deliberately
+- **The format and interface identifiers are renamed too — write-new, read-both.**
 
-- **`AIMVSEAL`, `AIMV`, and `aimv://` keep their names.** These are format and interface identifiers that the rename does not touch:
+  | | 4.x | 5.0 writes | 5.0 reads |
+  |---|---|---|---|
+  | Envelope magic | `AIMVSEAL` | `IRONSEAL` | both |
+  | Stream magic | `AIMV` | `IRNV` | both |
+  | URI scheme | `aimv://` | `iv://` | both |
+  | JSON-LD prefix | `aimv:` | `iv:` | — |
+  | Bundle extension | `.aimvault` | `.ivault` | any |
 
-  - `AIMVSEAL` is the 8-byte magic at the head of every sealed cloud object and every federation transfer.
-  - `AIMV` is the 4-byte magic at the head of every chunked-encrypted model on disk.
-  - `aimv://` is the published URI scheme, and `aimv:` the JSON-LD term prefix in `.well-known/ontology.jsonld`.
+  Renaming a magic byte string does not rename the bytes already written. Every object sealed into an S3 bucket, every chunked model encrypted inside an existing vault, and every `aimv://` URI stored in someone's manifest still carries the 4.x spelling, and nothing in this project ever rewrites them in place. So the constants move but the readers accept both: `is_sealed`, `open`, `StreamHeader::from_bytes`, `is_chunked_format`, and `IvUri::parse` all take either form, while `seal`, `to_bytes`, and `Display` emit only the new one. A bucket or vault may hold a mix indefinitely and every object in it opens.
 
-  Renaming the first two would not rename the bytes already written: `is_sealed` would report plaintext for sealed objects, and `is_chunked_format` would reject encrypted models as corrupt. That is a data migration wearing a find-and-replace costume. The third would invalidate every stored `aimv://` reference for cosmetic gain. All three now carry comments saying so, so this does not get "finished" later by someone tidying up.
+  Four tests pin this rather than leaving it to comments: a 4.x-sealed object must still decrypt, a 4.x chunked model must still decrypt, an `aimv://` URI must still parse, and — the other half, which is what stops the compatibility from quietly becoming the behaviour — new writes must carry the new magic and `Display` must never emit the old scheme.
+
+  `.aimvault` → `.ivault` is free: the extension was documented convention, never checked in code.
 
 - **The Rust vault directory does not move.** The XDG layout was already name-neutral (`~/.config/ai/models/`, `~/.local/share/ai/models/`), so existing vaults are found exactly where they were. Only the *Python* package had a name-derived directory; see `docs/MIGRATION.md` for that one.
 

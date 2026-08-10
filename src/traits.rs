@@ -62,20 +62,20 @@ impl fmt::Display for VaultState {
     }
 }
 
-/// Parsed AIMV URI with typed components.
+/// Parsed IronVault URI with typed components.
 ///
-/// Format: `aimv://{vault}/{model}@{version}/{resource}?{query}`
+/// Format: `iv://{vault}/{model}@{version}/{resource}?{query}`
 ///
 /// Examples:
-/// - `aimv://` — root (list vaults)
-/// - `aimv://default/` — vault "default"
-/// - `aimv://default/llama-3` — model latest
-/// - `aimv://default/llama-3@3` — model version 3
-/// - `aimv://default/llama-3@3/card` — model card
-/// - `aimv://default/_stats` — vault statistics
-/// - `aimv://default/_events?since=2026-01-01` — filtered event log
+/// - `iv://` — root (list vaults)
+/// - `iv://default/` — vault "default"
+/// - `iv://default/llama-3` — model latest
+/// - `iv://default/llama-3@3` — model version 3
+/// - `iv://default/llama-3@3/card` — model card
+/// - `iv://default/_stats` — vault statistics
+/// - `iv://default/_events?since=2026-01-01` — filtered event log
 #[derive(Debug, Clone, PartialEq)]
-pub struct AimvUri {
+pub struct IvUri {
     /// Vault name (None for root).
     pub vault: Option<String>,
     /// Model name (None for vault-level resources).
@@ -88,33 +88,41 @@ pub struct AimvUri {
     pub query: HashMap<String, String>,
 }
 
-impl AimvUri {
-    /// URI scheme prefix.
-    ///
-    /// Deliberately **not** renamed for IronVault. The scheme is a published
-    /// interface: it appears in `.well-known/ontology.jsonld`, in the JSON-LD
-    /// `aimv:` term prefix, and in URIs that callers have stored. Renaming it
-    /// would silently invalidate every `aimv://` reference in the wild for
-    /// cosmetic gain. A new scheme, if it is ever wanted, belongs alongside
-    /// this one rather than in place of it.
-    pub const SCHEME: &'static str = "aimv://";
+impl IvUri {
+    /// URI scheme prefix, emitted from 5.0 on.
+    pub const SCHEME: &'static str = "iv://";
 
-    /// Parse an AIMV URI string.
+    /// The 4.x scheme, still accepted by [`parse`](Self::parse).
+    ///
+    /// Callers have `aimv://` URIs stored in manifests, notebooks, and
+    /// databases. Emitting the new scheme is free; refusing to *read* the old
+    /// one would invalidate all of them, so parsing accepts both.
+    pub const LEGACY_SCHEME: &'static str = "aimv://";
+
+    /// Parse an IronVault URI string.
+    ///
+    /// Accepts both `iv://` and the 4.x `aimv://`.
     ///
     /// # Examples
     /// ```
-    /// use ironvault::traits::AimvUri;
+    /// use ironvault::traits::IvUri;
     ///
-    /// let uri = AimvUri::parse("aimv://default/llama-3@3/card").unwrap();
+    /// let uri = IvUri::parse("iv://default/llama-3@3/card").unwrap();
     /// assert_eq!(uri.vault, Some("default".into()));
     /// assert_eq!(uri.model, Some("llama-3".into()));
     /// assert_eq!(uri.version, Some(3));
     /// assert_eq!(uri.resource, Some("card".into()));
+    ///
+    /// // 4.x URIs still parse.
+    /// assert_eq!(IvUri::parse("aimv://default/llama-3@3/card").unwrap(), uri);
     /// ```
     pub fn parse(uri: &str) -> Result<Self> {
-        let stripped = uri.strip_prefix(Self::SCHEME).ok_or_else(|| {
-            VaultError::InvalidInput(format!("URI must start with '{}': {}", Self::SCHEME, uri))
-        })?;
+        let stripped = uri
+            .strip_prefix(Self::SCHEME)
+            .or_else(|| uri.strip_prefix(Self::LEGACY_SCHEME))
+            .ok_or_else(|| {
+                VaultError::InvalidInput(format!("URI must start with '{}': {}", Self::SCHEME, uri))
+            })?;
 
         // Split off query string
         let (path, query) = if let Some(idx) = stripped.find('?') {
@@ -186,7 +194,7 @@ impl AimvUri {
     }
 }
 
-impl fmt::Display for AimvUri {
+impl fmt::Display for IvUri {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(Self::SCHEME)?;
 
@@ -928,8 +936,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_aimv_uri_root() {
-        let uri = AimvUri::parse("aimv://").unwrap();
+    fn test_iv_uri_root() {
+        let uri = IvUri::parse("iv://").unwrap();
         assert_eq!(uri.vault, None);
         assert_eq!(uri.model, None);
         assert_eq!(uri.version, None);
@@ -937,31 +945,31 @@ mod tests {
     }
 
     #[test]
-    fn test_aimv_uri_vault() {
-        let uri = AimvUri::parse("aimv://default/").unwrap();
+    fn test_iv_uri_vault() {
+        let uri = IvUri::parse("iv://default/").unwrap();
         assert_eq!(uri.vault, Some("default".into()));
         assert_eq!(uri.model, None);
     }
 
     #[test]
-    fn test_aimv_uri_model_latest() {
-        let uri = AimvUri::parse("aimv://default/llama-3").unwrap();
+    fn test_iv_uri_model_latest() {
+        let uri = IvUri::parse("iv://default/llama-3").unwrap();
         assert_eq!(uri.vault, Some("default".into()));
         assert_eq!(uri.model, Some("llama-3".into()));
         assert_eq!(uri.version, None);
     }
 
     #[test]
-    fn test_aimv_uri_model_version() {
-        let uri = AimvUri::parse("aimv://default/llama-3@3").unwrap();
+    fn test_iv_uri_model_version() {
+        let uri = IvUri::parse("iv://default/llama-3@3").unwrap();
         assert_eq!(uri.vault, Some("default".into()));
         assert_eq!(uri.model, Some("llama-3".into()));
         assert_eq!(uri.version, Some(3));
     }
 
     #[test]
-    fn test_aimv_uri_with_resource() {
-        let uri = AimvUri::parse("aimv://default/llama-3@3/card").unwrap();
+    fn test_iv_uri_with_resource() {
+        let uri = IvUri::parse("iv://default/llama-3@3/card").unwrap();
         assert_eq!(uri.vault, Some("default".into()));
         assert_eq!(uri.model, Some("llama-3".into()));
         assert_eq!(uri.version, Some(3));
@@ -969,15 +977,15 @@ mod tests {
     }
 
     #[test]
-    fn test_aimv_uri_stats_resource() {
-        let uri = AimvUri::parse("aimv://default/_stats").unwrap();
+    fn test_iv_uri_stats_resource() {
+        let uri = IvUri::parse("iv://default/_stats").unwrap();
         assert_eq!(uri.vault, Some("default".into()));
         assert_eq!(uri.model, Some("_stats".into()));
     }
 
     #[test]
-    fn test_aimv_uri_with_query() {
-        let uri = AimvUri::parse("aimv://default/_events?since=2026-01-01&limit=100").unwrap();
+    fn test_iv_uri_with_query() {
+        let uri = IvUri::parse("iv://default/_events?since=2026-01-01&limit=100").unwrap();
         assert_eq!(uri.vault, Some("default".into()));
         assert_eq!(uri.model, Some("_events".into()));
         assert_eq!(uri.query.get("since"), Some(&"2026-01-01".into()));
@@ -985,15 +993,31 @@ mod tests {
     }
 
     #[test]
-    fn test_aimv_uri_roundtrip() {
-        let uri = AimvUri::parse("aimv://default/llama-3@3/card").unwrap();
+    fn test_iv_uri_roundtrip() {
+        let uri = IvUri::parse("iv://default/llama-3@3/card").unwrap();
         let s = uri.to_string();
-        assert_eq!(s, "aimv://default/llama-3@3/card");
+        assert_eq!(s, "iv://default/llama-3@3/card");
     }
 
     #[test]
-    fn test_aimv_uri_invalid_scheme() {
-        assert!(AimvUri::parse("http://default/").is_err());
+    fn test_iv_uri_invalid_scheme() {
+        assert!(IvUri::parse("http://default/").is_err());
+    }
+
+    /// 5.0 renamed the scheme to `iv://`. URIs written by 4.x are stored in
+    /// manifests and databases that nothing will rewrite, so parsing must keep
+    /// accepting `aimv://` — while `Display` emits only the new form.
+    #[test]
+    fn test_legacy_scheme_still_parses_but_is_not_emitted() {
+        let legacy = IvUri::parse("aimv://default/llama-3@3/card").unwrap();
+        let current = IvUri::parse("iv://default/llama-3@3/card").unwrap();
+        assert_eq!(legacy, current, "both schemes must parse identically");
+
+        assert_eq!(legacy.to_string(), "iv://default/llama-3@3/card");
+        assert!(
+            !legacy.to_string().starts_with("aimv://"),
+            "Display must emit the current scheme only"
+        );
     }
 
     #[test]
@@ -1084,9 +1108,9 @@ mod tests {
     }
 
     #[test]
-    fn test_aimv_uri_model_without_version_to_string() {
+    fn test_iv_uri_model_without_version_to_string() {
         // Covers line 194 — model without version in to_string()
-        let uri = AimvUri {
+        let uri = IvUri {
             vault: Some("default".into()),
             model: Some("llama-3".into()),
             version: None,
@@ -1094,15 +1118,15 @@ mod tests {
             query: HashMap::new(),
         };
         let s = uri.to_string();
-        assert_eq!(s, "aimv://default/llama-3");
+        assert_eq!(s, "iv://default/llama-3");
     }
 
     #[test]
-    fn test_aimv_uri_with_empty_value_query() {
+    fn test_iv_uri_with_empty_value_query() {
         // Covers line 217 — key-only query param (v.is_empty())
         let mut query = HashMap::new();
         query.insert("verbose".into(), String::new());
-        let uri = AimvUri {
+        let uri = IvUri {
             vault: Some("default".into()),
             model: Some("test".into()),
             version: None,
@@ -1115,10 +1139,10 @@ mod tests {
     }
 
     #[test]
-    fn test_aimv_uri_display_trait() {
-        let uri = AimvUri::parse("aimv://v1/m1@1").unwrap();
+    fn test_iv_uri_display_trait() {
+        let uri = IvUri::parse("iv://v1/m1@1").unwrap();
         let displayed = format!("{}", uri);
-        assert_eq!(displayed, "aimv://v1/m1@1");
+        assert_eq!(displayed, "iv://v1/m1@1");
     }
 
     #[test]
@@ -1324,8 +1348,8 @@ mod tests {
     }
 
     #[test]
-    fn test_aimv_uri_to_string_with_version_and_query() {
-        let uri = AimvUri {
+    fn test_iv_uri_to_string_with_version_and_query() {
+        let uri = IvUri {
             vault: Some("myvault".into()),
             model: Some("llama".into()),
             version: Some(3),
@@ -1338,7 +1362,7 @@ mod tests {
             },
         };
         let s = uri.to_string();
-        assert!(s.starts_with("aimv://"));
+        assert!(s.starts_with("iv://"));
         assert!(s.contains("myvault"));
         assert!(s.contains("llama"));
         assert!(s.contains("@3"));
@@ -1381,16 +1405,16 @@ mod tests {
     }
 
     #[test]
-    fn test_aimv_uri_too_many_segments() {
-        let result = AimvUri::parse("aimv://vault/model/resource/extra");
+    fn test_iv_uri_too_many_segments() {
+        let result = IvUri::parse("iv://vault/model/resource/extra");
         assert!(result.is_err());
         let err_msg = format!("{}", result.unwrap_err());
         assert!(err_msg.contains("too many path segments"));
     }
 
     #[test]
-    fn test_aimv_uri_invalid_version_number() {
-        let result = AimvUri::parse("aimv://vault/model@abc");
+    fn test_iv_uri_invalid_version_number() {
+        let result = IvUri::parse("iv://vault/model@abc");
         assert!(result.is_err());
         let err_msg = format!("{}", result.unwrap_err());
         assert!(err_msg.contains("Invalid version number"));
@@ -1582,7 +1606,7 @@ mod tests {
     #[test]
     fn test_parse_query_empty_key() {
         // Covers L173 — parse_query filters out empty keys
-        let uri = crate::traits::AimvUri::parse("aimv://vault/model?=value&good=yes").unwrap();
+        let uri = crate::traits::IvUri::parse("iv://vault/model?=value&good=yes").unwrap();
         // Empty key should be filtered out
         assert!(uri.query.contains_key("good"));
         assert!(!uri.query.contains_key(""));
