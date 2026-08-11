@@ -691,6 +691,10 @@ paths:
     get:
       summary: List supported conversion paths
       tags: [Conversion]
+      # Capability discovery, like /health and /openapi.json: the handler does
+      # not call require_auth, and this returns only which format pairs the
+      # binary supports — no vault data.
+      security: []
       responses:
         '200':
           description: Conversion paths
@@ -1606,6 +1610,10 @@ paths:
     get:
       summary: Return the CLI schema for agent bootstrapping
       tags: [Discovery]
+      # Bootstrapping happens before a caller has a token, so this is open by
+      # design — the handler takes no state and returns the CLI schema, which
+      # is derivable from the public binary.
+      security: []
       parameters:
         - name: format
           in: query

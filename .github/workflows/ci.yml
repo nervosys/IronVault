@@ -385,7 +385,13 @@ jobs:
     - name: Install mkdocs
       # mkdocs.yml declares the `minify` plugin, which is a separate package —
       # without it the build fails at config load, before any page is rendered.
-      run: pip install mkdocs-material mkdocs-minify-plugin
+      run: pip install mkdocs-material mkdocs-minify-plugin pyyaml
+
+    # docs/REST_API.md is derived from .well-known/openapi.yaml, so a spec
+    # change that skips regeneration is a stale page. Fail here rather than
+    # publish documentation that disagrees with the server.
+    - name: Check the REST API reference is current
+      run: python scripts/gen_api_reference.py --check
 
     - name: Build docs (strict)
       run: mkdocs build --strict

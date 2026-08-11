@@ -186,4 +186,5 @@ nav:
       - UV Integration: UV_INTEGRATION.md
       - Telemetry: TELEMETRY.md
       - Executive Summary: EXECUTIVE_SUMMARY.md
+  - REST API: REST_API.md
   - API Reference: api/ironvault/index.html
