@@ -42,3 +42,8 @@ yarn-error.log*
 # mkdocs build output (generated from ../docs/ via mkdocs build)
 /public/mkdocs/
 next-env.d.ts
+
+# written and re-added by `next dev` on every run, so they show up as untracked
+# after any local dev session (see generate-agent-files.js in the next package)
+/AGENTS.md
+/CLAUDE.md
