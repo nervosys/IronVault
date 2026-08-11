@@ -1,11 +1,12 @@
 //! Benchmarks for v1.5.0 modules — quantization, evaluation, scheduler, multi-vault.
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 use ironvault::{
     BackupFrequency, BackupManager, BackupSchedule, EvalRun, EvalStore, MetricResult, QuantMethod,
     QuantProfile, QuantProfileStore, VaultEntry, VaultRegistry,
 };
 use std::collections::BTreeMap;
+use std::hint::black_box;
 use tempfile::tempdir;
 
 // ── Quantization profile store ───────────────────────────────────────────────

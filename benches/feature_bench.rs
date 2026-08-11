@@ -1,7 +1,7 @@
 //! Benchmarks for v1.3–v1.5 feature modules: tags, signing, scanning, diff,
 //! lineage, access control, validation, policies, plugins, profiles, webhooks.
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use ironvault::access_control::{AclGuard, Role};
 use ironvault::diff::ModelDiffer;
 use ironvault::license_scan::LicenseScanner;
@@ -15,6 +15,7 @@ use ironvault::tags::{SearchQuery, TagStore};
 use ironvault::validation::ValidationStore;
 use ironvault::webhooks::{WebhookStore, WebhookTarget};
 use std::collections::BTreeMap;
+use std::hint::black_box;
 use tempfile::tempdir;
 
 fn now_iso() -> String {

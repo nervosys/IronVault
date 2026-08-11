@@ -1,12 +1,13 @@
 //! Vault operation benchmarks — store, retrieve, format detection, model card serialization
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use ironvault::crypto::FipsCrypto;
 use ironvault::formats::{ModelFormat, ModelMetadata};
 use ironvault::model_card::{
     Evaluation, IntendedUse, Metric, ModelCard, ModelDetails, TrainingData,
 };
 use ironvault::{Vault, VaultConfig};
+use std::hint::black_box;
 use tempfile::tempdir;
 
 fn create_test_vault() -> (tempfile::TempDir, Vault) {

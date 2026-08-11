@@ -43,7 +43,7 @@ jobs:
             asset_name: iv-darwin-arm64
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
@@ -106,7 +106,7 @@ jobs:
     # publish, and marked Latest. A draft is invisible to users until the
     # matrix is green.
     - name: Upload Release Asset (draft)
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         draft: true
         body: ${{ steps.changelog.outputs.body }}
@@ -137,7 +137,7 @@ jobs:
     needs: build-release
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
@@ -174,9 +174,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v7
       with:
         python-version: "3.12"
 
@@ -190,7 +190,7 @@ jobs:
         sccache: "true"
 
     - name: Upload wheels
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: wheels-${{ matrix.os }}
         path: dist
@@ -200,7 +200,7 @@ jobs:
     needs: build-release
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Build sdist
       uses: PyO3/maturin-action@v1
@@ -209,7 +209,7 @@ jobs:
         args: --out dist
 
     - name: Upload sdist
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: wheels-sdist
         path: dist
@@ -220,7 +220,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Download all wheels
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         pattern: wheels-*
         merge-multiple: true
