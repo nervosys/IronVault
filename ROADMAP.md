@@ -277,7 +277,7 @@ Native Rust-backed Python bindings replacing CLI-wrapper architecture.
   - `ModelMetadata` — builder-style constructor with description, framework, task, architecture, parameters
   - `ModelVersion` — read-only version snapshot (version, checkpoint_id, timestamp, format, size, checksum)
   - `ModelCard` — create, set_training_data, add_metric, add_metadata, to_json/to_yaml/to_markdown, from_json/from_yaml
-  - `sha256_hex()` — FIPS-compliant SHA-256 digest
+  - `sha256_hex()` — SHA-256 digest (FIPS-approved algorithm, unvalidated implementation)
   - `version()` — native library version string
 
 - [x] **Python `__init__.py` with native import + fallback**

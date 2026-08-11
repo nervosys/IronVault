@@ -134,6 +134,14 @@ fn default_blockchain_block_size() -> usize {
 /// Compliance and regulatory settings (FIPS mode, CVE scanning).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ComplianceSettings {
+    /// Declares a FIPS posture for reporting. **This does not enforce anything.**
+    ///
+    /// Nothing in the crate reads this field, and enabling it does not switch to
+    /// FIPS-approved primitives — the KDF is Argon2id either way, and the
+    /// implementations hold no CMVP certificate, so there is no FIPS mode to
+    /// enter. It is retained because removing it would break existing config
+    /// files. Treat it as a statement of intent, never as a control, and see
+    /// `compliance.rs` for what can actually be reported.
     pub fips_mode: bool,
     pub cve_scanning: bool,
     pub audit_retention_days: u32,

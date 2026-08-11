@@ -145,7 +145,7 @@ IronVault is a **production-ready**, **FIPS-approved algorithms** (not a CMVP-va
 ### Feature Completeness
 ```
 ✅ Core Features:        100% (all implemented)
-✅ Security Features:    100% (FIPS compliant)
+✅ Security Features:    100% (FIPS-approved algorithms; not a validated module)
 ✅ Utility Features:     100% (8 tools ready)
 ✅ Cloud Features:       100% (3 providers)
 ✅ RAG Features:         100% (full pipeline)

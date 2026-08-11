@@ -1,12 +1,25 @@
 //! IronVault - Universal secure vault for AI model formats
 //!
 //! A cross-platform, XDG-compliant secure storage system for Neural and Neurosymbolic AI models with:
-//! - FIPS 140-3 compliant encryption
-//! - CVE scanning and compliance
+//! - AES-256-GCM encryption with Argon2id key derivation
+//! - CVE scanning via `cargo-audit`, and compliance *reporting*
 //! - MITRE ATT&CK framework alignment
-//! - CMMC 2.0 compliance
+//! - Controls mapped to CMMC 2.0 Level 2 practices
 //! - Version control with complete checkpoint history
 //! - Format conversion capabilities
+//!
+//! # Compliance claims
+//!
+//! This crate is **not** a FIPS 140-3 validated cryptographic module, and is not
+//! CMMC certified — the latter certifies an organization, not software. It uses
+//! FIPS-approved algorithms (AES-256-GCM, SHA-256, Ed25519) but derives keys with
+//! Argon2id, which is not an approved KDF. See [`compliance`] for a report of the
+//! actual relationship to each framework, and `SECURITY.md` for the full picture.
+
+// The crate contains no `unsafe` today. This makes that a compile-time property
+// rather than a habit, which matters for software that parses untrusted binary
+// model files supplied by whoever uploaded them.
+#![forbid(unsafe_code)]
 
 pub mod access_control;
 #[cfg(feature = "api")]

@@ -312,7 +312,8 @@ echo $?  # Should return 0
 ```yaml
 # config.yaml
 compliance:
-  fips_mode: true  # Enforce FIPS-validated algorithms only
+  fips_mode: true  # Declarative only -- nothing reads this, and there is no
+                   # FIPS mode to enter; see SECURITY.md
   cve_scanning: true
   audit_retention_days: 90
 ```
@@ -322,7 +323,8 @@ compliance:
 **Required Controls**:
 - ✅ Access control (AC.3.018)
 - ✅ Identification and authentication (IA.3.080)
-- ✅ System and communications protection (SC.3.177, SC.3.191)
+- ⚠️ System and communications protection: SC.3.191 (data at rest) met;
+  SC.3.177 (FIPS-validated cryptography) **not met** — see SECURITY.md
 - ✅ Audit and accountability (AU.3.046, AU.3.049)
 
 **Verification**:

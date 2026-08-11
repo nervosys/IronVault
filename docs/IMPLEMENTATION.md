@@ -96,7 +96,7 @@ Metadata → Hash (SHA-256) → Version Control
 | FIPS 140-3    | Approved Algorithms | AES-256-GCM, SHA-256, Argon2id       |
 | CMMC AC.3.018 | Access Control      | Filesystem permissions (700/600)     |
 | CMMC IA.3.080 | Authenticators      | Encrypted key storage                |
-| CMMC SC.3.177 | FIPS Crypto         | All crypto operations FIPS-approved  |
+| CMMC SC.3.177 | FIPS Crypto         | Approved algorithms; **not** a validated module — not met |
 | CMMC SC.3.191 | Data at Rest        | AES-256-GCM encryption               |
 | CMMC AU.3.046 | Audit Logging       | Comprehensive event logging          |
 | CMMC AU.3.049 | Audit Protection    | Restrictive permissions, append-only |

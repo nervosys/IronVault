@@ -1,8 +1,19 @@
 """
-FIPS 140-3 Compliant Cryptographic Module
+FIPS-approved-algorithm cryptography (AES-256-GCM + PBKDF2)
 
-This module provides FIPS 140-3 compliant encryption/decryption for model storage.
-Uses AES-256-GCM with PBKDF2 key derivation.
+This module encrypts model storage using AES-256-GCM with PBKDF2-HMAC-SHA256 key
+derivation. Both are FIPS-*approved algorithms*, and unlike the Rust path's
+Argon2id, PBKDF2 is an approved KDF under SP 800-132.
+
+.. warning:: This is not a FIPS 140-3 validated module
+
+   FIPS 140-3 validates a cryptographic *module* through NIST's CMVP. This code
+   calls ``cryptography``/OpenSSL, whose validation status depends entirely on how
+   the host OpenSSL was built and whether it is running in FIPS mode -- neither of
+   which this module controls or checks. Using approved algorithms is necessary
+   for FIPS but nowhere near sufficient, so do not treat this module as evidence
+   of compliance. A real FIPS obligation needs a validated module and a documented
+   operating configuration.
 
 .. warning:: Crypto Compatibility
 
@@ -31,14 +42,21 @@ from cryptography.hazmat.backends import default_backend
 
 class FIPSCrypto:
     """
-    FIPS 140-3 compliant cryptographic operations.
-    
+    AES-256-GCM with PBKDF2-HMAC-SHA256, both FIPS-approved algorithms.
+
+    The class name is historical. Approved algorithms are necessary for FIPS but
+    not sufficient: validation applies to the module, and the module here is the
+    host's OpenSSL, whose status depends on how it was built and whether it runs
+    in FIPS mode. This class does not check either.
+
     Compliance Mappings:
-    - CMMC 2.0: SC.3.177 (Employ FIPS-validated cryptography)
+    - CMMC 2.0: contributes to SC.L2-3.13.8 (protect confidentiality at rest).
+      Does **not** satisfy SC.L2-3.13.11 (FIPS-validated cryptography for CUI),
+      which needs a validated module and a documented operating configuration.
     - MITRE ATT&CK: T1486 mitigation (Data Encrypted for Impact)
     """
-    
-    # FIPS 140-3 approved parameters
+
+    # FIPS-approved algorithm parameters
     KEY_SIZE = 32  # 256 bits for AES-256
     SALT_SIZE = 32  # 256 bits
     NONCE_SIZE = 12  # 96 bits (recommended for GCM)

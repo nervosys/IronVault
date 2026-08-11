@@ -965,6 +965,17 @@ fn validate_model_name(name: &str) -> Result<(), ApiError> {
             "Model name must contain only ASCII alphanumeric, hyphens, underscores, or dots",
         ));
     }
+    // Dots are allowed, so `.` and `..` pass the character check intact. Model
+    // names are index keys rather than path components today, which is the only
+    // reason that is harmless — but `federation_routes` already rejects `..`
+    // because it joins names to paths, and a future handler that does the same
+    // would inherit no protection from here. Rejecting all-dots names costs
+    // nothing and removes the sharp edge.
+    if name.chars().all(|c| c == '.') {
+        return Err(ApiError::bad_request(
+            "Model name must not consist only of dots",
+        ));
+    }
     Ok(())
 }
 
@@ -2134,6 +2145,42 @@ mod tests {
         let b = uuid_v4_simple();
         assert_ne!(a, b);
         assert!(!a.is_empty());
+    }
+
+    #[test]
+    fn model_names_that_are_only_dots_are_rejected() {
+        // Dots are legal in names, so `.` and `..` survive the character check
+        // intact. They are harmless while names are index keys rather than path
+        // components, but `federation_routes` rejects `..` for exactly this
+        // reason and this validator should not disagree with it.
+        for name in [".", "..", "...", "....."] {
+            assert!(
+                validate_model_name(name).is_err(),
+                "expected {name:?} to be rejected"
+            );
+        }
+    }
+
+    #[test]
+    fn ordinary_names_containing_dots_are_still_accepted() {
+        // The point is to reject names that are *only* dots, not to ban dots --
+        // version-like and file-like names stay valid.
+        for name in ["llama-3.1", "model.v2", "a.b.c", "resnet_50.onnx"] {
+            assert!(
+                validate_model_name(name).is_ok(),
+                "expected {name:?} to be accepted"
+            );
+        }
+    }
+
+    #[test]
+    fn separators_and_length_limits_still_apply() {
+        assert!(validate_model_name("../../etc/passwd").is_err());
+        assert!(validate_model_name("a/b").is_err());
+        assert!(validate_model_name("a\\b").is_err());
+        assert!(validate_model_name("").is_err());
+        assert!(validate_model_name(&"a".repeat(129)).is_err());
+        assert!(validate_model_name(&"a".repeat(128)).is_ok());
     }
 }
 

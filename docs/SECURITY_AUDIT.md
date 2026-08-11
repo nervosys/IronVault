@@ -242,7 +242,8 @@ src/rag.rs:96           similarities.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap
 ### CMMC 2.0 Level 2
 - [x] ✅ AC.3.018 - Access control
 - [x] ✅ IA.3.080 - Authenticator management
-- [x] ✅ SC.3.177 - FIPS-validated cryptography
+- [ ] ❌ SC.3.177 - FIPS-validated cryptography — **not met**. Uses FIPS-approved
+      algorithms but no CMVP-validated module, and Argon2id is not an approved KDF.
 - [x] ✅ SC.3.191 - Data at rest encryption
 - [x] ✅ AU.3.046 - Audit logging
 - [x] ✅ AU.3.049 - Audit protection

@@ -1,13 +1,19 @@
-//! FIPS 140-3 Compliant Cryptographic Module
+//! Vault cryptography: AES-256-GCM with Argon2id key derivation.
 //!
-//! This module provides FIPS 140-3 compliant encryption/decryption for model storage.
-//! Uses AES-256-GCM with Argon2id key derivation.
+//! **Not a FIPS 140-3 validated cryptographic module.** FIPS 140-3 validates a
+//! module through NIST's CMVP; these implementations hold no certificate, and
+//! Argon2id is not an approved KDF in any case — SP 800-132 approves PBKDF2.
+//! Argon2id is used deliberately: it is materially stronger against
+//! GPU-accelerated cracking, which is the right trade for most deployments but
+//! does place the KDF outside FIPS. See `compliance.rs`, which reports this
+//! relationship rather than asserting a determination.
 //!
-//! Security Controls:
-//! - NIST SP 800-38D (GCM mode)
-//! - NIST SP 800-63B (Password recommendations)
-//! - FIPS 197 (AES)
-//! - RFC 9106 (Argon2)
+//! Standards followed:
+//! - FIPS 197 (AES) — approved algorithm
+//! - NIST SP 800-38D (GCM mode) — approved mode
+//! - FIPS 180-4 (SHA-256) — approved algorithm
+//! - RFC 9106 (Argon2) — not a FIPS standard
+//! - NIST SP 800-63B (password recommendations)
 
 pub mod compression;
 pub mod streaming;
@@ -34,11 +40,25 @@ pub const NONCE_SIZE: usize = 12;
 /// Size of salt for key derivation
 pub const SALT_SIZE: usize = 32;
 
-/// FIPS 140-3 compliant cryptographic operations
+/// Vault cryptographic operations: AES-256-GCM with Argon2id key derivation.
 ///
-/// Compliance Mappings:
-/// - CMMC 2.0: SC.3.177 (Employ FIPS-validated cryptography)
-/// - MITRE ATT&CK: T1486 mitigation (Data Encrypted for Impact)
+/// **The name is historical and does not denote FIPS validation.** Renaming it
+/// is a breaking change to a published API, so it waits for the next major
+/// version; the accurate description is this doc comment.
+///
+/// What is and is not FIPS here:
+/// - AES-256-GCM (FIPS 197, SP 800-38D) and SHA-256 (FIPS 180-4) are
+///   FIPS-*approved algorithms*
+/// - the implementations hold no CMVP certificate, so this is not a
+///   FIPS-*validated module*
+/// - Argon2id is not an approved KDF at all; SP 800-132 approves PBKDF2
+///
+/// Compliance mappings:
+/// - MITRE ATT&CK: T1486 mitigation (Data Encrypted for Impact), T1005 (Data
+///   from Local System)
+/// - CMMC 2.0: contributes to SC.L2-3.13.8 (protect confidentiality at rest).
+///   It does **not** satisfy SC.L2-3.13.11, which requires FIPS-validated
+///   cryptography for CUI — see `compliance.rs`.
 pub struct FipsCrypto {
     argon2: Argon2<'static>,
 }
@@ -74,7 +94,11 @@ impl SecureKey {
 impl FipsCrypto {
     /// Create new FIPS crypto instance with recommended parameters
     pub fn new() -> Result<Self> {
-        // Argon2id with FIPS 140-3 / OWASP recommended parameters
+        // Argon2id at OWASP-recommended parameters. Deliberately *not* FIPS:
+        // SP 800-132 approves PBKDF2 for password-based derivation, not Argon2,
+        // so this KDF sits outside FIPS no matter how it is implemented. It is
+        // used anyway because it is materially stronger against GPU-accelerated
+        // cracking; `compliance.rs` reports the consequence honestly.
         let params = ParamsBuilder::new()
             .m_cost(65536) // 64 MiB memory
             .t_cost(3) // 3 iterations
