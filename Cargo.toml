@@ -1,10 +1,10 @@
 [package]
 name = "ai-model-vault"
-version = "4.6.0"
+version = "4.6.1"
 edition = "2021"
 rust-version = "1.89"
 authors = ["NERVOSYS AI Team"]
-description = "Universal cross-platform XDG-compliant secure vault for AI model formats (Neural and Neurosymbolic)"
+description = "DEPRECATED - renamed to `ironvault`. This crate is no longer maintained; 4.6.1 is identical to 4.6.0 apart from this notice."
 license = "AGPL-3.0-or-later"
 repository = "https://github.com/nervosys/AIModelVault"
 homepage = "https://github.com/nervosys/AIModelVault"

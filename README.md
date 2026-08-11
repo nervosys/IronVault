@@ -1,3 +1,22 @@
+> [!IMPORTANT]
+> **This crate has been renamed to [`ironvault`](https://crates.io/crates/ironvault).**
+>
+> `ai-model-vault` is no longer maintained. Version 4.6.1 is identical in code to
+> 4.6.0 and exists only to carry this notice; nothing will break if you stay on it,
+> but no further releases will be made under this name.
+>
+> To move:
+>
+> ```toml
+> # Cargo.toml
+> ironvault = "5"
+> ```
+>
+> The CLI binary is now `iv` (was `aim`), and the repository moved to
+> [nervosys/IronVault](https://github.com/nervosys/IronVault). See the
+> [migration guide](https://github.com/nervosys/IronVault/blob/master/docs/MIGRATION.md) --
+> existing vaults are read without conversion.
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/nervosys/AIModelVault/master/media/banner.png" alt="AI Model Vault — Secure Deployment Hub" width="900">
 </p>
