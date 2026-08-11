@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { FeatureCard } from "@/components/DocElements";
 
 export default function DocsIndex() {

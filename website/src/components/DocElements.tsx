@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ReactNode } from "react";
 
 type CodeBlockProps = {
@@ -76,7 +77,9 @@ export function FeatureCard({ icon, title, description, href }: FeatureCardProps
   );
 
   if (href) {
-    const Link = require("next/link").default;
+    // Statically imported above. This was a `require("next/link").default`
+    // inside the component, which defeats bundling and tree-shaking and is a
+    // CommonJS call in an ES module.
     return <Link href={href}>{content}</Link>;
   }
 

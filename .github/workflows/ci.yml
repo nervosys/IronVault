@@ -389,3 +389,36 @@ jobs:
 
     - name: Build docs (strict)
       run: mkdocs build --strict
+
+  website:
+    name: Website
+    runs-on: ubuntu-latest
+
+    # The website had no CI job at all, which is why its linter drifted to 866
+    # problems unnoticed and a `require()` call sat in a component. Building it
+    # here means a broken page fails the PR rather than the deploy.
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up Node
+      uses: actions/setup-node@v6
+      with:
+        node-version: "22"
+        cache: npm
+        cache-dependency-path: website/package-lock.json
+
+    - name: Install
+      working-directory: website
+      run: npm ci
+
+    - name: Lint
+      working-directory: website
+      run: npm run lint
+
+    - name: Type-check
+      working-directory: website
+      run: npx tsc --noEmit
+
+    - name: Build
+      working-directory: website
+      run: npm run build
