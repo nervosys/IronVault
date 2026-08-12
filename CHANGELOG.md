@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.1.1] - 2026-08-12
+
+### Fixed
+
+- **`/api/v1/openapi.json` declared version `1.3.0`.** The served spec built its
+  `info.version` from a string literal that was last updated in 1.x, so every
+  client generated from the live endpoint — the discovery path this project
+  points agents at — was told it was talking to a 1.3.0 server while the crate
+  shipped 5.x and then 6.x. It now comes from `CARGO_PKG_VERSION`.
+
+  This is the same failure as the 5.1.0 spec drift, one field over: the
+  `openapi_drift_test` suite added then compares *paths* between the served
+  router and `.well-known/openapi.yaml`, and never looked at `info.version`,
+  which is how a five-major-version discrepancy survived directly underneath it.
+  A test now pins both specs to the crate version.
+
+  Found by curling `/api/v1/openapi.json` on the published 6.1.0 binary while
+  verifying the release, rather than by reading the release job's green tick.
+
 ## [6.1.0] - 2026-08-12
 
 ### Changed

@@ -371,3 +371,39 @@ fn the_exemption_list_stays_small_and_real() {
         NOT_REST_RESOURCES.len()
     );
 }
+
+/// The served spec and the checked-in spec must both declare the crate version.
+///
+/// `openapi.rs` hard-coded `"1.3.0"` from 1.x until 6.1, so `/api/v1/openapi.json`
+/// told every client generated from it that it was talking to a 1.3.0 server
+/// while the crate went to 6.0. The path-drift tests above never looked at
+/// `info.version`, which is exactly how it survived five major releases.
+#[test]
+fn both_specs_declare_the_crate_version() {
+    let crate_version = env!("CARGO_PKG_VERSION");
+
+    let served = ironvault::api::openapi::openapi_spec();
+    let served_version = served
+        .get("info")
+        .and_then(|i| i.get("version"))
+        .and_then(|v| v.as_str())
+        .expect("served spec has info.version");
+    assert_eq!(
+        served_version, crate_version,
+        "the spec served at /api/v1/openapi.json declares {served_version} but the crate is          {crate_version}; `info.version` in src/api/openapi.rs must come from CARGO_PKG_VERSION"
+    );
+
+    let raw = std::fs::read_to_string(manifest_dir().join(".well-known/openapi.yaml"))
+        .expect("openapi.yaml is readable");
+    let doc: serde_yaml_ng::Value =
+        serde_yaml_ng::from_str(&raw).expect("openapi.yaml must be valid YAML");
+    let file_version = doc
+        .get("info")
+        .and_then(|i| i.get("version"))
+        .and_then(|v| v.as_str())
+        .expect("openapi.yaml has info.version");
+    assert_eq!(
+        file_version, crate_version,
+        ".well-known/openapi.yaml declares {file_version} but the crate is {crate_version};          bump it with the release"
+    );
+}
