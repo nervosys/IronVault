@@ -243,7 +243,7 @@ impl fmt::Display for IvUri {
 /// Crypto operations — encrypt, decrypt, hash, derive keys.
 ///
 /// Implementations:
-/// - `FipsCrypto` (default: AES-256-GCM + Argon2id)
+/// - `VaultCrypto` (default: AES-256-GCM + Argon2id)
 /// - Test mocks
 pub trait CryptoProvider: Send + Sync {
     /// Derive an encryption key from a passphrase.
@@ -1147,9 +1147,9 @@ mod tests {
 
     #[test]
     fn test_crypto_provider_hash_hex() {
-        // Covers line 256 — hash_hex default implementation via FipsCrypto
-        use crate::crypto::FipsCrypto;
-        let crypto = FipsCrypto::new().unwrap();
+        // Covers line 256 — hash_hex default implementation via VaultCrypto
+        use crate::crypto::VaultCrypto;
+        let crypto = VaultCrypto::new().unwrap();
         let hex_hash = crypto.hash_hex(b"hello");
         assert_eq!(hex_hash.len(), 64);
         assert!(hex_hash.chars().all(|c| c.is_ascii_hexdigit()));

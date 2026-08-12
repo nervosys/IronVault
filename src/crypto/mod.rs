@@ -42,9 +42,10 @@ pub const SALT_SIZE: usize = 32;
 
 /// Vault cryptographic operations: AES-256-GCM with Argon2id key derivation.
 ///
-/// **The name is historical and does not denote FIPS validation.** Renaming it
-/// is a breaking change to a published API, so it waits for the next major
-/// version; the accurate description is this doc comment.
+/// Named `FipsCrypto` until 6.1. That name asserted a validation this crate has
+/// never held, on the one type whose rustdoc lands in front of anyone
+/// evaluating the cryptography. The old name survives as a deprecated alias, so
+/// nothing downstream breaks.
 ///
 /// What is and is not FIPS here:
 /// - AES-256-GCM (FIPS 197, SP 800-38D) and SHA-256 (FIPS 180-4) are
@@ -59,9 +60,24 @@ pub const SALT_SIZE: usize = 32;
 /// - CMMC 2.0: contributes to SC.L2-3.13.8 (protect confidentiality at rest).
 ///   It does **not** satisfy SC.L2-3.13.11, which requires FIPS-validated
 ///   cryptography for CUI — see `compliance.rs`.
-pub struct FipsCrypto {
+pub struct VaultCrypto {
     argon2: Argon2<'static>,
 }
+
+/// Former name of [`VaultCrypto`], kept so 5.x and 6.0 code still compiles.
+///
+/// An alias rather than a removal: renaming a public type is only breaking if
+/// the old name disappears, and there was no reason to make every downstream
+/// caller edit for a rename that is about honesty in the *name*, not a change
+/// in behaviour. The type behind it is identical.
+#[deprecated(
+    since = "6.1.0",
+    note = "renamed to `VaultCrypto`. The old name implied FIPS 140-3 validation that this \
+            crate does not hold — it uses FIPS-approved AES-256-GCM and SHA-256, but the \
+            implementations carry no CMVP certificate and Argon2id is not an approved KDF. \
+            Behaviour is unchanged; only the name was wrong."
+)]
+pub type FipsCrypto = VaultCrypto;
 
 /// Secure key container that zeroizes on drop
 #[derive(Clone, ZeroizeOnDrop)]
@@ -91,8 +107,8 @@ impl SecureKey {
     }
 }
 
-impl FipsCrypto {
-    /// Create new FIPS crypto instance with recommended parameters
+impl VaultCrypto {
+    /// Create a crypto instance with the recommended Argon2id parameters.
     pub fn new() -> Result<Self> {
         // Argon2id at OWASP-recommended parameters. Deliberately *not* FIPS:
         // SP 800-132 approves PBKDF2 for password-based derivation, not Argon2,
@@ -122,9 +138,10 @@ impl FipsCrypto {
     /// # Returns
     /// Tuple of (encryption_key, salt)
     ///
-    /// # Compliance
-    /// - FIPS 140-3: Approved key derivation
+    /// # Standards
     /// - RFC 9106: Argon2 password hashing
+    /// - **Not** SP 800-132: that approves PBKDF2, not Argon2, so this
+    ///   derivation is outside FIPS by construction
     pub fn derive_key(
         &self,
         mut passphrase: Vec<u8>,
@@ -252,11 +269,11 @@ impl FipsCrypto {
     }
 }
 
-/// Note: `FipsCrypto::default()` panics if RNG initialization fails.
-/// Prefer `FipsCrypto::new()` which returns `Result` for fallible creation.
-impl Default for FipsCrypto {
+/// Note: `VaultCrypto::default()` panics if RNG initialization fails.
+/// Prefer `VaultCrypto::new()` which returns `Result` for fallible creation.
+impl Default for VaultCrypto {
     fn default() -> Self {
-        Self::new().expect("Failed to create FipsCrypto: RNG unavailable")
+        Self::new().expect("Failed to create VaultCrypto: RNG unavailable")
     }
 }
 
@@ -266,14 +283,14 @@ impl Default for FipsCrypto {
 /// - CMMC AC.3.018: Control connection of mobile devices
 /// - CMMC IA.3.080: Protect authenticators
 pub struct KeyManager {
-    crypto: FipsCrypto,
+    crypto: VaultCrypto,
 }
 
 impl KeyManager {
     /// Create new key manager
     pub fn new() -> Result<Self> {
         Ok(Self {
-            crypto: FipsCrypto::new()?,
+            crypto: VaultCrypto::new()?,
         })
     }
 
@@ -325,29 +342,29 @@ impl Default for KeyManager {
 
 // ── Trait implementation ─────────────────────────────────────
 
-impl crate::traits::CryptoProvider for FipsCrypto {
+impl crate::traits::CryptoProvider for VaultCrypto {
     fn derive_key(
         &self,
         passphrase: Vec<u8>,
         salt: Option<Vec<u8>>,
     ) -> Result<(SecureKey, Vec<u8>)> {
-        FipsCrypto::derive_key(self, passphrase, salt)
+        VaultCrypto::derive_key(self, passphrase, salt)
     }
 
     fn encrypt(&self, data: &[u8], key: &SecureKey) -> Result<Vec<u8>> {
-        FipsCrypto::encrypt(self, data, key)
+        VaultCrypto::encrypt(self, data, key)
     }
 
     fn decrypt(&self, encrypted_data: &[u8], key: &SecureKey) -> Result<Vec<u8>> {
-        FipsCrypto::decrypt(self, encrypted_data, key)
+        VaultCrypto::decrypt(self, encrypted_data, key)
     }
 
     fn hash(&self, data: &[u8]) -> Vec<u8> {
-        FipsCrypto::hash_sha256(data)
+        VaultCrypto::hash_sha256(data)
     }
 
     fn random_bytes(&self, length: usize) -> Vec<u8> {
-        FipsCrypto::generate_random(self, length)
+        VaultCrypto::generate_random(self, length)
     }
 }
 
@@ -357,7 +374,7 @@ mod tests {
 
     #[test]
     fn test_encrypt_decrypt() {
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let passphrase = b"test_passphrase_with_sufficient_entropy".to_vec();
         let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -370,7 +387,7 @@ mod tests {
 
     #[test]
     fn test_key_derivation_deterministic() {
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let passphrase = b"test_passphrase".to_vec();
         let salt = vec![0u8; SALT_SIZE];
 
@@ -384,7 +401,7 @@ mod tests {
 
     #[test]
     fn test_authentication_failure() {
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let passphrase1 = b"correct_passphrase".to_vec();
         let passphrase2 = b"wrong_passphrase".to_vec();
 
@@ -401,7 +418,7 @@ mod tests {
     #[test]
     fn test_key_manager_store_load_roundtrip() {
         let km = KeyManager::new().unwrap();
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (original_key, _) = crypto
             .derive_key(b"some_passphrase".to_vec(), None)
             .unwrap();
@@ -417,7 +434,7 @@ mod tests {
     #[test]
     fn test_key_manager_wrong_passphrase() {
         let km = KeyManager::new().unwrap();
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (key, _) = crypto.derive_key(b"gen_pass".to_vec(), None).unwrap();
 
         let stored = km.store_key(&key, b"correct_pass".to_vec()).unwrap();
@@ -437,7 +454,7 @@ mod tests {
     #[test]
     fn test_key_manager_default() {
         let km = KeyManager::default();
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (key, _) = crypto.derive_key(b"default_test".to_vec(), None).unwrap();
         let stored = km.store_key(&key, b"mp".to_vec()).unwrap();
         assert!(!stored.is_empty());
@@ -456,7 +473,7 @@ mod tests {
     #[test]
     fn test_decrypt_too_short_data() {
         // Covers L186-187 — decrypt with data shorter than NONCE_SIZE
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (key, _) = crypto.derive_key(b"short_test".to_vec(), None).unwrap();
         let short_data = vec![0u8; 5]; // less than NONCE_SIZE (12)
         let result = crypto.decrypt(&short_data, &key);
@@ -468,7 +485,7 @@ mod tests {
     #[test]
     fn test_generate_random() {
         // Covers L212-215 — generate_random
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let random1 = crypto.generate_random(32);
         let random2 = crypto.generate_random(32);
         assert_eq!(random1.len(), 32);
@@ -478,7 +495,7 @@ mod tests {
 
     #[test]
     fn test_hash_sha256() {
-        let hash = FipsCrypto::hash_sha256(b"hello");
+        let hash = VaultCrypto::hash_sha256(b"hello");
         assert_eq!(hash.len(), 32);
         let hex = hex::encode(&hash);
         assert_eq!(
@@ -490,7 +507,7 @@ mod tests {
     #[test]
     fn test_hash_sha256_hex() {
         // Covers L228-229 — hash_sha256_hex
-        let hex = FipsCrypto::hash_sha256_hex(b"hello");
+        let hex = VaultCrypto::hash_sha256_hex(b"hello");
         assert_eq!(hex.len(), 64);
         assert_eq!(
             hex,
@@ -500,8 +517,8 @@ mod tests {
 
     #[test]
     fn test_fips_crypto_default() {
-        // Covers L235-237 — Default impl for FipsCrypto
-        let crypto = FipsCrypto::default();
+        // Covers L235-237 — Default impl for VaultCrypto
+        let crypto = VaultCrypto::default();
         let (key, _) = crypto.derive_key(b"default_works".to_vec(), None).unwrap();
         let encrypted = crypto.encrypt(b"test", &key).unwrap();
         assert!(!encrypted.is_empty());
@@ -511,7 +528,7 @@ mod tests {
     fn test_crypto_provider_trait() {
         // Covers CryptoProvider trait impl
         use crate::traits::CryptoProvider;
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let provider: &dyn CryptoProvider = &crypto;
 
         let (key, salt) = provider.derive_key(b"trait_test".to_vec(), None).unwrap();
@@ -529,5 +546,22 @@ mod tests {
 
         let hex = provider.hash_hex(b"test");
         assert_eq!(hex.len(), 64);
+    }
+
+    /// The rename is only non-breaking if the old name still resolves to the
+    /// same type. Downstream 5.x/6.0 code does exactly this.
+    #[test]
+    #[allow(deprecated)]
+    fn the_old_name_still_resolves_to_the_same_type() {
+        let via_old: FipsCrypto = VaultCrypto::new().expect("constructs");
+        let key = via_old
+            .derive_key(b"passphrase".to_vec(), Some(vec![7u8; SALT_SIZE]))
+            .expect("derives")
+            .0;
+        let sealed = via_old.encrypt(b"payload", &key).expect("encrypts");
+        assert_eq!(
+            via_old.decrypt(&sealed, &key).expect("decrypts"),
+            b"payload"
+        );
     }
 }

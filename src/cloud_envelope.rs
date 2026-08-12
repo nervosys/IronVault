@@ -34,7 +34,7 @@
 //! and the GCM tag check fails. Tampering produces an error, never wrong
 //! plaintext.
 
-use crate::crypto::{FipsCrypto, SALT_SIZE};
+use crate::crypto::{VaultCrypto, SALT_SIZE};
 use crate::error::{Result, VaultError};
 
 /// Identifies a sealed object. Chosen to be unambiguous in the first bytes of
@@ -81,7 +81,7 @@ pub fn is_sealed(data: &[u8]) -> bool {
 /// A fresh salt is drawn per call, so pushing the same model twice produces
 /// two different ciphertexts and reveals nothing by comparison.
 pub fn seal(plaintext: &[u8], passphrase: Vec<u8>) -> Result<Vec<u8>> {
-    let crypto = FipsCrypto::new()?;
+    let crypto = VaultCrypto::new()?;
     let (key, salt) = crypto.derive_key(passphrase, None)?;
     let body = crypto.encrypt(plaintext, &key)?;
 
@@ -146,7 +146,7 @@ pub fn open(sealed: &[u8], passphrase: Vec<u8>) -> Result<Vec<u8>> {
     }
 
     let salt = sealed[HEADER_PREFIX_LEN..body_start].to_vec();
-    let crypto = FipsCrypto::new()?;
+    let crypto = VaultCrypto::new()?;
     let (key, _) = crypto.derive_key(passphrase, Some(salt))?;
     crypto.decrypt(&sealed[body_start..], &key)
 }

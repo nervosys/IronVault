@@ -7,7 +7,7 @@
 
 use proptest::prelude::*;
 
-use ironvault::crypto::FipsCrypto;
+use ironvault::crypto::VaultCrypto;
 use ironvault::formats::ModelFormat;
 use ironvault::version::ModelVersion;
 
@@ -19,7 +19,7 @@ proptest! {
     /// Encrypt then decrypt must always return the original plaintext.
     #[test]
     fn crypto_encrypt_decrypt_roundtrip(data in proptest::collection::vec(any::<u8>(), 0..4096)) {
-        let crypto = FipsCrypto::new().expect("FipsCrypto::new");
+        let crypto = VaultCrypto::new().expect("VaultCrypto::new");
         let (key, _salt) = crypto
             .derive_key(b"test-passphrase".to_vec(), None)
             .expect("derive_key");
@@ -38,7 +38,7 @@ proptest! {
     ) {
         prop_assume!(a != b);
 
-        let crypto = FipsCrypto::new().expect("FipsCrypto::new");
+        let crypto = VaultCrypto::new().expect("VaultCrypto::new");
         let (key, _salt) = crypto.derive_key(b"passphrase".to_vec(), None).expect("derive_key");
 
         let enc_a = crypto.encrypt(&a, &key).expect("encrypt a");
@@ -50,7 +50,7 @@ proptest! {
     /// Ciphertext must be strictly larger than plaintext (nonce + tag overhead).
     #[test]
     fn crypto_ciphertext_has_overhead(data in proptest::collection::vec(any::<u8>(), 0..2048)) {
-        let crypto = FipsCrypto::new().expect("FipsCrypto::new");
+        let crypto = VaultCrypto::new().expect("VaultCrypto::new");
         let (key, _salt) = crypto.derive_key(b"pass".to_vec(), None).expect("derive_key");
 
         let encrypted = crypto.encrypt(&data, &key).expect("encrypt");
@@ -202,14 +202,14 @@ proptest! {
     /// SHA-256 hash must always produce exactly 32 bytes.
     #[test]
     fn sha256_always_32_bytes(data in proptest::collection::vec(any::<u8>(), 0..8192)) {
-        let hash = FipsCrypto::hash_sha256(&data);
+        let hash = VaultCrypto::hash_sha256(&data);
         prop_assert_eq!(hash.len(), 32, "SHA-256 must be 32 bytes, got {}", hash.len());
     }
 
     /// SHA-256 hex must always produce exactly 64 hex characters.
     #[test]
     fn sha256_hex_always_64_chars(data in proptest::collection::vec(any::<u8>(), 0..8192)) {
-        let hex = FipsCrypto::hash_sha256_hex(&data);
+        let hex = VaultCrypto::hash_sha256_hex(&data);
         prop_assert_eq!(hex.len(), 64, "SHA-256 hex must be 64 chars, got {}", hex.len());
         prop_assert!(hex.chars().all(|c| c.is_ascii_hexdigit()),
             "SHA-256 hex contains non-hex chars: {}", hex);
@@ -218,8 +218,8 @@ proptest! {
     /// Identical inputs must produce identical hashes (determinism).
     #[test]
     fn sha256_deterministic(data in proptest::collection::vec(any::<u8>(), 0..4096)) {
-        let h1 = FipsCrypto::hash_sha256(&data);
-        let h2 = FipsCrypto::hash_sha256(&data);
+        let h1 = VaultCrypto::hash_sha256(&data);
+        let h2 = VaultCrypto::hash_sha256(&data);
         prop_assert_eq!(h1, h2, "SHA-256 not deterministic");
     }
 }

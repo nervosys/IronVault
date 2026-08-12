@@ -15,7 +15,7 @@ mod comprehensive_coverage_tests {
     //! - federation (VectorClock, FederationConfig, PeerConfig, ClockComparison)
     //! - telemetry (global functions, TrackingTimer)
     //! - version (VersionRepo trait, VersionControl methods)
-    //! - crypto/mod.rs (edge cases, SecureKey, FipsCrypto)
+    //! - crypto/mod.rs (edge cases, SecureKey, VaultCrypto)
 
     // ============================================================================
     // FEDERATION — VectorClock::compare all branches, config structs
@@ -448,7 +448,7 @@ mod comprehensive_coverage_tests {
     // VERSION — VersionRepo trait impl on VersionControl, all methods
     // ============================================================================
     mod version_coverage {
-        use ironvault::crypto::FipsCrypto;
+        use ironvault::crypto::VaultCrypto;
         use ironvault::traits::{CryptoProvider, VersionRepo};
         use ironvault::version::VersionControl;
         use std::collections::HashMap;
@@ -586,7 +586,7 @@ mod comprehensive_coverage_tests {
             let mut vc = VersionControl::new(tmp.path()).unwrap();
 
             let data = b"hello";
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let checksum_hex = crypto.hash_hex(data);
 
             vc.add_version("m", "f.enc", "pt", 5, 5, &checksum_hex, None, None)
@@ -645,7 +645,7 @@ mod comprehensive_coverage_tests {
     // CRYPTO — edge cases in encrypt/decrypt, key derivation
     // ============================================================================
     mod crypto_coverage {
-        use ironvault::crypto::{FipsCrypto, SecureKey, KEY_SIZE};
+        use ironvault::crypto::{SecureKey, VaultCrypto, KEY_SIZE};
         use ironvault::traits::CryptoProvider;
 
         #[test]
@@ -662,7 +662,7 @@ mod comprehensive_coverage_tests {
 
         #[test]
         fn test_fips_crypto_roundtrip() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let (key, _salt) = crypto.derive_key(b"my passphrase".to_vec(), None).unwrap();
             let data = b"secret model data";
             let encrypted = crypto.encrypt(data, &key).unwrap();
@@ -673,7 +673,7 @@ mod comprehensive_coverage_tests {
 
         #[test]
         fn test_fips_crypto_derive_key_with_salt() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let (key1, salt) = crypto.derive_key(b"pass".to_vec(), None).unwrap();
             let (key2, salt2) = crypto
                 .derive_key(b"pass".to_vec(), Some(salt.clone()))
@@ -684,21 +684,21 @@ mod comprehensive_coverage_tests {
 
         #[test]
         fn test_fips_crypto_hash() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let hash = crypto.hash(b"hello");
             assert_eq!(hash.len(), 32);
         }
 
         #[test]
         fn test_fips_crypto_hash_hex() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let hex = crypto.hash_hex(b"hello");
             assert_eq!(hex.len(), 64);
         }
 
         #[test]
         fn test_fips_crypto_random_bytes() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let bytes = crypto.random_bytes(32);
             assert_eq!(bytes.len(), 32);
             // Should not be all zeros (with overwhelming probability)
@@ -707,7 +707,7 @@ mod comprehensive_coverage_tests {
 
         #[test]
         fn test_decrypt_with_wrong_key() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let (key1, _) = crypto.derive_key(b"pass1".to_vec(), None).unwrap();
             let (key2, _) = crypto.derive_key(b"pass2".to_vec(), None).unwrap();
             let encrypted = crypto.encrypt(b"data", &key1).unwrap();
@@ -716,7 +716,7 @@ mod comprehensive_coverage_tests {
 
         #[test]
         fn test_encrypt_empty_data() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let (key, _) = crypto.derive_key(b"pass".to_vec(), None).unwrap();
             let encrypted = crypto.encrypt(b"", &key).unwrap();
             let decrypted = crypto.decrypt(&encrypted, &key).unwrap();
@@ -725,7 +725,7 @@ mod comprehensive_coverage_tests {
 
         #[test]
         fn test_decrypt_truncated() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let result = crypto.decrypt(
                 &[0u8; 5], // too short for nonce + tag
                 &SecureKey::from_bytes(&[0u8; KEY_SIZE]).unwrap(),
@@ -735,7 +735,7 @@ mod comprehensive_coverage_tests {
 
         #[test]
         fn test_fips_crypto_large_data() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let (key, _) = crypto.derive_key(b"pass".to_vec(), None).unwrap();
             let data: Vec<u8> = (0..10000).map(|i| (i % 256) as u8).collect();
             let encrypted = crypto.encrypt(&data, &key).unwrap();
@@ -745,7 +745,7 @@ mod comprehensive_coverage_tests {
 
         #[test]
         fn test_hash_sha256_static() {
-            let hash = FipsCrypto::hash_sha256(b"test");
+            let hash = VaultCrypto::hash_sha256(b"test");
             assert_eq!(hash.len(), 32);
         }
     }
@@ -771,7 +771,7 @@ mod coverage_boost_tests {
     // VERSION_SQLITE — SqliteVersionRepo via VersionRepo trait (in-memory)
     // ============================================================================
     mod version_sqlite_coverage {
-        use ironvault::crypto::FipsCrypto;
+        use ironvault::crypto::VaultCrypto;
         use ironvault::traits::VersionRepo;
         use ironvault::version_sqlite::SqliteVersionRepo;
         use std::collections::HashMap;
@@ -781,7 +781,7 @@ mod coverage_boost_tests {
         }
 
         fn sha256_hex(data: &[u8]) -> String {
-            hex::encode(FipsCrypto::hash_sha256(data))
+            hex::encode(VaultCrypto::hash_sha256(data))
         }
 
         #[test]
@@ -1964,23 +1964,23 @@ mod coverage_boost_tests {
     }
 
     // ============================================================================
-    // CRYPTO MOD — FipsCrypto trait impl, hash_sha256_hex
+    // CRYPTO MOD — VaultCrypto trait impl, hash_sha256_hex
     // ============================================================================
     mod crypto_trait_coverage {
-        use ironvault::crypto::FipsCrypto;
+        use ironvault::crypto::VaultCrypto;
         use ironvault::traits::CryptoProvider;
 
         #[test]
         fn crypto_provider_hash_hex() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let hash = crypto.hash_hex(b"hello");
             assert_eq!(hash.len(), 64);
-            assert_eq!(hash, FipsCrypto::hash_sha256_hex(b"hello"));
+            assert_eq!(hash, VaultCrypto::hash_sha256_hex(b"hello"));
         }
 
         #[test]
         fn crypto_generate_random() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let r1 = crypto.random_bytes(32);
             let r2 = crypto.random_bytes(32);
             assert_eq!(r1.len(), 32);
@@ -1989,7 +1989,7 @@ mod coverage_boost_tests {
 
         #[test]
         fn crypto_default() {
-            let _crypto = FipsCrypto::default();
+            let _crypto = VaultCrypto::default();
         }
     }
 
@@ -2715,7 +2715,7 @@ mod coverage_final_push_tests {
             let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
 
             let data = b"model data bytes";
-            let checksum = hex::encode(ironvault::crypto::FipsCrypto::hash_sha256(data));
+            let checksum = hex::encode(ironvault::crypto::VaultCrypto::hash_sha256(data));
             repo.add_version(
                 "m",
                 "/p",
@@ -4350,7 +4350,7 @@ mod coverage_gap_tests {
 
     use ironvault::audit::{AuditEventType, AuditLogger};
     use ironvault::compliance::ComplianceChecker;
-    use ironvault::crypto::FipsCrypto;
+    use ironvault::crypto::VaultCrypto;
     use ironvault::formats::{FormatConverter, ModelFormat, ModelMetadata};
     use ironvault::version::VersionControl;
     use ironvault::{Vault, VaultConfig};
@@ -4541,7 +4541,7 @@ mod coverage_gap_tests {
         let mut vc = VersionControl::new(tmp.path()).unwrap();
 
         let data = b"test model data for checksum";
-        let checksum = hex::encode(FipsCrypto::hash_sha256(data));
+        let checksum = hex::encode(VaultCrypto::hash_sha256(data));
 
         vc.add_version(
             "cksum_model",
@@ -4564,7 +4564,7 @@ mod coverage_gap_tests {
         let mut vc = VersionControl::new(tmp.path()).unwrap();
 
         let data = b"original data";
-        let checksum = hex::encode(FipsCrypto::hash_sha256(data));
+        let checksum = hex::encode(VaultCrypto::hash_sha256(data));
 
         vc.add_version(
             "cksum_model",
@@ -4705,7 +4705,7 @@ mod coverage_maximizer_tests {
             SafeTensorsToPyTorchConverter,
         },
         crypto::compression::{compress, decompress, CompressionAlgorithm, CompressionLevel},
-        crypto::FipsCrypto,
+        crypto::VaultCrypto,
         // Formats
         formats::ModelFormat,
         rag::{ChunkInfo, SQLiteDatabase},
@@ -4850,7 +4850,7 @@ mod coverage_maximizer_tests {
         fn verify_checksum() {
             let (mut repo, _tmp) = make_repo();
             let data = b"hello world checksum test";
-            let hash = hex::encode(FipsCrypto::hash_sha256(data));
+            let hash = hex::encode(VaultCrypto::hash_sha256(data));
             repo.add_version("m2", "x.st", "safetensors", 25, 20, &hash, None, None)
                 .unwrap();
             assert!(repo.verify_checksum("m2", 1, data));
@@ -5729,7 +5729,7 @@ mod coverage_ultimate_tests {
     use ironvault::crypto::compression::{
         compress, decompress, CompressionAlgorithm, CompressionLevel,
     };
-    use ironvault::crypto::{FipsCrypto, SecureKey};
+    use ironvault::crypto::{SecureKey, VaultCrypto};
     use ironvault::formats::ModelFormat;
     use ironvault::rag::{ChunkInfo, Document, SQLiteDatabase};
     use ironvault::*;
@@ -6380,7 +6380,7 @@ mod coverage_ultimate_tests {
 
         #[test]
         fn test_crypto_provider_hash_hex() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             use ironvault::traits::CryptoProvider;
             let hex = crypto.hash_hex(b"test data");
             assert_eq!(hex.len(), 64); // SHA-256 hex is 64 chars
@@ -6504,7 +6504,7 @@ mod coverage_ultimate_tests {
 
         #[test]
         fn test_encrypt_decrypt_chunked_roundtrip() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let passphrase = b"streaming-test-passphrase-12345".to_vec();
             let (key, _salt) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -6521,7 +6521,7 @@ mod coverage_ultimate_tests {
 
         #[test]
         fn test_chunked_with_large_data() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let passphrase = b"large-data-passphrase-xyz".to_vec();
             let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -6533,7 +6533,7 @@ mod coverage_ultimate_tests {
 
         #[test]
         fn test_chunked_decrypt_wrong_version() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let passphrase = b"version-check-pass".to_vec();
             let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -6549,7 +6549,7 @@ mod coverage_ultimate_tests {
 
         #[test]
         fn test_chunked_decrypt_corrupted_mac() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let passphrase = b"mac-corruption-test".to_vec();
             let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -6566,7 +6566,7 @@ mod coverage_ultimate_tests {
 
         #[test]
         fn test_chunked_decrypt_too_short() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let passphrase = b"short-data-test".to_vec();
             let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -8417,12 +8417,12 @@ mod deep_coverage_tests {
     // ADDITIONAL CRYPTO EDGE CASES — streaming chunk sizes
     // ============================================================================
     mod crypto_streaming_edge_cases {
-        use ironvault::crypto::{FipsCrypto, SecureKey};
+        use ironvault::crypto::{SecureKey, VaultCrypto};
         use ironvault::{decrypt_chunked, encrypt_chunked};
 
         #[test]
         fn streaming_small_data() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let key = SecureKey::from_bytes(&[0x42; 32]).unwrap();
             let data = b"tiny";
             let enc = encrypt_chunked(&crypto, data, &key, 1024).unwrap();
@@ -8432,7 +8432,7 @@ mod deep_coverage_tests {
 
         #[test]
         fn streaming_exact_chunk_boundary() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let key = SecureKey::from_bytes(&[0x55; 32]).unwrap();
             let data = vec![0xAB; 64];
             let enc = encrypt_chunked(&crypto, &data, &key, 32).unwrap();
@@ -8442,7 +8442,7 @@ mod deep_coverage_tests {
 
         #[test]
         fn streaming_single_byte_chunks() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let key = SecureKey::from_bytes(&[0x99; 32]).unwrap();
             let data = b"abc";
             let enc = encrypt_chunked(&crypto, data, &key, 1).unwrap();
@@ -8452,7 +8452,7 @@ mod deep_coverage_tests {
 
         #[test]
         fn streaming_large_chunk_size() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let key = SecureKey::from_bytes(&[0xCC; 32]).unwrap();
             let data = vec![0x11; 256];
             // Chunk size larger than data
@@ -10485,11 +10485,11 @@ mod final_coverage_tests {
     // VERSION — cleanup_old_versions, verify_checksum edges
     // ============================================================================
     mod version_cleanup_tests {
-        use ironvault::crypto::FipsCrypto;
+        use ironvault::crypto::VaultCrypto;
         use ironvault::version::VersionControl;
 
         fn checksum(data: &[u8]) -> String {
-            hex::encode(FipsCrypto::hash_sha256(data))
+            hex::encode(VaultCrypto::hash_sha256(data))
         }
 
         #[test]
@@ -11785,7 +11785,7 @@ mod full_coverage_tests {
     // ============================================================================
     mod storage_coverage {
         use ironvault::crypto::compression::{CompressionAlgorithm, CompressionLevel};
-        use ironvault::crypto::FipsCrypto;
+        use ironvault::crypto::VaultCrypto;
         use ironvault::storage::Storage;
         use ironvault::traits::BlobStore;
         use tempfile::TempDir;
@@ -11793,7 +11793,7 @@ mod full_coverage_tests {
         fn setup() -> (Storage, ironvault::crypto::SecureKey, TempDir) {
             let tmp = TempDir::new().unwrap();
             let storage = Storage::new(tmp.path()).unwrap();
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let (key, _) = crypto
                 .derive_key(b"test_pass_with_entropy_1234".to_vec(), None)
                 .unwrap();
@@ -14833,7 +14833,7 @@ mod remaining_coverage_tests {
     // CRYPTO — additional edge cases
     // ============================================================================
     mod crypto_extra_coverage {
-        use ironvault::crypto::{FipsCrypto, KeyManager};
+        use ironvault::crypto::{KeyManager, VaultCrypto};
 
         #[test]
         fn key_manager_new() {
@@ -14843,22 +14843,22 @@ mod remaining_coverage_tests {
 
         #[test]
         fn hash_sha256_deterministic() {
-            let h1 = FipsCrypto::hash_sha256(b"test data");
-            let h2 = FipsCrypto::hash_sha256(b"test data");
+            let h1 = VaultCrypto::hash_sha256(b"test data");
+            let h2 = VaultCrypto::hash_sha256(b"test data");
             assert_eq!(h1, h2);
             assert_eq!(h1.len(), 32);
         }
 
         #[test]
         fn hash_sha256_different_inputs() {
-            let h1 = FipsCrypto::hash_sha256(b"hello");
-            let h2 = FipsCrypto::hash_sha256(b"world");
+            let h1 = VaultCrypto::hash_sha256(b"hello");
+            let h2 = VaultCrypto::hash_sha256(b"world");
             assert_ne!(h1, h2);
         }
 
         #[test]
         fn derive_key_custom_salt() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let salt = vec![42u8; 32];
             let (key1, _) = crypto
                 .derive_key(b"pass".to_vec(), Some(salt.clone()))
@@ -14872,7 +14872,7 @@ mod remaining_coverage_tests {
     // STREAMING ENCRYPTION — additional roundtrip coverage
     // ============================================================================
     mod streaming_crypto_coverage {
-        use ironvault::crypto::{FipsCrypto, SecureKey};
+        use ironvault::crypto::{SecureKey, VaultCrypto};
         use ironvault::{
             decrypt_chunked, encrypt_chunked, is_chunked_format, DEFAULT_CHUNK_SIZE, STREAM_MAGIC,
             STREAM_VERSION,
@@ -14880,7 +14880,7 @@ mod remaining_coverage_tests {
 
         #[test]
         fn chunked_roundtrip() {
-            let crypto = FipsCrypto::new().unwrap();
+            let crypto = VaultCrypto::new().unwrap();
             let key = SecureKey::from_bytes(&[0xAB; 32]).unwrap();
             let plaintext = b"hello streaming encryption world";
             let encrypted = encrypt_chunked(&crypto, plaintext, &key, 16).unwrap();

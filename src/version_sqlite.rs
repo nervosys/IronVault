@@ -16,7 +16,7 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 #[cfg(feature = "sqlite")]
-use crate::crypto::FipsCrypto;
+use crate::crypto::VaultCrypto;
 #[cfg(feature = "sqlite")]
 use crate::error::{Result, VaultError};
 #[cfg(feature = "sqlite")]
@@ -515,7 +515,7 @@ impl crate::traits::VersionRepo for SqliteVersionRepo {
 
     fn verify_checksum(&self, model: &str, version: u32, data: &[u8]) -> bool {
         if let Some(mv) = self.get_version(model, Some(version)) {
-            let checksum = hex::encode(FipsCrypto::hash_sha256(data));
+            let checksum = hex::encode(VaultCrypto::hash_sha256(data));
             return checksum == mv.checksum_sha256;
         }
         false
@@ -802,7 +802,7 @@ mod tests {
         // Covers lines 497, 501, 509
         let mut repo = SqliteVersionRepo::in_memory().unwrap();
         let data = b"model data";
-        let checksum = hex::encode(FipsCrypto::hash_sha256(data));
+        let checksum = hex::encode(VaultCrypto::hash_sha256(data));
         repo.add_version("m", "f.enc", "pt", 100, 50, &checksum, None, None)
             .unwrap();
 

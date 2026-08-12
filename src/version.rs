@@ -9,7 +9,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
 
-use crate::crypto::FipsCrypto;
+use crate::crypto::VaultCrypto;
 use crate::error::Result;
 
 /// Represents a single model version/checkpoint
@@ -258,7 +258,7 @@ impl VersionControl {
     /// Verify data integrity using stored checksum
     pub fn verify_checksum(&self, model_name: &str, version: u32, data: &[u8]) -> bool {
         if let Some(model_version) = self.get_version(model_name, Some(version)) {
-            let checksum = hex::encode(FipsCrypto::hash_sha256(data));
+            let checksum = hex::encode(VaultCrypto::hash_sha256(data));
             return checksum == model_version.checksum_sha256;
         }
         false
@@ -566,7 +566,7 @@ mod tests {
         let temp_dir = tempdir().unwrap();
         let mut vc = VersionControl::new(temp_dir.path()).unwrap();
         let data = b"hello world";
-        let checksum = hex::encode(crate::crypto::FipsCrypto::hash_sha256(data));
+        let checksum = hex::encode(crate::crypto::VaultCrypto::hash_sha256(data));
         vc.add_version(
             "m",
             "f.enc",

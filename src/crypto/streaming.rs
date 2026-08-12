@@ -31,7 +31,7 @@
 
 use sha2::{Digest, Sha256};
 
-use crate::crypto::{FipsCrypto, SecureKey, NONCE_SIZE};
+use crate::crypto::{SecureKey, VaultCrypto, NONCE_SIZE};
 use crate::error::{Result, VaultError};
 
 /// Default chunk size: 4 MiB (tuned for SSD page alignment).
@@ -121,7 +121,7 @@ impl StreamHeader {
 /// Each chunk gets its own nonce (derived from base_nonce XOR chunk_index).
 /// A stream MAC at the end authenticates the entire sequence.
 pub fn encrypt_chunked(
-    crypto: &FipsCrypto,
+    crypto: &VaultCrypto,
     data: &[u8],
     key: &SecureKey,
     chunk_size: usize,
@@ -172,7 +172,7 @@ pub fn encrypt_chunked(
 /// Decrypt chunked data, returning the original plaintext.
 ///
 /// Verifies the stream MAC to detect truncation, reordering, or extension.
-pub fn decrypt_chunked(crypto: &FipsCrypto, encrypted: &[u8], key: &SecureKey) -> Result<Vec<u8>> {
+pub fn decrypt_chunked(crypto: &VaultCrypto, encrypted: &[u8], key: &SecureKey) -> Result<Vec<u8>> {
     if encrypted.len() < HEADER_SIZE + 32 {
         return Err(VaultError::CryptoError(
             "Encrypted data too short for chunked format".to_string(),
@@ -272,7 +272,7 @@ mod tests {
     /// the old spelling or those models become permanently undecryptable.
     #[test]
     fn test_models_encrypted_before_the_rename_still_decrypt() {
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let passphrase = b"test_passphrase_with_sufficient_entropy".to_vec();
         let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -297,7 +297,7 @@ mod tests {
     /// The compatibility above is read-only: new writes use the new magic.
     #[test]
     fn test_encrypt_writes_the_current_magic() {
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (key, _) = crypto
             .derive_key(b"test_passphrase_with_sufficient_entropy".to_vec(), None)
             .unwrap();
@@ -308,7 +308,7 @@ mod tests {
 
     #[test]
     fn test_encrypt_decrypt_chunked_small() {
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let passphrase = b"test_passphrase_with_sufficient_entropy".to_vec();
         let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -323,7 +323,7 @@ mod tests {
 
     #[test]
     fn test_encrypt_decrypt_chunked_exact_boundary() {
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let passphrase = b"test_passphrase_boundary".to_vec();
         let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -336,7 +336,7 @@ mod tests {
 
     #[test]
     fn test_encrypt_decrypt_chunked_large() {
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let passphrase = b"test_passphrase_large_data".to_vec();
         let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -349,7 +349,7 @@ mod tests {
 
     #[test]
     fn test_tampered_stream_mac_fails() {
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let passphrase = b"test_passphrase_tamper".to_vec();
         let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -374,7 +374,7 @@ mod tests {
 
     #[test]
     fn test_empty_data() {
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let passphrase = b"test_passphrase_empty".to_vec();
         let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -386,7 +386,7 @@ mod tests {
 
     #[test]
     fn test_truncated_chunk_rejected() {
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let passphrase = b"truncation_test".to_vec();
         let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -405,7 +405,7 @@ mod tests {
 
     #[test]
     fn test_single_byte_data() {
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let passphrase = b"single_byte_test".to_vec();
         let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -445,7 +445,7 @@ mod tests {
     #[test]
     fn test_decrypt_chunked_too_short() {
         // Covers L166-167 — encrypted data too short for chunked format
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (key, _) = crypto.derive_key(b"short_test".to_vec(), None).unwrap();
         let short = vec![0u8; 10]; // way too short
         let result = decrypt_chunked(&crypto, &short, &key);

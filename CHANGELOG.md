@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.1.0] - 2026-08-12
+
+### Changed
+
+- **`FipsCrypto` is now `VaultCrypto`.** The old name asserted a validation this
+  crate has never held, on the one type whose rustdoc lands in front of anyone
+  evaluating the cryptography — and 6.0.0's audit corrected every *sentence*
+  making that claim while leaving the *identifier* making it.
+
+  The rename was deferred to "the next major" on the assumption it was breaking.
+  That was wrong: renaming a public type only breaks callers if the old name
+  disappears. `FipsCrypto` remains as a deprecated alias, so 5.x and 6.0 code
+  compiles unchanged and gets a warning explaining the rename. Behaviour is
+  identical; only the name was inaccurate.
+
+### Fixed
+
+- **`iv serve` no longer prints "Listening on …" before refusing to serve.** The
+  6.0.0 TLS check ran after the startup banner, so a refused bind announced an
+  address it had never bound, then errored. Anything scraping logs for
+  `Listening on` would have read a failed start as a success. The check now runs
+  first, and the scheme in the banner comes from its result rather than from
+  whether `tls_cert` happens to be set, so the printed URL and the socket cannot
+  disagree.
+
+  Found by running the published 6.0.0 binary rather than trusting the release
+  job — the same check that caught 5.1.0 shipping binaries without the REST API.
+
+- **`derive_key`'s rustdoc claimed "FIPS 140-3: Approved key derivation".** It is
+  Argon2id, which SP 800-132 does not approve. Reversed exactly.
+
 ## [6.0.0] - 2026-08-11
 
 Major because two changes break existing deployments. Both were pre-announced —

@@ -1,14 +1,14 @@
 #![no_main]
 use libfuzzer_sys::fuzz_target;
 
-use ironvault::crypto::FipsCrypto;
+use ironvault::crypto::VaultCrypto;
 
 fuzz_target!(|data: &[u8]| {
     if data.is_empty() {
         return;
     }
 
-    let crypto = match FipsCrypto::new() {
+    let crypto = match VaultCrypto::new() {
         Ok(c) => c,
         Err(_) => return,
     };

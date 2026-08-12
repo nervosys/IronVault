@@ -8,7 +8,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 use crate::audit::{AuditEntry, AuditEventType, AuditLogger};
 use crate::config::VaultConfig;
-use crate::crypto::{FipsCrypto, KeyManager, SecureKey};
+use crate::crypto::{KeyManager, SecureKey, VaultCrypto};
 use crate::error::{Result, VaultError};
 use crate::formats::ModelMetadata;
 use crate::storage::Storage;
@@ -234,7 +234,7 @@ pub struct Vault {
     storage: Storage,
     version_backend: VersionBackend,
     audit_logger: Option<AuditLogger>,
-    crypto: FipsCrypto,
+    crypto: VaultCrypto,
     key_manager: KeyManager,
     active_key: Option<SecureKey>,
     /// Event bus for dispatching domain events to subscribers.
@@ -270,7 +270,7 @@ impl Vault {
 
         let audit_logger = build_audit_logger(&config)?;
 
-        let crypto = FipsCrypto::new()?;
+        let crypto = VaultCrypto::new()?;
         let key_manager = KeyManager::new()?;
 
         if let Some(logger) = &audit_logger {
@@ -397,7 +397,7 @@ impl Vault {
             .ok_or_else(|| VaultError::SecurityViolation("Vault is locked".to_string()))?;
 
         // Compute checksum before compression/encryption
-        let checksum = hex::encode(FipsCrypto::hash_sha256(&data));
+        let checksum = hex::encode(VaultCrypto::hash_sha256(&data));
 
         // Generate filename
         let filename = format!("{}.vault", uuid::Uuid::new_v4());
@@ -535,7 +535,7 @@ impl Vault {
                 model: name.to_string(),
                 version: model_version.version,
                 expected: model_version.checksum_sha256.clone(),
-                actual: hex::encode(FipsCrypto::hash_sha256(&data)),
+                actual: hex::encode(VaultCrypto::hash_sha256(&data)),
                 timestamp: chrono::Utc::now(),
             });
 
@@ -934,7 +934,7 @@ impl VaultBuilder {
 
         let audit_logger = build_audit_logger(&config)?;
 
-        let crypto = FipsCrypto::new()?;
+        let crypto = VaultCrypto::new()?;
         let key_manager = KeyManager::new()?;
 
         if let Some(logger) = &audit_logger {

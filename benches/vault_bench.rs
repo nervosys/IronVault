@@ -1,7 +1,7 @@
 //! Vault operation benchmarks — store, retrieve, format detection, model card serialization
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-use ironvault::crypto::FipsCrypto;
+use ironvault::crypto::VaultCrypto;
 use ironvault::formats::{ModelFormat, ModelMetadata};
 use ironvault::model_card::{
     Evaluation, IntendedUse, Metric, ModelCard, ModelDetails, TrainingData,
@@ -118,7 +118,7 @@ fn bench_sha256(c: &mut Criterion) {
     for size in [1024, 10 * 1024, 100 * 1024, 1024 * 1024] {
         let data = vec![0x42u8; size];
         group.bench_with_input(BenchmarkId::from_parameter(size), &data, |b, data| {
-            b.iter(|| black_box(FipsCrypto::hash_sha256(data)));
+            b.iter(|| black_box(VaultCrypto::hash_sha256(data)));
         });
     }
 

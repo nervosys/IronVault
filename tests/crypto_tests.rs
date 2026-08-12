@@ -2,12 +2,12 @@
 
 use ironvault::crypto::{
     compression::{compress, decompress, CompressionAlgorithm, CompressionLevel},
-    FipsCrypto, KeyManager,
+    KeyManager, VaultCrypto,
 };
 
 #[test]
 fn test_key_derivation_consistency() {
-    let crypto = FipsCrypto::new().unwrap();
+    let crypto = VaultCrypto::new().unwrap();
     let passphrase = b"test_passphrase_12345".to_vec();
 
     // Derive key twice with same passphrase and salt
@@ -19,7 +19,7 @@ fn test_key_derivation_consistency() {
 
 #[test]
 fn test_key_derivation_different_salts() {
-    let crypto = FipsCrypto::new().unwrap();
+    let crypto = VaultCrypto::new().unwrap();
     let passphrase = b"test_passphrase_12345".to_vec();
 
     // Derive keys with different salts
@@ -32,7 +32,7 @@ fn test_key_derivation_different_salts() {
 
 #[test]
 fn test_encrypt_decrypt_various_sizes() {
-    let crypto = FipsCrypto::new().unwrap();
+    let crypto = VaultCrypto::new().unwrap();
     let passphrase = b"test_passphrase_12345".to_vec();
     let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -54,7 +54,7 @@ fn test_encrypt_decrypt_various_sizes() {
 
 #[test]
 fn test_encrypt_decrypt_random_data() {
-    let crypto = FipsCrypto::new().unwrap();
+    let crypto = VaultCrypto::new().unwrap();
     let passphrase = b"test_passphrase_12345".to_vec();
     let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -69,7 +69,7 @@ fn test_encrypt_decrypt_random_data() {
 
 #[test]
 fn test_encryption_authentication_failure() {
-    let crypto = FipsCrypto::new().unwrap();
+    let crypto = VaultCrypto::new().unwrap();
     let passphrase = b"test_passphrase_12345".to_vec();
     let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -88,7 +88,7 @@ fn test_encryption_authentication_failure() {
 
 #[test]
 fn test_encryption_nonce_uniqueness() {
-    let crypto = FipsCrypto::new().unwrap();
+    let crypto = VaultCrypto::new().unwrap();
     let passphrase = b"test_passphrase_12345".to_vec();
     let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -112,7 +112,7 @@ fn test_encryption_nonce_uniqueness() {
 
 #[test]
 fn test_secure_key_zeroization() {
-    let crypto = FipsCrypto::new().unwrap();
+    let crypto = VaultCrypto::new().unwrap();
     let passphrase = b"test_passphrase_12345".to_vec();
     let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -216,7 +216,7 @@ fn test_compression_incompressible_data() {
 #[test]
 fn test_key_manager_store_and_load() {
     let manager = KeyManager::new().unwrap();
-    let crypto = FipsCrypto::new().unwrap();
+    let crypto = VaultCrypto::new().unwrap();
     let passphrase = b"test_passphrase_12345".to_vec();
 
     let (key, _) = crypto.derive_key(passphrase.clone(), None).unwrap();
@@ -233,7 +233,7 @@ fn test_key_manager_store_and_load() {
 #[test]
 fn test_key_manager_wrong_passphrase() {
     let manager = KeyManager::new().unwrap();
-    let crypto = FipsCrypto::new().unwrap();
+    let crypto = VaultCrypto::new().unwrap();
 
     let (key, _) = crypto.derive_key(b"pass1".to_vec(), None).unwrap();
 

@@ -11,7 +11,7 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
 use crate::crypto::compression::{compress, decompress, CompressionAlgorithm, CompressionLevel};
-use crate::crypto::{FipsCrypto, SecureKey};
+use crate::crypto::{SecureKey, VaultCrypto};
 use crate::error::{Result, VaultError};
 use async_trait::async_trait;
 
@@ -131,7 +131,7 @@ impl StorageConfig {
 /// Storage backend for encrypted and compressed model data
 pub struct Storage {
     vault_path: PathBuf,
-    crypto: FipsCrypto,
+    crypto: VaultCrypto,
 }
 
 impl Storage {
@@ -144,7 +144,7 @@ impl Storage {
 
         Ok(Self {
             vault_path: vault_path.to_path_buf(),
-            crypto: FipsCrypto::new()?,
+            crypto: VaultCrypto::new()?,
         })
     }
 
@@ -391,7 +391,7 @@ mod tests {
         let temp_dir = tempdir().unwrap();
         let storage = Storage::new(temp_dir.path()).unwrap();
 
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let passphrase = b"test_passphrase_with_sufficient_entropy".to_vec();
         let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -420,7 +420,7 @@ mod tests {
     fn test_storage_delete_and_exists() {
         let temp_dir = tempdir().unwrap();
         let storage = Storage::new(temp_dir.path()).unwrap();
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (key, _) = crypto.derive_key(b"delete_test".to_vec(), None).unwrap();
 
         storage
@@ -443,7 +443,7 @@ mod tests {
     fn test_storage_file_size_and_list() {
         let temp_dir = tempdir().unwrap();
         let storage = Storage::new(temp_dir.path()).unwrap();
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (key, _) = crypto.derive_key(b"list_test".to_vec(), None).unwrap();
 
         storage
@@ -476,7 +476,7 @@ mod tests {
     fn test_storage_stats() {
         let temp_dir = tempdir().unwrap();
         let storage = Storage::new(temp_dir.path()).unwrap();
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (key, _) = crypto.derive_key(b"stats_test".to_vec(), None).unwrap();
 
         storage
@@ -498,7 +498,7 @@ mod tests {
     fn test_storage_streamed_and_retrieve_auto() {
         let temp_dir = tempdir().unwrap();
         let storage = Storage::new(temp_dir.path()).unwrap();
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (key, _) = crypto.derive_key(b"stream_test".to_vec(), None).unwrap();
 
         let data = vec![0xAB; 1024];
@@ -522,7 +522,7 @@ mod tests {
     fn test_storage_retrieve_auto_legacy_fallback() {
         let temp_dir = tempdir().unwrap();
         let storage = Storage::new(temp_dir.path()).unwrap();
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (key, _) = crypto.derive_key(b"legacy_test".to_vec(), None).unwrap();
 
         storage
@@ -545,7 +545,7 @@ mod tests {
     fn test_storage_retrieve_missing_file() {
         let temp_dir = tempdir().unwrap();
         let storage = Storage::new(temp_dir.path()).unwrap();
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (key, _) = crypto.derive_key(b"missing_test".to_vec(), None).unwrap();
 
         let result = storage.retrieve("nonexistent.enc", &key, CompressionAlgorithm::None);
@@ -556,7 +556,7 @@ mod tests {
     fn test_storage_blob_store_trait() {
         let temp_dir = tempdir().unwrap();
         let storage = Storage::new(temp_dir.path()).unwrap();
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (key, _) = crypto.derive_key(b"blob_test".to_vec(), None).unwrap();
 
         use crate::traits::BlobStore;
@@ -662,7 +662,7 @@ mod tests {
     fn test_storage_retrieve_auto_missing() {
         let temp_dir = tempdir().unwrap();
         let storage = Storage::new(temp_dir.path()).unwrap();
-        let crypto = FipsCrypto::new().unwrap();
+        let crypto = VaultCrypto::new().unwrap();
         let (key, _) = crypto.derive_key(b"auto_miss_test".to_vec(), None).unwrap();
         let result = storage.retrieve_auto("nonexistent.enc", &key, CompressionAlgorithm::None);
         assert!(result.is_err());

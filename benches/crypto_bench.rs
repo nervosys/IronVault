@@ -3,12 +3,12 @@
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use ironvault::crypto::{
     compression::{compress, CompressionAlgorithm, CompressionLevel},
-    FipsCrypto,
+    VaultCrypto,
 };
 use std::hint::black_box;
 
 fn bench_encryption(c: &mut Criterion) {
-    let crypto = FipsCrypto::new().unwrap();
+    let crypto = VaultCrypto::new().unwrap();
     let passphrase = b"benchmark_passphrase_12345".to_vec();
     let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -26,7 +26,7 @@ fn bench_encryption(c: &mut Criterion) {
 }
 
 fn bench_decryption(c: &mut Criterion) {
-    let crypto = FipsCrypto::new().unwrap();
+    let crypto = VaultCrypto::new().unwrap();
     let passphrase = b"benchmark_passphrase_12345".to_vec();
     let (key, _) = crypto.derive_key(passphrase, None).unwrap();
 
@@ -53,7 +53,7 @@ fn bench_decryption(c: &mut Criterion) {
 }
 
 fn bench_key_derivation(c: &mut Criterion) {
-    let crypto = FipsCrypto::new().unwrap();
+    let crypto = VaultCrypto::new().unwrap();
 
     c.bench_function("key_derivation", |b| {
         b.iter(|| {

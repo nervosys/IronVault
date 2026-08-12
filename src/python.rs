@@ -815,7 +815,7 @@ impl PyVaultBuilder {
 /// Standalone utility: SHA-256 hex digest of data.
 #[pyfunction]
 fn sha256_hex(data: &[u8]) -> String {
-    crate::crypto::FipsCrypto::hash_sha256_hex(data)
+    crate::crypto::VaultCrypto::hash_sha256_hex(data)
 }
 
 /// Library version string.
