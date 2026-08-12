@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.2.0] - 2026-08-12
+
+### Added
+
+- **`--format json` on `list`, `versions`, `stats`, `compliance` and
+  `lineage`.** The README's stability contract for agents has always said "every
+  read-style subcommand accepts `--format json`". It did not: the flag existed on
+  `introspect`, `search`, `scan`, `diff` and `license-scan`, and the five most
+  basic read commands — the ones an agent reaches for first — were text-only and
+  rejected the argument outright.
+
+  Each emits a stable object rather than a bare array, so fields can be added
+  without breaking callers, and an empty vault serialises as `{"models": []}`
+  rather than omitting the key. The compliance report carries the same caveat in
+  JSON that it prints in text: a machine-readable compliance document that drops
+  "this is not a certification" is precisely the one that ends up pasted into
+  evidence.
+
+  Found by running the published binary against the documented contract rather
+  than by reading either. `scripts/smoke_release.sh` now checks all five on every
+  release, against a real vault it creates and throws away.
+
 ## [6.1.1] - 2026-08-12
 
 ### Fixed

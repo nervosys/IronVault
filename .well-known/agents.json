@@ -4,7 +4,7 @@
   "project": {
     "id": "ironvault",
     "name": "IronVault",
-    "version": "6.1.1",
+    "version": "6.2.0",
     "description": "Encrypted AI/ML model management system with versioning, 23+ format conversion, compliance validation (FIPS 140-3, CMMC 2.0, MITRE ATT&CK), RAG with MCP tools, federation, blockchain audit, model download (HuggingFace/Ollama/URL), HMAC signing & verification, pickle safety scanning, tensor-level diffing, engine interop (Ollama/LM Studio), license scanning, model tags & search, vault export/import, garbage collection, TUI dashboard, webhooks, role-based ACL, KMS integration, model validation, retention policies, cross-model lineage DAG, plugin system, config profiles, quantization pipeline, evaluation harness, backup scheduling, and multi-vault management.",
     "homepage": "https://github.com/nervosys/IronVault",
     "documentation": "https://github.com/nervosys/IronVault/tree/master/docs",

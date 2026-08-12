@@ -78,12 +78,20 @@ pub enum Commands {
     },
 
     /// List all models in the vault
-    List,
+    List {
+        /// Output format (text, json)
+        #[arg(short, long, default_value = "text")]
+        format: String,
+    },
 
     /// Show versions of a model
     Versions {
         /// Model name
         name: String,
+
+        /// Output format (text, json)
+        #[arg(short, long, default_value = "text")]
+        format: String,
     },
 
     /// Show lineage/history of a model version
@@ -93,6 +101,10 @@ pub enum Commands {
 
         /// Version number
         version: u32,
+
+        /// Output format (text, json)
+        #[arg(short, long, default_value = "text")]
+        format: String,
     },
 
     /// Delete a model version
@@ -109,10 +121,18 @@ pub enum Commands {
     },
 
     /// Show vault statistics
-    Stats,
+    Stats {
+        /// Output format (text, json)
+        #[arg(short, long, default_value = "text")]
+        format: String,
+    },
 
     /// Run compliance checks
-    Compliance,
+    Compliance {
+        /// Output format (text, json)
+        #[arg(short, long, default_value = "text")]
+        format: String,
+    },
 
     /// Change vault passphrase
     ChangePassphrase,

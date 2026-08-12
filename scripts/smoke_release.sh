@@ -82,6 +82,27 @@ else
   printf 'FAIL  served spec declares only %s paths\n' "${PATHS:-0}"; FAIL=$((FAIL + 1))
 fi
 
+
+# The README's agent contract promises `--format json` on every read-style
+# command. It was false for these five until 6.2.0 -- the first thing an agent
+# integration would hit, and text-only output is not something `cargo test`
+# would have noticed.
+VAULTDIR="$(mktemp -d)"
+export IRONVAULT_HOME="$VAULTDIR"
+export IRONVAULT_PASSPHRASE="smoke-test-passphrase-not-a-real-secret"
+"$BIN" init >/dev/null 2>&1
+head -c 4096 /dev/urandom > "$VAULTDIR/m.safetensors" 2>/dev/null
+"$BIN" store smoketest "$VAULTDIR/m.safetensors" >/dev/null 2>&1
+
+for spec in "list" "versions smoketest" "stats" "compliance" "lineage smoketest 1"; do
+  # shellcheck disable=SC2086
+  if "$BIN" $spec --format json 2>/dev/null | python -c 'import sys,json; json.load(sys.stdin)' 2>/dev/null; then
+    printf 'PASS  iv %s --format json\n' "$spec"; PASS=$((PASS + 1))
+  else
+    printf 'FAIL  iv %s --format json\n' "$spec"; FAIL=$((FAIL + 1))
+  fi
+done
+rm -rf "$VAULTDIR"
 echo
 printf '%s passed, %s failed\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]

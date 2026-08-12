@@ -167,18 +167,22 @@ fn run() -> Result<()> {
             output,
             version,
         } => vault::handle_get(name, output, version, config, use_sqlite),
-        Commands::List => vault::handle_list(config, use_sqlite),
-        Commands::Versions { name } => vault::handle_versions(name, config, use_sqlite),
-        Commands::Lineage { name, version } => {
-            vault::handle_lineage(name, version, config, use_sqlite)
+        Commands::List { format } => vault::handle_list(config, use_sqlite, &format),
+        Commands::Versions { name, format } => {
+            vault::handle_versions(name, config, use_sqlite, &format)
         }
+        Commands::Lineage {
+            name,
+            version,
+            format,
+        } => vault::handle_lineage(name, version, config, use_sqlite, &format),
         Commands::Delete {
             name,
             version,
             force,
         } => vault::handle_delete(name, version, force, config, use_sqlite),
-        Commands::Stats => vault::handle_stats(config, use_sqlite),
-        Commands::Compliance => vault::handle_compliance(),
+        Commands::Stats { format } => vault::handle_stats(config, use_sqlite, &format),
+        Commands::Compliance { format } => vault::handle_compliance(&format),
         Commands::ChangePassphrase => vault::handle_change_passphrase(config, use_sqlite),
         Commands::Archive {
             models,

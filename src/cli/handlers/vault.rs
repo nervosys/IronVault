@@ -156,13 +156,34 @@ pub fn handle_get(
     Ok(())
 }
 
-pub fn handle_list(config: VaultConfig, use_sqlite: bool) -> Result<()> {
+pub fn handle_list(config: VaultConfig, use_sqlite: bool, format: &str) -> Result<()> {
     let passphrase = prompt_passphrase("Enter vault passphrase: ")?;
 
     let mut vault = build_vault(config, use_sqlite)?;
     vault.unlock(passphrase)?;
 
     let models = vault.list_models();
+
+    if format == "json" {
+        let payload: Vec<serde_json::Value> = models
+            .iter()
+            .map(|model| {
+                let versions = vault.list_versions(model);
+                serde_json::json!({
+                    "name": model,
+                    "versions": versions.len(),
+                    "latest_version": versions.iter().map(|v| v.version).max(),
+                })
+            })
+            .collect();
+        // An empty vault serialises as an empty array rather than an absent
+        // key, so a caller indexing the result never has to special-case it.
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&serde_json::json!({ "models": payload }))?
+        );
+        return Ok(());
+    }
 
     if models.is_empty() {
         println!("No models in vault");
@@ -176,7 +197,12 @@ pub fn handle_list(config: VaultConfig, use_sqlite: bool) -> Result<()> {
     Ok(())
 }
 
-pub fn handle_versions(name: String, config: VaultConfig, use_sqlite: bool) -> Result<()> {
+pub fn handle_versions(
+    name: String,
+    config: VaultConfig,
+    use_sqlite: bool,
+    format: &str,
+) -> Result<()> {
     let vault = build_vault(config, use_sqlite)?;
     let versions = vault.list_versions(&name);
 
@@ -184,6 +210,28 @@ pub fn handle_versions(name: String, config: VaultConfig, use_sqlite: bool) -> R
         // A model with no versions is not in this vault. Printing and exiting
         // 0 told every script that the lookup succeeded.
         return Err(VaultError::ModelNotFound(name));
+    }
+
+    if format == "json" {
+        let payload: Vec<serde_json::Value> = versions
+            .iter()
+            .map(|v| {
+                serde_json::json!({
+                    "version": v.version,
+                    "timestamp": v.timestamp.to_rfc3339(),
+                    "size_bytes": v.size_bytes,
+                    "format": v.format.to_string(),
+                    "checkpoint_id": v.checkpoint_id,
+                })
+            })
+            .collect();
+        println!(
+            "{}",
+            serde_json::to_string_pretty(
+                &serde_json::json!({ "model": name, "versions": payload })
+            )?
+        );
+        return Ok(());
     }
 
     println!("Versions of '{}':", name);
@@ -204,12 +252,36 @@ pub fn handle_lineage(
     version: u32,
     config: VaultConfig,
     use_sqlite: bool,
+    format: &str,
 ) -> Result<()> {
     let vault = build_vault(config, use_sqlite)?;
     let lineage = vault.get_lineage(&name, version);
 
     if lineage.is_empty() {
         return Err(VaultError::VersionNotFound(version, name));
+    }
+
+    if format == "json" {
+        let payload: Vec<serde_json::Value> = lineage
+            .iter()
+            .map(|v| {
+                serde_json::json!({
+                    "version": v.version,
+                    "timestamp": v.timestamp.to_rfc3339(),
+                    "checkpoint_id": v.checkpoint_id,
+                    "parent_version": v.parent_version,
+                })
+            })
+            .collect();
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&serde_json::json!({
+                "model": name,
+                "version": version,
+                "lineage": payload,
+            }))?
+        );
+        return Ok(());
     }
 
     println!("Lineage for '{}' v{}:", name, version);
@@ -279,9 +351,22 @@ pub fn handle_delete(
     Ok(())
 }
 
-pub fn handle_stats(config: VaultConfig, use_sqlite: bool) -> Result<()> {
+pub fn handle_stats(config: VaultConfig, use_sqlite: bool, format: &str) -> Result<()> {
     let vault = build_vault(config, use_sqlite)?;
     let stats = vault.get_stats()?;
+
+    if format == "json" {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&serde_json::json!({
+                "model_count": stats.model_count,
+                "total_versions": stats.total_versions,
+                "total_size_bytes": stats.total_size_bytes,
+                "file_count": stats.file_count,
+            }))?
+        );
+        return Ok(());
+    }
 
     println!("Vault Statistics:");
     println!("  Models: {}", stats.model_count);
@@ -295,12 +380,51 @@ pub fn handle_stats(config: VaultConfig, use_sqlite: bool) -> Result<()> {
     Ok(())
 }
 
-pub fn handle_compliance() -> Result<()> {
-    println!("Running compliance checks...\n");
+/// Caveat attached to every compliance report, text or JSON.
+const NOTE_TEXT: &str = "Only checks reported as VERIFIED were tested by this run. This is not a certification: FIPS 140-3 validation is issued by NIST's CMVP for a cryptographic module, and CMMC certification by a C3PAO assessment of an organisation.";
 
+pub fn handle_compliance(format: &str) -> Result<()> {
     let checker = ComplianceChecker::new();
     let status = checker.run_all_checks()?;
 
+    if format == "json" {
+        let outcomes: Vec<serde_json::Value> = status
+            .outcomes
+            .iter()
+            .map(|(name, outcome)| {
+                serde_json::json!({
+                    "check": name,
+                    "result": outcome.label(),
+                    "detail": outcome.detail(),
+                })
+            })
+            .collect();
+        let violations: Vec<serde_json::Value> = status
+            .violations
+            .iter()
+            .map(|v| {
+                serde_json::json!({
+                    "severity": format!("{:?}", v.severity),
+                    "standard": v.standard,
+                    "control": v.control,
+                    "description": v.description,
+                })
+            })
+            .collect();
+        // Carries the same caveat as the text output. A machine-readable
+        // compliance report without it invites being pasted into evidence.
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&serde_json::json!({
+                "checks": outcomes,
+                "violations": violations,
+                "note": NOTE_TEXT,
+            }))?
+        );
+        return Ok(());
+    }
+
+    println!("Running compliance checks...\n");
     println!("Compliance Status:");
     for (name, outcome) in &status.outcomes {
         println!("  {name}: {}", outcome.label());
