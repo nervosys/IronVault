@@ -121,7 +121,8 @@ mapping.
 | [`.well-known/`](.well-known/) — discovery manifests             | [Installation](#installation)                       | [Build & Validate](#build--validate)           |
 | [`iv introspect`](#for-ai-agents--read-this-first) — CLI schema | [CLI Reference](docs/CLI.md)                        | [Architecture](#architecture)                  |
 | [MCP tools](docs/MCP_TOOLS.md) — 86 tools                        | [Rust API Quickstart](#rust-library-api-quickstart) | [Performance](docs/PERFORMANCE.md)             |
-| [OpenAPI 3.1](.well-known/openapi.yaml) — 56 endpoints           | [Demos](#interactive-demos)                         | [Deployment](#deployment)                      |
+| [OpenAPI 3.1](.well-known/openapi.yaml) — 56 endpoints           | [REST API Reference](docs/REST_API.md)              | [Deployment](#deployment)                      |
+|                                                                  | [Demos](#interactive-demos)                         |                                                |
 |                                                                  | [Telemetry](docs/TELEMETRY.md) — opt-in, disclosed  | [Contributing](CONTRIBUTING.md)                |
 
 ---
@@ -280,7 +281,7 @@ All features below are fully implemented, tested, and exposed via both CLI and l
 
 | Feature              | Surface               | Notes                                              |
 | -------------------- | --------------------- | -------------------------------------------------- |
-| REST API             | `iv serve`           | Axum + JWT + 56 endpoints, OpenAPI 3.1             |
+| REST API             | `iv serve`           | Axum + JWT + 56 endpoints, [reference](docs/REST_API.md) |
 | GraphQL API          | `iv serve --graphql` | `async-graphql` with playground                    |
 | MCP tools            | library               | 4 built-in tools + custom registration             |
 | Python bindings      | `pip install` (PyO3)  | `--features python`                                |
@@ -478,6 +479,18 @@ Full guide: [docs/CLOUD_STORAGE.md](docs/CLOUD_STORAGE.md) · CLI: [docs/CLOUD_C
 ## Deployment
 
 Running `iv serve` as a service. Both paths keep configuration **service-scoped** — nothing is written to `/etc/environment` or a profile script, so no other process on the host inherits the API secret or a telemetry token.
+
+> [!IMPORTANT]
+> **`iv serve` refuses to bind a non-loopback address without TLS.** Set
+> `tls_cert` and `tls_key` to PEM paths and it serves HTTPS directly; loopback
+> binds still serve plain HTTP, because those packets never reach a network.
+>
+> This is enforced, not advised, because `POST /api/v1/auth/token` carries the
+> vault **passphrase** — the value the encryption key is derived from. Unlike a
+> leaked token it never expires, revocation cannot reach it, and it decrypts any
+> copy of the vault taken at any time. To terminate TLS at a reverse proxy, run
+> the proxy on the same host and leave the server on `127.0.0.1`; a proxy on a
+> different host is a real network hop that needs its own TLS.
 
 ### systemd
 
