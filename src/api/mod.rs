@@ -58,6 +58,28 @@ pub struct ApiConfig {
     /// why this does not extend across replicas.
     #[serde(default)]
     pub revocation_store: Option<std::path::PathBuf>,
+
+    /// PEM certificate chain for in-process TLS. Required to bind a
+    /// non-loopback address; see [`tls_key`](Self::tls_key).
+    #[serde(default)]
+    pub tls_cert: Option<std::path::PathBuf>,
+
+    /// PEM private key matching [`tls_cert`](Self::tls_cert).
+    ///
+    /// The server refuses to bind anything but loopback without both of these.
+    /// `POST /api/v1/auth/token` carries the vault *passphrase*, not merely a
+    /// credential for a session — anyone who can read that request derives the
+    /// vault key permanently, including against a copy of the vault taken
+    /// later, and leaves no audit trail doing it. A revoked token expires; a
+    /// disclosed passphrase does not.
+    ///
+    /// Loopback is exempt because the traffic never reaches a wire. If TLS is
+    /// terminated by a reverse proxy, run the proxy on the same host and let
+    /// this bind `127.0.0.1` — that is the configuration this exemption is for.
+    /// A proxy on a *different* host means the hop to it is a real network hop
+    /// and needs its own TLS, which is why there is no "trust me" flag here.
+    #[serde(default)]
+    pub tls_key: Option<std::path::PathBuf>,
 }
 
 impl Default for ApiConfig {
@@ -71,6 +93,8 @@ impl Default for ApiConfig {
             max_body_size: 512 * 1024 * 1024,
             enable_dashboard: true,
             revocation_store: None,
+            tls_cert: None,
+            tls_key: None,
         }
     }
 }

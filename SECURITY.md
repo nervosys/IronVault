@@ -52,6 +52,25 @@ BoringCrypto, or an HSM) *and* a FIPS-approved KDF. See `iv compliance` and
 `src/compliance.rs`, which report this relationship rather than asserting a
 determination.
 
+### Transport
+
+`iv serve` **refuses to bind a non-loopback address without TLS.** Set `tls_cert`
+and `tls_key` to PEM paths and the server terminates TLS itself; loopback binds
+continue to serve plain HTTP, because those packets never reach a network.
+
+This is enforced rather than recommended because `POST /api/v1/auth/token`
+carries the vault passphrase — the value the encryption key is derived from.
+Disclosing it is not comparable to leaking a session token: it does not expire,
+revocation cannot reach it, it decrypts any copy of the vault taken at any time,
+and using it offline leaves no audit record. A single packet capture on a shared
+segment during one unlock is a permanent, silent compromise.
+
+To terminate TLS at a reverse proxy, run the proxy on the same host and leave the
+server on `127.0.0.1`. There is deliberately no flag to bypass the check: a proxy
+on a different host is a real network hop that needs its own TLS, and a
+"the network is trusted" switch is the kind that gets set while debugging and
+never unset.
+
 ### Access Control
 - Passphrase-protected vault access
 - Secure key management

@@ -164,6 +164,12 @@ jsonwebtoken = { version = "11.0", optional = true, default-features = false, fe
 utoipa = { version = "5", features = ["axum_extras"], optional = true }
 base64 = { version = "0.23", optional = true }
 hyper = { version = "1.4", optional = true }
+# In-process TLS. The server refuses to bind a non-loopback address without it,
+# because `POST /auth/token` carries the vault passphrase — see `ApiConfig::tls_key`.
+# `rustls` rather than native-tls so there is no OpenSSL build dependency.
+axum-server = { version = "0.7", features = [
+    "tls-rustls",
+], optional = true }
 
 # GraphQL API (optional)
 async-graphql = { version = "7.0", features = [
@@ -230,6 +236,7 @@ api = [
     "utoipa",
     "base64",
     "hyper",
+    "axum-server",
 ]
 # GraphQL API (requires api)
 graphql = ["api", "async-graphql"]

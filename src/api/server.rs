@@ -4,10 +4,20 @@
 //!
 //! ## TLS / HTTPS
 //!
-//! This server binds plain HTTP by default. For production deployments,
-//! terminate TLS at a reverse proxy (e.g., nginx, Caddy, AWS ALB) or use
-//! `axum-server` with `rustls` for direct TLS termination. Never expose
-//! the API over plain HTTP on untrusted networks.
+//! Loopback binds serve plain HTTP; **any other address requires TLS** and the
+//! server refuses to start without it. Set `tls_cert` and `tls_key` to PEM paths
+//! and it terminates TLS itself via `rustls`.
+//!
+//! This is enforced rather than advised because `POST /api/v1/auth/token`
+//! carries the vault passphrase — the value the encryption key is derived from.
+//! Disclosing it is not comparable to leaking a session token: it never expires,
+//! revocation cannot reach it, it decrypts any copy of the vault taken at any
+//! time, and using it offline leaves no audit record.
+//!
+//! To terminate TLS at a reverse proxy (nginx, Caddy, an ALB), run the proxy on
+//! this host and leave the server bound to `127.0.0.1`. A proxy on a different
+//! host is a real network hop and needs TLS of its own, which is why there is no
+//! flag to disable this check.
 
 use axum::routing::{delete, get, post, put};
 use axum::Router;
@@ -410,21 +420,87 @@ pub async fn serve(vault_config: VaultConfig, api_config: ApiConfig) -> Result<(
         .parse()
         .map_err(|e| VaultError::ConfigError(format!("Invalid bind address: {e}")))?;
 
+    let scheme = if api_config.tls_cert.is_some() {
+        "https"
+    } else {
+        "http"
+    };
     println!("IronVault API v{}", env!("CARGO_PKG_VERSION"));
-    println!("  Listening on http://{}", addr);
-    println!("  Dashboard:   http://{}/", addr);
-    println!("  OpenAPI:     http://{}/api/v1/openapi.json", addr);
+    println!("  Listening on {scheme}://{addr}");
+    println!("  Dashboard:   {scheme}://{addr}/");
+    println!("  OpenAPI:     {scheme}://{addr}/api/v1/openapi.json");
     println!();
 
-    let listener = tokio::net::TcpListener::bind(addr)
-        .await
-        .map_err(VaultError::IoError)?;
-
-    axum::serve(listener, router)
-        .await
-        .map_err(|e| VaultError::IoError(std::io::Error::other(e.to_string())))?;
+    if let Some((cert, key)) = resolve_tls(
+        &addr,
+        api_config.tls_cert.as_deref(),
+        api_config.tls_key.as_deref(),
+    )? {
+        let config = axum_server::tls_rustls::RustlsConfig::from_pem_file(&cert, &key)
+            .await
+            .map_err(|e| {
+                VaultError::ConfigError(format!(
+                    "Failed to load TLS certificate {} / key {}: {e}",
+                    cert.display(),
+                    key.display()
+                ))
+            })?;
+        axum_server::bind_rustls(addr, config)
+            .serve(router)
+            .await
+            .map_err(|e| VaultError::IoError(std::io::Error::other(e.to_string())))?;
+    } else {
+        let listener = tokio::net::TcpListener::bind(addr)
+            .await
+            .map_err(VaultError::IoError)?;
+        axum::serve(listener, router)
+            .await
+            .map_err(|e| VaultError::IoError(std::io::Error::other(e.to_string())))?;
+    }
 
     Ok(())
+}
+
+/// Decide whether this bind runs over TLS, refusing the combination that would
+/// put the vault passphrase on a wire in the clear.
+///
+/// `POST /api/v1/auth/token` takes the vault passphrase in its body. That is the
+/// value the encryption key is derived from, so disclosing it is not like
+/// leaking a session token: it does not expire, revocation cannot reach it, it
+/// decrypts any copy of the vault taken at any time, and using it offline
+/// produces no audit record. One packet capture on a shared segment during a
+/// single unlock is a permanent, silent compromise.
+///
+/// Loopback is exempt because those packets never reach a network. Everything
+/// else requires a certificate and key. There is deliberately no bypass flag: a
+/// "trust me, this network is fine" switch is precisely what gets set during
+/// debugging and never unset. Operators terminating TLS at a reverse proxy
+/// should run the proxy on this host and leave the server on loopback — a proxy
+/// on another host is a real network hop and needs real TLS.
+fn resolve_tls(
+    addr: &SocketAddr,
+    cert: Option<&std::path::Path>,
+    key: Option<&std::path::Path>,
+) -> Result<Option<(std::path::PathBuf, std::path::PathBuf)>> {
+    match (cert, key) {
+        (Some(c), Some(k)) => Ok(Some((c.to_path_buf(), k.to_path_buf()))),
+        (None, None) if addr.ip().is_loopback() => Ok(None),
+        (None, None) => Err(VaultError::ConfigError(format!(
+            "Refusing to serve {addr} without TLS.\n\n\
+             `POST /api/v1/auth/token` carries the vault passphrase, which derives the \
+             encryption key. Over plain HTTP anyone who can observe the traffic can \
+             decrypt the vault permanently, and revoking a token does not help.\n\n\
+             Either:\n  \
+             - set `tls_cert` and `tls_key` (PEM paths) to serve HTTPS directly, or\n  \
+             - bind 127.0.0.1 and terminate TLS at a reverse proxy on this host."
+        ))),
+        (Some(_), None) => Err(VaultError::ConfigError(
+            "`tls_cert` is set but `tls_key` is not; TLS needs both".into(),
+        )),
+        (None, Some(_)) => Err(VaultError::ConfigError(
+            "`tls_key` is set but `tls_cert` is not; TLS needs both".into(),
+        )),
+    }
 }
 
 #[cfg(test)]
@@ -529,5 +605,66 @@ mod tests {
         let err = validate_jwt_secret("short").unwrap_err().to_string();
         assert!(err.contains("RFC 7518"), "got: {err}");
         assert!(err.contains("openssl rand"), "got: {err}");
+    }
+
+    // ── TLS enforcement ──────────────────────────────────────────────────
+    //
+    // The rule these pin: loopback may serve plain HTTP, anything else must
+    // present a certificate and key. `POST /auth/token` carries the vault
+    // passphrase, so a cleartext bind on a real interface discloses the value
+    // the encryption key is derived from.
+
+    fn sock(s: &str) -> SocketAddr {
+        s.parse().expect("test address parses")
+    }
+
+    #[test]
+    fn loopback_may_serve_plain_http() {
+        for addr in ["127.0.0.1:8080", "[::1]:8080", "127.0.0.5:9999"] {
+            let got = resolve_tls(&sock(addr), None, None);
+            assert!(
+                matches!(got, Ok(None)),
+                "{addr} should be allowed without TLS"
+            );
+        }
+    }
+
+    #[test]
+    fn non_loopback_without_tls_is_refused() {
+        for addr in [
+            "0.0.0.0:8080",
+            "192.168.1.10:8080",
+            "10.0.0.4:443",
+            "[::]:8080",
+        ] {
+            let err = resolve_tls(&sock(addr), None, None)
+                .expect_err("{addr} must be refused without TLS")
+                .to_string();
+            assert!(err.contains("Refusing to serve"), "got: {err}");
+            // The message has to say *why*, or an operator will just look for a
+            // flag to silence it.
+            assert!(err.contains("passphrase"), "got: {err}");
+            assert!(err.contains("tls_cert"), "got: {err}");
+        }
+    }
+
+    #[test]
+    fn non_loopback_with_tls_is_allowed() {
+        let got = resolve_tls(
+            &sock("0.0.0.0:8443"),
+            Some(std::path::Path::new("/etc/ssl/cert.pem")),
+            Some(std::path::Path::new("/etc/ssl/key.pem")),
+        );
+        assert!(matches!(got, Ok(Some(_))), "TLS bind should be allowed");
+    }
+
+    #[test]
+    fn half_configured_tls_is_refused_even_on_loopback() {
+        let cert = Some(std::path::Path::new("/etc/ssl/cert.pem"));
+        let key = Some(std::path::Path::new("/etc/ssl/key.pem"));
+        // Silently downgrading to plain HTTP because one path was missing is
+        // exactly the failure this whole change exists to prevent.
+        assert!(resolve_tls(&sock("127.0.0.1:8080"), cert, None).is_err());
+        assert!(resolve_tls(&sock("127.0.0.1:8080"), None, key).is_err());
     }
 }
