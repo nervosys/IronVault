@@ -72,10 +72,14 @@ iv list --format json      # after
 | `AIM_REVOCATION_STORE` | `IRONVAULT_REVOCATION_STORE` |
 | `AIM_TELEMETRY_ENABLED` / `_DISABLED` | `IRONVAULT_TELEMETRY_ENABLED` / `_DISABLED` |
 
-**The old names still work in 5.0.** Each one warns once to stderr the first
-time it is read. The warning prints the variable name only, never its value —
-several of these carry passphrases. Support for the old names is removed in
-6.0, so treat this as a deprecation rather than a break.
+**The old names worked throughout 5.x**, warning once to stderr the first time
+each was read. **6.0 removed that fallback**, as those warnings said it would.
+
+Setting an old name now prints a warning that it is set, is *not* being read,
+and what to rename it to — so the removal announces itself instead of quietly
+leaving a passphrase or JWT secret unset. The warning prints the variable name
+only, never its value; several of these carry secrets. If you are upgrading from
+4.x or from a 5.x deployment that never renamed, rename before upgrading.
 
 `DO_NOT_TRACK`, `AWS_*`, `AZURE_*`, and `OTEL_*` are third-party or cross-vendor
 conventions and are unaffected.

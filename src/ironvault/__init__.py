@@ -5,7 +5,7 @@ Native Rust bindings via PyO3. Falls back to pure-Python CLI wrappers
 if the native extension is not available (e.g. source installs without Rust).
 """
 
-__version__ = "5.1.2"
+__version__ = "6.0.0"
 
 try:
     # Native Rust bindings (installed via maturin)

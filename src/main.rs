@@ -77,7 +77,7 @@ fn run() -> Result<()> {
     // directly and cannot be routed through `env::var`; without this, upgrading
     // would silently drop an existing deployment's `--jwt-secret`, `--host`,
     // and `--port` configuration. Warns once per variable.
-    ironvault::env::migrate_legacy();
+    ironvault::env::report_legacy();
 
     // Parsed by hand rather than with `Cli::parse()`, which exits 2 on a usage
     // error. Code 2 is `EXIT_AUTH` in the published table, so a mistyped

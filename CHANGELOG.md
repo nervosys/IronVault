@@ -5,7 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [5.1.2] - 2026-08-11
+## [6.0.0] - 2026-08-11
+
+Major because two changes break existing deployments. Both were pre-announced —
+one by a runtime warning since 5.0, the other by a security review — but a
+breaking change is breaking regardless of how well it was signposted, and
+shipping it as a patch would have let `cargo update` and `pip install -U` take
+it silently. That is the whole reason the version number carries meaning.
+
+### Changed — BREAKING
+
+- **`iv serve` refuses to bind a non-loopback address without TLS.** Set
+  `tls_cert` and `tls_key` (PEM paths) and the server terminates TLS itself via
+  rustls; loopback binds still serve plain HTTP, because those packets never
+  reach a network. Anything else without both paths now fails at startup.
+
+  The value at risk is not a session credential. `POST /api/v1/auth/token`
+  carries the vault *passphrase*, which the encryption key is derived from —
+  so disclosure does not expire, the revocation list added in 5.1.0 cannot
+  reach it, it decrypts any copy of the vault taken at any time, and using it
+  offline leaves no audit record. One packet capture on a shared segment during
+  a single unlock is a permanent, silent compromise. The line is therefore
+  loopback versus not, rather than local versus remote: a LAN is a wire other
+  machines can read, which is MITRE ATT&CK T1040 exactly.
+
+  There is deliberately no bypass flag. A "this network is trusted" switch is
+  the kind that gets set while debugging and never unset. Terminating TLS at a
+  reverse proxy is still supported — run the proxy on the same host and leave
+  the server on `127.0.0.1`; a proxy on a different host is a real network hop
+  that needs its own TLS.
+
+  **To upgrade:** if you bind `0.0.0.0` or a LAN address, either configure
+  `tls_cert` / `tls_key`, or move the server to `127.0.0.1` behind a local
+  proxy. Until you do, it will not start — which is preferable to what it was
+  doing before.
+
+- **The 4.x environment variable names are no longer read.** `aimodelvault_*`
+  and `AIM_*` resolved to their `IRONVAULT_*` equivalents throughout 5.x, with
+  a one-time warning per variable saying the fallback would go in 6.0. It is
+  gone.
+
+  The names are still *detected*: setting one now prints a warning that it is
+  set, is not being read, and what to rename it to. Removing the fallback
+  silently would have meant an upgrade where a passphrase or JWT secret simply
+  becomes unset, which is the failure the shim existed to prevent — reintroducing
+  it at removal time would be the worst possible moment for it.
 
 ### Fixed
 

@@ -14,7 +14,7 @@
 [![CMMC](https://img.shields.io/badge/CMMC%202.0%20L2-controls%20supported-blue.svg)](docs/SECURITY_HARDENING.md)
 [![Tests](https://img.shields.io/badge/tests-2%2C227%20passing-brightgreen.svg)](reports/)
 [![Coverage](https://img.shields.io/badge/coverage-85.4%25-brightgreen.svg)](docs/PERFORMANCE.md)
-[![Version](https://img.shields.io/badge/version-5.1.2-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-6.0.0-blue.svg)](CHANGELOG.md)
 [![crates.io](https://img.shields.io/crates/v/ironvault.svg)](https://crates.io/crates/ironvault)
 [![PyPI](https://img.shields.io/pypi/v/ironvault.svg)](https://pypi.org/project/ironvault/)
 [![Clippy](https://img.shields.io/badge/clippy-clean-brightgreen.svg)](validate.ps1)
@@ -41,7 +41,8 @@ This project was renamed to **IronVault** in 5.0.0. Every identity moved at once
 XDG layout was already name-neutral (`~/.config/ai/models/`), and the encrypted
 formats are read under both their old and new identifiers — objects sealed by
 4.x still decrypt, and stored `aimv://` URIs still parse. The old environment
-variable names still work too, warning once each; they stop being read in 6.0.
+variable names worked throughout 5.x, warning once each; **6.0 stopped reading
+them** — setting one now warns that it has no effect and names its replacement.
 
 The old packages remain installable at 4.6.x and receive no further releases.
 Full details and the systemd migration steps: **[docs/MIGRATION.md](docs/MIGRATION.md)**.
