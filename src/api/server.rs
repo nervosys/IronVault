@@ -420,22 +420,23 @@ pub async fn serve(vault_config: VaultConfig, api_config: ApiConfig) -> Result<(
         .parse()
         .map_err(|e| VaultError::ConfigError(format!("Invalid bind address: {e}")))?;
 
-    let scheme = if api_config.tls_cert.is_some() {
-        "https"
-    } else {
-        "http"
-    };
+    // Resolved before the banner, not after: printing "Listening on
+    // http://0.0.0.0:8080" and *then* refusing to serve tells the operator the
+    // server started when it did not.
+    let tls = resolve_tls(
+        &addr,
+        api_config.tls_cert.as_deref(),
+        api_config.tls_key.as_deref(),
+    )?;
+
+    let scheme = if tls.is_some() { "https" } else { "http" };
     println!("IronVault API v{}", env!("CARGO_PKG_VERSION"));
     println!("  Listening on {scheme}://{addr}");
     println!("  Dashboard:   {scheme}://{addr}/");
     println!("  OpenAPI:     {scheme}://{addr}/api/v1/openapi.json");
     println!();
 
-    if let Some((cert, key)) = resolve_tls(
-        &addr,
-        api_config.tls_cert.as_deref(),
-        api_config.tls_key.as_deref(),
-    )? {
+    if let Some((cert, key)) = tls {
         let config = axum_server::tls_rustls::RustlsConfig::from_pem_file(&cert, &key)
             .await
             .map_err(|e| {
