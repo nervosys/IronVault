@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.2] - 2026-08-11
+
+### Fixed
+
+- **Deleting a model's last version now removes the model.** `delete_version` is the only delete there is — deleting every version *is* how a caller deletes a model — and it left the name behind with an empty version list. That name went on appearing in `list_models` and counting toward `get_stats().model_count`, so a vault reported a model `get_model` could not serve, and a CLI built on this had to explain the difference.
+
+  Worse in the SQLite backend, where it was an inconsistency with itself: `list_models` answers from the in-memory cache while the rows had already been deleted, so the repo listed a model that the same repo stopped listing after a reopen rebuilt that cache from those rows. Both backends now drop the model when its last version goes — which is also what the shared `VersionRepo` trait implies by making them interchangeable.
+
+  `cleanup_old_versions(name, 0)` reached the same state in the JSON backend and got the same fix; the SQLite backend inherits it by delegating to its own `delete_version`.
+
+  Found downstream, by a caller implementing "delete this model" as a loop over `delete_version` and then having to render a model with no versions — but it was never only downstream: the GraphQL `deleteModel` mutation is that same loop, so it reported `success: true` and the model stayed in `models`. That one is fixed by this change without touching the resolver.
+
+- **`DirectoryPaths::vault_dir` is now documented, and its 27 wrong uses corrected.** The field is the directory vaults live *in*; `get_vault_path` joins the vault's name onto it. Every test in `vault.rs` set it to `data/vaults/default`, which yields `…/vaults/default/default` — harmless in a temp directory, but a downstream caller copied the shape from those tests and shipped the doubled path. The tests now show the layout `config.rs` actually builds.
+
 ## [5.1.1] - 2026-08-10
 
 ### Fixed

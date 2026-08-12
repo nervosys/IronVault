@@ -194,13 +194,23 @@ impl VersionControl {
         lineage
     }
 
-    /// Delete a specific version
+    /// Delete a specific version.
+    ///
+    /// Deleting a model's last version removes the model, rather than leaving
+    /// the name behind with an empty version list. There is no "delete a model"
+    /// operation — deleting every version *is* how a caller deletes one — so a
+    /// name that outlived its versions showed up in `list_models` and counted
+    /// toward `model_count` while having nothing in it, and a CLI built on this
+    /// had to explain a model that was not there.
     pub fn delete_version(&mut self, model_name: &str, version: u32) -> Result<bool> {
         if let Some(versions) = self.versions.get_mut(model_name) {
             let original_len = versions.len();
             versions.retain(|v| v.version != version);
 
             if versions.len() < original_len {
+                if versions.is_empty() {
+                    self.versions.remove(model_name);
+                }
                 self.save_versions()?;
                 return Ok(true);
             }
@@ -233,6 +243,13 @@ impl VersionControl {
             .collect();
 
         versions.truncate(keep_count);
+        // `keep_count == 0` empties the model, and a name with no versions is
+        // not a model — the same rule `delete_version` follows. The SQLite
+        // backend gets this for free by delegating to its own `delete_version`;
+        // this branch is what keeps the two agreeing.
+        if versions.is_empty() {
+            self.versions.remove(model_name);
+        }
         self.save_versions()?;
 
         Ok(to_delete)
@@ -473,6 +490,42 @@ mod tests {
         // Delete from nonexistent model
         let not_deleted2 = vc.delete_version("nonexistent", 1).unwrap();
         assert!(!not_deleted2);
+    }
+
+    /// Deleting every version of a model deletes the model. There is no other
+    /// way to delete one, so a name left behind with an empty version list is a
+    /// model that `list_models` reports and `get_model` cannot serve.
+    #[test]
+    fn deleting_the_last_version_removes_the_model() {
+        let temp_dir = tempdir().unwrap();
+        let mut vc = VersionControl::new(temp_dir.path()).unwrap();
+        vc.add_version("m", "f1.enc", "pt", 100, 50, "c1", None, None)
+            .unwrap();
+        vc.add_version("keep", "k1.enc", "pt", 10, 5, "k", None, None)
+            .unwrap();
+
+        assert!(vc.delete_version("m", 1).unwrap());
+
+        assert!(
+            !vc.list_models_owned().contains(&"m".to_string()),
+            "the model outlived its last version: {:?}",
+            vc.list_models_owned()
+        );
+        assert!(vc.list_versions("m").is_empty());
+        // Its neighbour is untouched.
+        assert_eq!(vc.list_versions("keep").len(), 1);
+
+        // And the removal is persisted, not only in memory.
+        let reloaded = VersionControl::new(temp_dir.path()).unwrap();
+        assert_eq!(reloaded.list_models_owned(), vec!["keep".to_string()]);
+
+        // Storing under the name again starts a fresh history.
+        assert_eq!(
+            vc.add_version("m", "f2.enc", "pt", 100, 50, "c2", None, None)
+                .unwrap()
+                .version,
+            1
+        );
     }
 
     #[test]

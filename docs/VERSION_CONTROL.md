@@ -396,6 +396,13 @@ println!("Deleted {} versions: {:?}", deleted.len(), deleted);
 
 ### Delete Specific Version
 
+Deleting a version is the only delete there is — there is no "delete the model" —
+so **deleting a model's last version removes the model.** Its name stops
+appearing in `list_models`, stops counting toward `get_stats().model_count`, and
+storing under that name again starts a fresh history at v1. The alternative, a
+name kept alive with an empty version list, is a model `list_models` reports and
+`get_model` cannot serve.
+
 ```rust
 let deleted = vault.delete_version("llama-2-7b-chat", 7)?;
 

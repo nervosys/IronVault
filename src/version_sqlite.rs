@@ -461,9 +461,18 @@ impl crate::traits::VersionRepo for SqliteVersionRepo {
             count > 0
         };
 
-        // Update cache
+        // Update the cache, dropping the model when its last version goes.
+        //
+        // Not cosmetic: `list_models` answers from the cache, and the rows are
+        // already gone from the database. A retained empty entry meant this repo
+        // listed a model that the same repo would not list after a restart, when
+        // the cache is rebuilt from those rows. It also matches the JSON
+        // backend, which the same trait is meant to make interchangeable.
         if let Some(versions) = self.cache.get_mut(model) {
             versions.retain(|v| v.version != version);
+            if versions.is_empty() {
+                self.cache.remove(model);
+            }
         }
 
         Ok(deleted)
@@ -627,6 +636,37 @@ mod tests {
         assert!(repo.delete_version("m", 2).unwrap());
         assert_eq!(repo.list_versions("m").len(), 2);
         assert!(!repo.delete_version("m", 99).unwrap());
+    }
+
+    /// Deleting every version deletes the model here too, and for a reason
+    /// specific to this backend: `list_models` answers from the cache while the
+    /// rows are already gone, so a retained empty entry made this repo list a
+    /// model that the same repo would stop listing after a reopen.
+    #[test]
+    fn deleting_the_last_version_removes_the_model_from_the_cache_and_the_database() {
+        let temp = tempfile::tempdir().unwrap();
+        let vault_path = temp.path();
+
+        {
+            let mut repo = SqliteVersionRepo::new(vault_path).unwrap();
+            repo.add_version("gone", "f.enc", "pt", 100, 50, "c1", None, None)
+                .unwrap();
+            repo.add_version("keep", "k.enc", "pt", 10, 5, "k1", None, None)
+                .unwrap();
+
+            assert!(repo.delete_version("gone", 1).unwrap());
+            assert!(
+                !repo.list_models().contains(&"gone".to_string()),
+                "the cache still lists a model with no rows: {:?}",
+                repo.list_models()
+            );
+            assert!(repo.list_versions("gone").is_empty());
+            assert!(repo.list_models().contains(&"keep".to_string()));
+        }
+
+        // What a reopen rebuilds from the rows must be what the cache said.
+        let reopened = SqliteVersionRepo::new(vault_path).unwrap();
+        assert_eq!(reopened.list_models(), vec!["keep".to_string()]);
     }
 
     #[test]

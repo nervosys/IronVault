@@ -301,6 +301,12 @@ pub struct DirectoryPaths {
     pub config_dir: PathBuf,
     pub data_dir: PathBuf,
     pub cache_dir: PathBuf,
+    /// The directory vaults live *in* — `…/data/vaults`, not one vault.
+    ///
+    /// [`VaultConfig::get_vault_path`] joins the vault's name onto this, so
+    /// naming a vault here gives you `…/vaults/default/default`. Worth stating,
+    /// because the tests in `vault.rs` all set it to `data/vaults/default` and a
+    /// downstream caller copied that shape from them.
     pub vault_dir: PathBuf,
     pub log_dir: PathBuf,
     pub backends_dir: PathBuf,

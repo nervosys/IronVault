@@ -4326,6 +4326,16 @@ mod coverage_final_tests {
         // Should not be retrievable
         let result = vault.get_model("del-model", Some(1));
         assert!(result.is_err());
+
+        // Nor still listed. This test is named for deleting a *model* and only
+        // checked that retrieval failed, which is how a deleted model went on
+        // appearing in `list_models` and counting toward `model_count` unnoticed.
+        assert!(
+            !vault.list_models().contains(&"del-model".to_string()),
+            "deleted model still listed: {:?}",
+            vault.list_models()
+        );
+        assert_eq!(vault.get_stats().unwrap().model_count, 0);
     }
 }
 
