@@ -203,7 +203,16 @@ pub fn handle_versions(
     use_sqlite: bool,
     format: &str,
 ) -> Result<()> {
-    let vault = build_vault(config, use_sqlite)?;
+    // 7.0 requires the passphrase here. Version metadata lives in
+    // `versions.json`, which is not encrypted, so this command used to answer
+    // with no passphrase at all -- model names, sizes, formats and timestamps
+    // to anyone who could run the binary. Unlocking does not encrypt the file
+    // (see SECURITY.md), but the tool no longer hands out the inventory to a
+    // caller who cannot open the vault.
+    let passphrase = prompt_passphrase("Enter vault passphrase: ")?;
+    let mut vault = build_vault(config, use_sqlite)?;
+    vault.unlock(passphrase)?;
+
     let versions = vault.list_versions(&name);
 
     if versions.is_empty() {
@@ -254,7 +263,11 @@ pub fn handle_lineage(
     use_sqlite: bool,
     format: &str,
 ) -> Result<()> {
-    let vault = build_vault(config, use_sqlite)?;
+    // Requires the passphrase from 7.0 on -- same reasoning as `handle_versions`.
+    let passphrase = prompt_passphrase("Enter vault passphrase: ")?;
+    let mut vault = build_vault(config, use_sqlite)?;
+    vault.unlock(passphrase)?;
+
     let lineage = vault.get_lineage(&name, version);
 
     if lineage.is_empty() {
@@ -352,7 +365,11 @@ pub fn handle_delete(
 }
 
 pub fn handle_stats(config: VaultConfig, use_sqlite: bool, format: &str) -> Result<()> {
-    let vault = build_vault(config, use_sqlite)?;
+    // Requires the passphrase from 7.0 on -- same reasoning as `handle_versions`.
+    let passphrase = prompt_passphrase("Enter vault passphrase: ")?;
+    let mut vault = build_vault(config, use_sqlite)?;
+    vault.unlock(passphrase)?;
+
     let stats = vault.get_stats()?;
 
     if format == "json" {

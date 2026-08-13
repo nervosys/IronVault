@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.0.0] - 2026-08-13
+
+Clears the three items 6.x deferred to a major. Each is small on its own; each
+is breaking, which is why they waited.
+
+### Removed — BREAKING
+
+- **`compliance.fips_mode` is gone.** It defaulted to `true`, the hardening
+  guide documented it as "Enforce FIPS-validated algorithms only", and nothing
+  in the crate ever read it. There is no FIPS mode to enter — the KDF is
+  Argon2id either way and the implementations hold no CMVP certificate — so an
+  operator who set it got a switch that appeared enabled and enforced nothing.
+  Existing config files still load unchanged: serde ignores the unknown key.
+
+- **The deprecated `FipsCrypto` alias is gone.** Renamed to `VaultCrypto` in
+  6.1.0 with the old name kept as a deprecated alias for one minor cycle, as
+  planned. Code still using it should switch to `VaultCrypto`; the type is
+  otherwise identical.
+
+### Changed — BREAKING
+
+- **`iv versions`, `iv lineage` and `iv stats` now require the passphrase.**
+  They read `versions.json`, which is not encrypted, so they answered with no
+  passphrase at all — model names, sizes, formats, timestamps and checkpoint IDs
+  to anyone who could run the binary against the vault directory.
+
+  Unlocking does not encrypt that file, and this is not a claim that it does:
+  anything with filesystem access to the vault can still read it, which
+  `SECURITY.md` states plainly. What changes is that the tool no longer serves
+  the inventory to a caller who cannot open the vault. Scripts that ran these
+  commands without a passphrase now need `IRONVAULT_PASSPHRASE` set, the same as
+  `iv list` has always required.
+
+### Not in this release
+
+- **Encrypting `versions.json` itself.** It is a storage-format change across
+  both version backends, with a migration that has to be right the first time,
+  and the JSON and SQLite backends need different answers — encrypting a SQLite
+  index means SQLCipher or per-row encryption, not a file-level seal. Shipping
+  half of it, or shipping it in a hurry, is how vaults become unreadable. It
+  needs a design decision, not a patch.
+
 ## [6.2.1] - 2026-08-13
 
 ### Security

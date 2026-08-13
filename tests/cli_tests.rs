@@ -159,11 +159,15 @@ fn test_cli_stats_on_vault() {
 
     iv().args(["init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_PASSPHRASE", "cli-test-passphrase-3318")
         .assert()
         .success();
 
+    // `stats` requires the passphrase from 7.0 on. It reads the unencrypted
+    // version index, so it used to answer without one.
     iv().args(["stats"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_PASSPHRASE", "cli-test-passphrase-3318")
         .assert()
         .success();
 }
@@ -687,11 +691,14 @@ fn test_cli_sqlite_versions_with_stats() {
 
     iv().args(["--sqlite-versions", "init"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_PASSPHRASE", "cli-test-passphrase-3318")
         .assert()
         .success();
 
+    // Same 7.0 requirement on the SQLite backend.
     iv().args(["--sqlite-versions", "stats"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_PASSPHRASE", "cli-test-passphrase-3318")
         .assert()
         .success();
 }

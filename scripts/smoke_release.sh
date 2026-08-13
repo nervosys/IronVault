@@ -146,12 +146,28 @@ GOOD="$(curl -s -o /dev/null -w '%{http_code}' -X POST "$ABASE/auth/token" \
   -H 'content-type: application/json' -d '{"passphrase":"the-real-one-2291"}')"
 check "correct passphrase still gets a token" "$GOOD" "200"
 
-# The CLI side of the same bug: listing succeeded with any passphrase.
-if IRONVAULT_HOME="$AUTHDIR" IRONVAULT_PASSPHRASE="definitely-wrong" "$BIN" list >/dev/null 2>&1; then
-  printf 'FAIL  iv list succeeded with a wrong passphrase\n'; FAIL=$((FAIL + 1))
-else
-  printf 'PASS  iv list refuses a wrong passphrase\n'; PASS=$((PASS + 1))
-fi
+# The CLI side of the same bug: listing succeeded with any passphrase. 7.0
+# extended the requirement to the commands that read the version index,
+# which answered with no passphrase at all because versions.json is not
+# encrypted.
+for cmd in "list" "stats" "versions authcheck" "lineage authcheck 1"; do
+  # shellcheck disable=SC2086
+  if IRONVAULT_HOME="$AUTHDIR" IRONVAULT_PASSPHRASE="definitely-wrong" "$BIN" $cmd >/dev/null 2>&1; then
+    printf 'FAIL  iv %s succeeded with a wrong passphrase\n' "$cmd"; FAIL=$((FAIL + 1))
+  else
+    printf 'PASS  iv %s refuses a wrong passphrase\n' "$cmd"; PASS=$((PASS + 1))
+  fi
+done
+
+# And with nothing supplied at all; stdin is closed so the prompt cannot block.
+for cmd in "stats" "versions authcheck"; do
+  # shellcheck disable=SC2086
+  if IRONVAULT_HOME="$AUTHDIR" "$BIN" $cmd </dev/null >/dev/null 2>&1; then
+    printf 'FAIL  iv %s answered with no passphrase\n' "$cmd"; FAIL=$((FAIL + 1))
+  else
+    printf 'PASS  iv %s requires a passphrase\n' "$cmd"; PASS=$((PASS + 1))
+  fi
+done
 
 kill "$AUTHSRV" 2>/dev/null || true
 rm -rf "$AUTHDIR"

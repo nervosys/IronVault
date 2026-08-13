@@ -64,21 +64,6 @@ pub struct VaultCrypto {
     argon2: Argon2<'static>,
 }
 
-/// Former name of [`VaultCrypto`], kept so 5.x and 6.0 code still compiles.
-///
-/// An alias rather than a removal: renaming a public type is only breaking if
-/// the old name disappears, and there was no reason to make every downstream
-/// caller edit for a rename that is about honesty in the *name*, not a change
-/// in behaviour. The type behind it is identical.
-#[deprecated(
-    since = "6.1.0",
-    note = "renamed to `VaultCrypto`. The old name implied FIPS 140-3 validation that this \
-            crate does not hold — it uses FIPS-approved AES-256-GCM and SHA-256, but the \
-            implementations carry no CMVP certificate and Argon2id is not an approved KDF. \
-            Behaviour is unchanged; only the name was wrong."
-)]
-pub type FipsCrypto = VaultCrypto;
-
 /// Secure key container that zeroizes on drop
 #[derive(Clone, ZeroizeOnDrop)]
 pub struct SecureKey {
@@ -546,22 +531,5 @@ mod tests {
 
         let hex = provider.hash_hex(b"test");
         assert_eq!(hex.len(), 64);
-    }
-
-    /// The rename is only non-breaking if the old name still resolves to the
-    /// same type. Downstream 5.x/6.0 code does exactly this.
-    #[test]
-    #[allow(deprecated)]
-    fn the_old_name_still_resolves_to_the_same_type() {
-        let via_old: FipsCrypto = VaultCrypto::new().expect("constructs");
-        let key = via_old
-            .derive_key(b"passphrase".to_vec(), Some(vec![7u8; SALT_SIZE]))
-            .expect("derives")
-            .0;
-        let sealed = via_old.encrypt(b"payload", &key).expect("encrypts");
-        assert_eq!(
-            via_old.decrypt(&sealed, &key).expect("decrypts"),
-            b"payload"
-        );
     }
 }

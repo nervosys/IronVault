@@ -134,7 +134,6 @@ fn test_error_debug_format() {
 #[test]
 fn test_config_compliance_settings() {
     let config = VaultConfig::default();
-    assert!(config.compliance.fips_mode);
     assert!(config.compliance.audit_retention_days > 0);
 }
 
