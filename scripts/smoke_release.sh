@@ -17,6 +17,19 @@ if [ ! -x "$BIN" ]; then
   exit 1
 fi
 
+# ubuntu-latest ships `python3` and often no `python`; Git Bash on Windows has
+# `python`, and a `python3` that is the Microsoft Store stub -- on PATH, and it
+# prints an ad instead of running. So each candidate is executed before it is
+# accepted rather than trusted for being on PATH.
+PY=""
+for cand in python3 python; do
+  if command -v "$cand" >/dev/null 2>&1 && "$cand" -c "" >/dev/null 2>&1; then
+    PY="$cand"
+    break
+  fi
+done
+if [ -z "$PY" ]; then echo "no working python on PATH" >&2; exit 1; fi
+
 EXPECTED="$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)"
 PORT="${PORT:-18973}"
 PASS=0
@@ -64,18 +77,18 @@ done
 
 check "GET /health" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/health")" "200"
 check "health.version" \
-  "$(curl -s "$BASE/health" | python -c 'import sys,json;print(json.load(sys.stdin).get("version",""))' 2>/dev/null)" \
+  "$(curl -s "$BASE/health" | "$PY" -c 'import sys,json;print(json.load(sys.stdin).get("version",""))' 2>/dev/null)" \
   "$EXPECTED"
 check "openapi.json info.version" \
-  "$(curl -s "$BASE/openapi.json" | python -c 'import sys,json;print(json.load(sys.stdin)["info"]["version"])' 2>/dev/null)" \
+  "$(curl -s "$BASE/openapi.json" | "$PY" -c 'import sys,json;print(json.load(sys.stdin)["info"]["version"])' 2>/dev/null)" \
   "$EXPECTED"
 check "introspect version" \
-  "$("$BIN" introspect --format json 2>/dev/null | python -c 'import sys,json;print(json.load(sys.stdin).get("version",""))' 2>/dev/null)" \
+  "$("$BIN" introspect --format json 2>/dev/null | "$PY" -c 'import sys,json;print(json.load(sys.stdin).get("version",""))' 2>/dev/null)" \
   "$EXPECTED"
 
 # The served spec is what clients are generated from, so it should not be empty
 # or truncated even when every version string agrees.
-PATHS="$(curl -s "$BASE/openapi.json" | python -c 'import sys,json;print(len(json.load(sys.stdin).get("paths",{})))' 2>/dev/null)"
+PATHS="$(curl -s "$BASE/openapi.json" | "$PY" -c 'import sys,json;print(len(json.load(sys.stdin).get("paths",{})))' 2>/dev/null)"
 if [ "${PATHS:-0}" -ge 20 ]; then
   printf 'PASS  served spec declares %s paths\n' "$PATHS"; PASS=$((PASS + 1))
 else
@@ -96,7 +109,7 @@ head -c 4096 /dev/urandom > "$VAULTDIR/m.safetensors" 2>/dev/null
 
 for spec in "list" "versions smoketest" "stats" "compliance" "lineage smoketest 1"; do
   # shellcheck disable=SC2086
-  if "$BIN" $spec --format json 2>/dev/null | python -c 'import sys,json; json.load(sys.stdin)' 2>/dev/null; then
+  if "$BIN" $spec --format json 2>/dev/null | "$PY" -c 'import sys,json; json.load(sys.stdin)' 2>/dev/null; then
     printf 'PASS  iv %s --format json\n' "$spec"; PASS=$((PASS + 1))
   else
     printf 'FAIL  iv %s --format json\n' "$spec"; FAIL=$((FAIL + 1))

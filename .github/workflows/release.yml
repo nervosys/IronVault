@@ -72,6 +72,23 @@ jobs:
     - name: Build
       run: cargo build --release --features api --target ${{ matrix.target }}
 
+    # Run the built binary before anything is published.
+    #
+    # `cargo test` exercises the router in-process and never starts `iv serve`,
+    # which is how four separate defects reached published releases: binaries
+    # with no REST API at all, `/api/v1/openapi.json` serving 18 of 56 paths
+    # under a version string frozen at 1.3.0, a refused bind that printed
+    # "Listening on ..." first, and `POST /auth/token` issuing an admin JWT for
+    # a wrong passphrase. Every one was invisible to the suite above and obvious
+    # the moment something ran the binary and read what it said.
+    #
+    # Linux gnu only: the script needs bash, curl and python, and one host
+    # exercising the binary is enough to catch a bad build. It gates publishing
+    # because every publish job needs this one.
+    - name: Smoke-test the built binary
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: bash scripts/smoke_release.sh target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+
     - name: Strip binary (Unix)
       if: runner.os != 'Windows'
       run: strip target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
