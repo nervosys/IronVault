@@ -4,6 +4,7 @@
 
 use std::collections::HashMap;
 use std::fs;
+use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use crate::audit::{AuditEntry, AuditEventType, AuditLogger};
@@ -320,6 +321,70 @@ impl Vault {
     ///
     /// The salt used for key derivation is persisted in the vault directory.
     /// This ensures the same passphrase always derives the same key across sessions.
+    /// Constant sealed under the vault key so a wrong passphrase can be
+    /// detected at unlock rather than at first decryption.
+    const KEY_CHECK_MAGIC: &'static [u8] = b"IRONVAULT-KEY-CHECK-v1";
+
+    /// Confirm `key` is the vault's key, or fail with [`VaultError::AuthenticationFailed`].
+    ///
+    /// Three cases, in order:
+    ///
+    /// 1. A `vault.keycheck` exists — decrypt it. AES-256-GCM authenticates, so
+    ///    a wrong key cannot forge a passing result.
+    /// 2. No keycheck but the vault holds data (a vault created before 6.2.1).
+    ///    The key is proved against a real stored blob first, then the keycheck
+    ///    is written. Writing it unconditionally would let a *wrong* first
+    ///    unlock mint a keycheck for the wrong key and lock the owner out of
+    ///    their own vault — a far worse bug than the one being fixed.
+    /// 3. No keycheck and no data — any passphrase is legitimately correct for
+    ///    an empty vault, so the keycheck is created and checked from then on.
+    fn verify_key(&self, key: &SecureKey, vault_path: &Path) -> Result<()> {
+        let check_file = vault_path.join("vault.keycheck");
+
+        if check_file.exists() {
+            let sealed = fs::read(&check_file)?;
+            let opened = self
+                .crypto
+                .decrypt(&sealed, key)
+                .map_err(|_| VaultError::AuthenticationFailed)?;
+            return if opened == Self::KEY_CHECK_MAGIC {
+                Ok(())
+            } else {
+                Err(VaultError::AuthenticationFailed)
+            };
+        }
+
+        if let Some(existing) = self.any_stored_version() {
+            self.storage
+                .retrieve_auto(&existing, key, self.config.get_compression_algorithm())
+                .map_err(|_| VaultError::AuthenticationFailed)?;
+        }
+
+        let sealed = self.crypto.encrypt(Self::KEY_CHECK_MAGIC, key)?;
+        use std::io::Write;
+        let mut opts = fs::OpenOptions::new();
+        opts.write(true).create_new(true);
+        crate::permissions::set_create_mode(&mut opts);
+        // A concurrent unlock may have written it first; that is not an error,
+        // and the next unlock will check against it.
+        if let Ok(mut f) = opts.open(&check_file) {
+            f.write_all(&sealed)?;
+            drop(f);
+            crate::permissions::restrict_file(&check_file)?;
+        }
+        Ok(())
+    }
+
+    /// Path of any one stored blob, used to prove a key against real data.
+    fn any_stored_version(&self) -> Option<String> {
+        for name in self.version_backend.list_models() {
+            if let Some(v) = self.version_backend.get_version(&name, None) {
+                return Some(v.file_path.clone());
+            }
+        }
+        None
+    }
+
     pub fn unlock(&mut self, passphrase: Vec<u8>) -> Result<()> {
         let vault_path = self.config.get_vault_path(None);
         let salt_file = vault_path.join("vault.salt");
@@ -345,6 +410,16 @@ impl Vault {
             drop(f);
             crate::permissions::restrict_file(&salt_file)?;
         }
+
+        // Prove the derived key before accepting it. Deriving a key always
+        // succeeds -- Argon2 will happily stretch the wrong passphrase -- so
+        // without this, `unlock` returned Ok for any input and the mistake only
+        // surfaced when an AEAD tag failed on the first read. Everything that
+        // did not touch ciphertext therefore worked with the wrong passphrase:
+        // `iv list` and `iv stats` printed the inventory and exited 0, and
+        // `POST /api/v1/auth/token` issued an admin JWT that could read the
+        // model list, the audit log, the ACLs and the policies.
+        self.verify_key(&key, &vault_path)?;
 
         self.active_key = Some(key);
         self.unlocked_at = Some(chrono::Utc::now());
@@ -709,6 +784,15 @@ impl Vault {
         let salt_file = vault_path.join("vault.salt");
         fs::write(&salt_file, &new_salt)?;
         crate::permissions::restrict_file(&salt_file)?;
+
+        // Re-seal the key check under the new key. Without this the vault
+        // re-encrypts every blob and then refuses the new passphrase at the
+        // next unlock, because the check still holds a constant sealed under
+        // the old one — a passphrase change that locks the owner out.
+        let check_file = vault_path.join("vault.keycheck");
+        let sealed = self.crypto.encrypt(Self::KEY_CHECK_MAGIC, &new_key)?;
+        fs::write(&check_file, &sealed)?;
+        crate::permissions::restrict_file(&check_file)?;
 
         self.active_key = Some(new_key);
 

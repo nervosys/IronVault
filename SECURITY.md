@@ -71,8 +71,23 @@ on a different host is a real network hop that needs its own TLS, and a
 "the network is trusted" switch is the kind that gets set while debugging and
 never unset.
 
+### What the vault encrypts, and what it does not
+
+**Model contents are encrypted. The version index is not.**
+
+`versions.json` holds model names, sizes, formats, timestamps and checkpoint
+IDs in the clear. Anything that can read the vault directory can read that,
+with or without the passphrase — which is why `iv versions` and `iv lineage`
+answer without unlocking. Over the REST API the same data is behind
+`require_auth`, so this is local exposure, not remote.
+
+If model *names* are themselves sensitive in your deployment, treat the vault
+directory as sensitive and rely on filesystem permissions (0600/0700, applied
+on creation) rather than on the passphrase. Encrypting the index is a
+storage-format change, not a configuration option.
+
 ### Access Control
-- Passphrase-protected vault access
+- Passphrase-protected vault access, verified at unlock (see below)
 - Secure key management
 - Session timeout enforcement
 - File permission restrictions (Unix: 0600/0700)

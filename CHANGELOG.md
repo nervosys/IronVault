@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.2.1] - 2026-08-13
+
+### Security
+
+- **`Vault::unlock` accepted any passphrase.** Deriving a key always succeeds —
+  Argon2 stretches whatever it is given — and nothing checked the result, so
+  `unlock` returned `Ok` with a garbage key. The mistake surfaced only when an
+  AEAD tag failed on the first read, which meant every operation that never
+  touched ciphertext succeeded for an attacker:
+
+  - `iv list` and `iv stats` printed the model inventory and exited **0**
+  - `POST /api/v1/auth/token` returned **HTTP 200 and an admin JWT** for a wrong
+    passphrase, against a vault that had never been unlocked. That token then
+    read `/models`, `/audit`, `/acl`, `/policies` and `/stats`.
+
+  Model *contents* were never exposed — those are AEAD-sealed, and reads failed
+  with 401. What leaked was everything around them, including the audit log and
+  the access-control configuration, to anyone who could reach the API.
+
+  Unlock now proves the derived key against `vault.keycheck`, a constant sealed
+  under that key, before installing it. Vaults created before this release have
+  no keycheck, so the key is proved against a real stored blob and the keycheck
+  written afterwards. Doing it the other way round — writing the keycheck on
+  first unlock unconditionally — would let a *wrong* first attempt mint a
+  keycheck for the wrong key and lock an owner out of their own vault, which is
+  a worse bug than the one being fixed. Four regression tests cover the wrong
+  passphrase, the failed-then-correct sequence, the empty-vault case, and that
+  contents stay unreadable.
+
+  Found by exercising the published binary: `POST /auth/token` with a deliberate
+  wrong passphrase, expecting 401, and getting a token.
+
+### Documentation
+
+- **`SECURITY.md` now states what the vault does not encrypt.** `versions.json`
+  holds model names, sizes, formats and timestamps in the clear, which is why
+  `iv versions` and `iv lineage` answer without a passphrase. Over REST the same
+  data sits behind `require_auth`, so this is local exposure — but it was
+  nowhere in the documentation, and "encrypted vault" invites the opposite
+  assumption.
+
 ## [6.2.0] - 2026-08-12
 
 ### Added

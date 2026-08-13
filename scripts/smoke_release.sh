@@ -103,6 +103,45 @@ for spec in "list" "versions smoketest" "stats" "compliance" "lineage smoketest 
   fi
 done
 rm -rf "$VAULTDIR"
+
+# A wrong passphrase must not mint a token. Until 6.2.1 this returned HTTP 200
+# with an admin JWT against a vault that had never been unlocked, because
+# `Vault::unlock` derived a key without ever checking it. The token then read
+# /models, /audit, /acl, /policies and /stats.
+AUTHDIR="$(mktemp -d)"
+IRONVAULT_HOME="$AUTHDIR" IRONVAULT_PASSPHRASE="the-real-one-2291" "$BIN" init >/dev/null 2>&1
+head -c 2048 /dev/urandom > "$AUTHDIR/a.safetensors" 2>/dev/null
+IRONVAULT_HOME="$AUTHDIR" IRONVAULT_PASSPHRASE="the-real-one-2291" \
+  "$BIN" store authcheck "$AUTHDIR/a.safetensors" >/dev/null 2>&1
+
+APORT=$((PORT + 1))
+IRONVAULT_HOME="$AUTHDIR" "$BIN" serve --host 127.0.0.1 --port "$APORT" \
+  --jwt-secret 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \
+  >/tmp/smoke_auth.log 2>&1 &
+AUTHSRV=$!
+for _ in $(seq 1 30); do
+  [ "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$APORT/api/v1/health")" = "200" ] && break
+  sleep 1
+done
+
+ABASE="http://127.0.0.1:$APORT/api/v1"
+BAD="$(curl -s -o /dev/null -w '%{http_code}' -X POST "$ABASE/auth/token" \
+  -H 'content-type: application/json' -d '{"passphrase":"definitely-wrong"}')"
+check "wrong passphrase is refused a token" "$BAD" "401"
+
+GOOD="$(curl -s -o /dev/null -w '%{http_code}' -X POST "$ABASE/auth/token" \
+  -H 'content-type: application/json' -d '{"passphrase":"the-real-one-2291"}')"
+check "correct passphrase still gets a token" "$GOOD" "200"
+
+# The CLI side of the same bug: listing succeeded with any passphrase.
+if IRONVAULT_HOME="$AUTHDIR" IRONVAULT_PASSPHRASE="definitely-wrong" "$BIN" list >/dev/null 2>&1; then
+  printf 'FAIL  iv list succeeded with a wrong passphrase\n'; FAIL=$((FAIL + 1))
+else
+  printf 'PASS  iv list refuses a wrong passphrase\n'; PASS=$((PASS + 1))
+fi
+
+kill "$AUTHSRV" 2>/dev/null || true
+rm -rf "$AUTHDIR"
 echo
 printf '%s passed, %s failed\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]
