@@ -173,4 +173,15 @@ kill "$AUTHSRV" 2>/dev/null || true
 rm -rf "$AUTHDIR"
 echo
 printf '%s passed, %s failed\n' "$PASS" "$FAIL"
+# A gate that passes having run nothing is not a gate. If a future edit
+# breaks the setup -- no binary, a server that never binds, a renamed
+# subcommand -- the checks below it silently stop running, FAIL stays 0,
+# and this exits 0 while verifying nothing. So the count is asserted too.
+EXPECTED_MIN=21
+RAN=$((PASS + FAIL))
+if [ "$RAN" -lt "$EXPECTED_MIN" ]; then
+  printf 'FAIL  only %s checks ran, expected at least %s -- the harness is broken, not the binary\n' "$RAN" "$EXPECTED_MIN"
+  exit 1
+fi
+
 [ "$FAIL" -eq 0 ]
