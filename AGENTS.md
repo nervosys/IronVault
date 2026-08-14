@@ -12,7 +12,7 @@ iv introspect --format json
 # 2. List the 86 MCP tools (JSON Schema inputs)
 cat .well-known/mcp-manifest.json | jq '.tools[] | {name, description}'
 
-# 3. List the 53 REST endpoints
+# 3. List the 56 REST endpoints
 cat .well-known/openapi.yaml | grep -E '^  /api/v1/'
 ```
 
@@ -76,35 +76,41 @@ passphrase. See [docs/KMS.md](docs/KMS.md) for the URI table and backend setup.
 
 IronVault is an **encrypted AI/ML model management system**. It provides:
 
-1. **Encrypted Storage** — AES-256-GCM encryption with Argon2id key derivation (FIPS 140-3)
+1. **Encrypted Storage** — AES-256-GCM encryption with Argon2id key derivation. FIPS-approved algorithms, but not a FIPS-validated module; see the compliance table below
 2. **Version Control** — Sequential versioning with parent lineage trees and instant rollback
 3. **Format Conversion** — 23+ formats detected. Native pure-Rust conversion for SafeTensors ↔ PyTorch and SafeTensors ↔ raw; PyTorch→ONNX, ONNX→TensorRT, ONNX→CoreML and SafeTensors→GGUF require an external Python toolchain and return a plan (`converted: false`) instead of a file
-4. **Compliance** — FIPS 140-3, CMMC 2.0 Level 2, MITRE ATT&CK validation
+4. **Compliance** — reports posture against FIPS 140-3, CMMC 2.0 Level 2 and MITRE ATT&CK. It reports; it does not certify
 5. **RAG System** — Document store, knowledge base, rule engine with MCP tool integration
 6. **Cloud Storage** — Push/pull to AWS S3, Azure Blob, Google Cloud Storage
 7. **Model Cards** — Google/HuggingFace standard model documentation
 8. **Federation** — Sync vaults across peers with vector clocks
 9. **Blockchain Audit** — Append-only audit trail with Merkle proofs
-10. **API Server** — REST (Axum) + GraphQL (async-graphql) with JWT auth
-11. **Model Download** — Pull models from HuggingFace Hub, Ollama registry, or URLs with SHA-256 verification
-12. **Model Signing** — HMAC-SHA256 signatures with detached `.sig` files for provenance
-13. **Pickle Scanning** — Detect dangerous opcodes and patterns in PyTorch/pickle files
-14. **Model Diffing** — Compare model versions at the tensor level (SafeTensors, GGUF, generic)
-15. **Engine Interop** — Register models with Ollama (`ollama create`) and LM Studio
-16. **Benchmark Metadata** — Store and query benchmark results per model version
-17. **License Scanning** — Detect licenses from model cards, config.json, GGUF metadata, LICENSE files
-18. **Model Tags & Search** — Tag models with labels and annotations, search by name/tags/annotations
-19. **Vault Export/Import** — Portable tar.gz vault bundles with selective model export
-20. **Garbage Collection** — Orphaned blob detection, temp file cleanup, space reclaim
-21. **TUI Dashboard** — Terminal UI browser for vault contents
-22. **Webhooks** — HTTP notification system with EventSubscriber integration
-23. **Access Control** — Role-based ACL (Reader/Writer/Admin) per principal
-24. **KMS Integration** — Fetch secrets from env, AWS Secrets Manager, Azure Key Vault, HashiCorp Vault
-25. **Model Validation** — Integrity probes with SHA-256 checksums per model version
-26. **Retention Policies** — Configurable max versions/age/minimum with dry-run enforcement
-27. **Cross-Model Lineage DAG** — Directed acyclic graph tracking model derivation chains
-28. **Plugin System** — Discover, install, uninstall plugins with JSON manifests
-29. **Config Profiles** — Named configuration profiles with activate/deactivate switching
+10. **Model Download** — Pull models from HuggingFace Hub, Ollama registry, or URLs with SHA-256 verification
+11. **Model Signing** — HMAC-SHA256 signatures with detached `.sig` files for provenance
+12. **Pickle Scanning** — Detect dangerous opcodes and patterns in PyTorch/pickle files
+13. **Model Diffing** — Compare model versions at the tensor level (SafeTensors, GGUF, generic)
+14. **Engine Interop** — Register models with Ollama (`ollama create`) and LM Studio
+15. **Benchmark Metadata** — Store and query benchmark results per model version
+16. **License Scanning** — Detect licenses from model cards, config.json, GGUF metadata, LICENSE files
+17. **Model Tags & Search** — Tag models with labels and annotations, search by name/tags/annotations
+18. **Vault Export/Import** — Portable tar.gz vault bundles with selective model export
+19. **Garbage Collection** — Orphaned blob detection, temp file cleanup, space reclaim
+20. **TUI Dashboard** — Terminal UI browser for vault contents
+21. **Webhooks** — HTTP notification system with EventSubscriber integration
+22. **Access Control** — Role-based ACL (Reader/Writer/Admin) per principal
+23. **KMS Integration** — Fetch secrets from env, AWS Secrets Manager, Azure Key Vault, HashiCorp Vault
+24. **Model Validation** — Integrity probes with SHA-256 checksums per model version
+25. **Retention Policies** — Configurable max versions/age/minimum with dry-run enforcement
+26. **Cross-Model Lineage DAG** — Directed acyclic graph tracking model derivation chains
+27. **Plugin System** — Discover, install, uninstall plugins with JSON manifests
+28. **Config Profiles** — Named configuration profiles with activate/deactivate switching
+29. **Backup Scheduling** — scheduled vault backups with retention windows
+30. **Evaluation** — store and query model evaluation runs and metrics
+31. **Multi-Vault** — multiple named vaults, each with its own passphrase
+32. **Quantization** — quantize models to q4/q5/q8 variants
+33. **Telemetry** — opt-in, disclosed, honours `DO_NOT_TRACK`
+34. **Agent Discovery** — `iv introspect` emits the whole CLI schema as JSON/JSON-LD
+35. **Utilities** — the `iv://` URI scheme, checksums, and shared helpers
 
 ## Discovery Files
 

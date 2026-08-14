@@ -6,7 +6,7 @@
   </picture>
 </p>
 
-> Universal cross-platform encrypted vault for AI/ML model storage, versioning, conversion, and lifecycle management — **agent-first by design**, military-grade security, 23+ formats, 29 production features.
+> Universal cross-platform encrypted vault for AI/ML model storage, versioning, conversion, and lifecycle management — **agent-first by design**, military-grade security, 23+ formats, 35 production features.
 
 [![Rust](https://img.shields.io/badge/rust-1.89%2B-orange.svg)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue.svg)](LICENSE)
@@ -81,7 +81,7 @@ iv introspect --format json          # entire CLI schema, machine-readable
 
 | File                                                 | Purpose                                                           |
 | ---------------------------------------------------- | ----------------------------------------------------------------- |
-| [`agents.json`](.well-known/agents.json)             | Capability catalog (29 features), taxonomy, interface inventory   |
+| [`agents.json`](.well-known/agents.json)             | Capability catalog (35 capabilities), taxonomy, interface inventory   |
 | [`mcp-manifest.json`](.well-known/mcp-manifest.json) | **86 MCP tools** with full JSON Schema inputs, resources, prompts |
 | [`openapi.yaml`](.well-known/openapi.yaml)           | OpenAPI 3.1 — **56 REST endpoints**, checked against the router in CI          |
 | [`ontology.jsonld`](.well-known/ontology.jsonld)     | JSON-LD ontology — every concept, class, and relationship         |
@@ -121,7 +121,7 @@ curl  http://host:8080/api/v1/...     # REST (see openapi.yaml)
 
 ### Three-surface coverage matrix
 
-Every one of the 29 features in [AGENTS.md](AGENTS.md) is reachable from **all
+Every one of the 35 capabilities in [AGENTS.md](AGENTS.md) is reachable from **all
 three** of: CLI subcommand, REST endpoint, and MCP tool. This became true in
 5.1.0 — `sign`, `verify`, `scan`, `diff`, `pull`, `license-scan`, `register`,
 `benchmarks`, the card operations, and vault `export` / `import` had CLI and MCP
@@ -311,7 +311,7 @@ All features below are fully implemented, tested, and exposed via both CLI and l
 | `iv://` URI scheme | library               | Agent-addressable vault resources                  |
 | Agent introspection  | `iv introspect`      | JSON / YAML / JSON-LD CLI schema                   |
 
-> Full machine-readable surface (29 features, all CLI subcommands, ontology, OpenAPI, MCP manifest) is in [`.well-known/`](.well-known/) and [`AGENTS.md`](AGENTS.md).
+> Full machine-readable surface (35 capabilities, all CLI subcommands, ontology, OpenAPI, MCP manifest) is in [`.well-known/`](.well-known/) and [`AGENTS.md`](AGENTS.md).
 
 ---
 
