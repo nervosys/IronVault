@@ -637,6 +637,157 @@ impl Vault {
         Ok(data)
     }
 
+    /// The size of a model's plaintext, without reading or decrypting it.
+    ///
+    /// Read this first, allocate exactly this much, then fill it with
+    /// [`Vault::read_model_into`].
+    ///
+    /// # Errors
+    ///
+    /// Returns [`VaultError::ModelNotFound`] or [`VaultError::VersionNotFound`]
+    /// if there is no such model or version.
+    pub fn model_plaintext_len(&self, name: &str, version: Option<u32>) -> Result<u64> {
+        self.version_backend
+            .get_version(name, version)
+            .map(|v| v.size_bytes)
+            .ok_or_else(|| match version {
+                Some(v) => VaultError::VersionNotFound(v, name.to_string()),
+                None => VaultError::ModelNotFound(name.to_string()),
+            })
+    }
+
+    /// Decrypt a model directly into `dst`, holding one chunk at a time.
+    ///
+    /// [`Vault::get_model`] reads the whole ciphertext, decrypts it into a
+    /// second allocation, and decompresses into a third — around 3× the model in
+    /// peak residency, and the caller then usually copies it somewhere a fourth
+    /// time. This writes the plaintext exactly once, into memory the caller
+    /// already owns, and never holds more than one 4 MiB chunk.
+    ///
+    /// It exists for inference engines. IronWorks maps a model as one flat byte
+    /// range, page-locks parts of it for host-to-device transfer, and captures
+    /// CUDA graphs holding those host pointers, so the plaintext has to land in
+    /// one contiguous buffer it controls. Given this call it can allocate that
+    /// buffer page-locked up front and decrypt straight into it, which is both
+    /// the cheapest way to load an encrypted model and the only way to run one
+    /// without writing plaintext to disk.
+    ///
+    /// `dst` must be exactly [`Vault::model_plaintext_len`] bytes.
+    ///
+    /// # Integrity
+    ///
+    /// Equivalent to [`Vault::get_model`]: every chunk's GCM tag is checked as
+    /// it is decrypted, the stream MAC is checked at the end (this reads to EOF
+    /// deliberately, so truncation cannot pass), and the SHA-256 recorded for
+    /// the version is verified over the filled buffer. A model that fails any of
+    /// these leaves `dst` zeroed rather than partially populated, so a caller
+    /// that ignores the error cannot run on half-decrypted weights.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`VaultError::SecurityViolation`] if the vault is locked,
+    /// [`VaultError::ModelNotFound`] / [`VaultError::VersionNotFound`] if it does
+    /// not exist, [`VaultError::InvalidInput`] if `dst` is the wrong size, and
+    /// [`VaultError::IntegrityError`] if any check fails.
+    pub fn read_model_into(
+        &self,
+        name: &str,
+        version: Option<u32>,
+        dst: &mut [u8],
+    ) -> Result<usize> {
+        let key = self
+            .active_key
+            .as_ref()
+            .ok_or_else(|| VaultError::SecurityViolation("Vault is locked".to_string()))?;
+
+        let model_version = self
+            .version_backend
+            .get_version(name, version)
+            .ok_or_else(|| match version {
+                Some(v) => VaultError::VersionNotFound(v, name.to_string()),
+                None => VaultError::ModelNotFound(name.to_string()),
+            })?;
+
+        // Name what we got, not just what we needed: a caller that sized its
+        // buffer from a stale listing should be told both numbers.
+        if dst.len() as u64 != model_version.size_bytes {
+            return Err(VaultError::InvalidInput(format!(
+                "destination is {} bytes but model '{}' version {} is {} bytes",
+                dst.len(),
+                name,
+                model_version.version,
+                model_version.size_bytes
+            )));
+        }
+
+        let file_path = model_version.file_path.clone();
+        let expected_checksum = model_version.checksum_sha256.clone();
+        let model_version_number = model_version.version;
+
+        let result = self
+            .storage
+            .retrieve_into(
+                &file_path,
+                key,
+                self.config.get_compression_algorithm(),
+                dst,
+            )
+            .and_then(|written| {
+                let actual = VaultCrypto::hash_sha256_hex(dst);
+                if actual == expected_checksum {
+                    Ok(written)
+                } else {
+                    Err(VaultError::IntegrityError(format!(
+                        "Checksum mismatch for model '{name}' version {model_version_number}"
+                    )))
+                }
+            });
+
+        if let Err(error) = result {
+            // Never leave a caller holding plausible-looking half-decrypted
+            // weights. A model that failed authentication must not be runnable.
+            dst.fill(0);
+
+            if matches!(error, VaultError::IntegrityError(_)) {
+                if let Some(logger) = &self.audit_logger {
+                    let _ = logger.log(AuditEntry {
+                        timestamp: chrono::Utc::now(),
+                        event_type: AuditEventType::IntegrityFailure,
+                        description: format!(
+                            "Integrity check failed for model '{name}' version {model_version_number}"
+                        ),
+                        model_name: Some(name.to_string()),
+                        version: Some(model_version_number),
+                        success: false,
+                        metadata: None,
+                    });
+                }
+                self.event_bus.emit(&VaultEvent::IntegrityFailed {
+                    vault: self.vault_name(),
+                    model: name.to_string(),
+                    version: model_version_number,
+                    expected: expected_checksum,
+                    actual: "streamed".to_string(),
+                    timestamp: chrono::Utc::now(),
+                });
+            }
+            return Err(error);
+        }
+
+        if let Some(logger) = &self.audit_logger {
+            logger.log_model_retrieved(name, model_version_number, true)?;
+        }
+        self.event_bus.emit(&VaultEvent::ModelRetrieved {
+            vault: self.vault_name(),
+            model: name.to_string(),
+            version: model_version_number,
+            timestamp: chrono::Utc::now(),
+        });
+        self.operations_count.fetch_add(1, Ordering::Relaxed);
+
+        result
+    }
+
     /// List all models in vault
     #[must_use]
     pub fn list_models(&self) -> Vec<String> {

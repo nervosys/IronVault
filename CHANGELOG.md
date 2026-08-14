@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.1.0] - 2026-08-14
+
+Adds a streaming read path. Until now every way of getting a model *out* of the
+vault ended in a `Vec<u8>`: `get_model` reads the whole ciphertext, decrypts into
+a second allocation and decompresses into a third, and `get_model_chunked` calls
+`get_model` and then chunks the result. Writing has been streaming since 5.0;
+reading gave the entire budget back.
+
+That is affordable for a tool that hands a model to something else. It is not
+affordable for an inference engine, which maps a model as one flat byte range,
+page-locks parts of it for host-to-device transfer, and captures CUDA graphs
+holding those host pointers — it needs the plaintext in one contiguous buffer it
+owns, and cannot pay ~3× the model in peak residency to get there.
+
+### Added
+
+- `Vault::read_model_into(name, version, &mut [u8])` — decrypts a model directly
+  into a caller-owned buffer, holding one 4 MiB chunk at a time regardless of
+  model size. Integrity is unchanged from `get_model`: per-chunk GCM tags, the
+  stream MAC, and the recorded SHA-256, all verified. A failed read **zeroes the
+  destination**, so a caller that ignores the error cannot run on half-decrypted
+  weights.
+- `Vault::model_plaintext_len(name, version)` — the size to allocate, without
+  reading or decrypting anything.
+- `crypto::streaming::ChunkDecryptReader` — the `Read` implementation behind it.
+  Note the stream MAC can only be checked once the last chunk has been read, so
+  **a caller that stops early has verified nothing about the stream as a whole**;
+  read to EOF. `read_model_into` does.
+- `storage::LocalStorage::retrieve_into` — decrypt-and-decompress into a caller's
+  buffer. All three compression settings stream: gzip through `flate2`'s reader
+  adapter, LZMA into a cursor over the destination, and `None` straight through.
+  Legacy (pre-5.0, non-chunked) files still buffer the decrypt, because a single
+  AES-GCM message cannot be authenticated incrementally.
+
+### Notes
+
+- Nothing is deprecated and no signature changed; `get_model` remains the right
+  call when you want an owned `Vec`.
+- For inference, store models with `compression = "none"`. Quantized weights do
+  not compress meaningfully, and gzip is applied to the whole model *before*
+  chunked encryption, so it costs CPU on every read for nothing.
+
 ## [7.0.0] - 2026-08-13
 
 Clears the three items 6.x deferred to a major. Each is small on its own; each

@@ -7,7 +7,7 @@ info:
     
     Requires the `api` cargo feature: `cargo build --features api`
     Start with: `iv serve --port 8080`
-  version: 7.0.0
+  version: 7.1.0
   license:
     name: AGPL-3.0-or-later
     url: https://www.gnu.org/licenses/agpl-3.0.html

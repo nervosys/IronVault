@@ -7,7 +7,7 @@
 //! - Google Cloud Storage
 
 use std::fs::{self, File};
-use std::io::{Read, Write};
+use std::io::{BufReader, Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 
 use crate::crypto::compression::{compress, decompress, CompressionAlgorithm, CompressionLevel};
@@ -326,6 +326,126 @@ impl Storage {
 
         Ok(data)
     }
+
+    /// Decrypt and decompress a stored file directly into `dst`.
+    ///
+    /// The streaming counterpart to [`LocalStorage::retrieve_auto`], which reads
+    /// the whole ciphertext, allocates the whole plaintext, and then allocates
+    /// again to decompress — roughly 3× the model in peak residency. This holds
+    /// one 4 MiB chunk plus whatever the decompressor needs, whatever the model
+    /// size, and writes the result exactly once, into memory the caller already
+    /// owns.
+    ///
+    /// `dst` must be exactly the model's original size; a short or long buffer
+    /// is an error rather than a truncated model.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`VaultError::ModelNotFound`] if the file is absent,
+    /// [`VaultError::IntegrityError`] if the stream MAC or a chunk tag fails, or
+    /// [`VaultError::InvalidInput`] if `dst` is not the expected size.
+    pub fn retrieve_into(
+        &self,
+        filename: &str,
+        key: &SecureKey,
+        compression: CompressionAlgorithm,
+        dst: &mut [u8],
+    ) -> Result<usize> {
+        use crate::crypto::streaming::{is_chunked_format, ChunkDecryptReader, HEADER_SIZE};
+
+        let file_path = self.vault_path.join(filename);
+        if !file_path.exists() {
+            return Err(VaultError::ModelNotFound(filename.to_string()));
+        }
+
+        // Peek only the header: enough to tell chunked from legacy without
+        // reading the model.
+        let mut file = File::open(&file_path)?;
+        let mut probe = [0u8; HEADER_SIZE];
+        let probed = read_up_to(&mut file, &mut probe)?;
+        file.seek(SeekFrom::Start(0))?;
+
+        if !is_chunked_format(&probe[..probed]) {
+            // Legacy single-shot format: the whole ciphertext is one AES-GCM
+            // message, so there is nothing to stream — it cannot be
+            // authenticated without being held. Buffer it, then stream only the
+            // decompression into `dst`.
+            let mut encrypted = Vec::new();
+            file.read_to_end(&mut encrypted)?;
+            let compressed = self.crypto.decrypt(&encrypted, key)?;
+            drop(encrypted);
+            return decompress_into(&compressed[..], compression, dst);
+        }
+
+        let reader = ChunkDecryptReader::new(&self.crypto, key, BufReader::new(file))?;
+        decompress_into(reader, compression, dst)
+    }
+}
+
+/// Fill as much of `buf` as the reader has, tolerating a short file.
+fn read_up_to<R: Read>(reader: &mut R, buf: &mut [u8]) -> Result<usize> {
+    let mut filled = 0;
+    while filled < buf.len() {
+        match reader.read(&mut buf[filled..])? {
+            0 => break,
+            n => filled += n,
+        }
+    }
+    Ok(filled)
+}
+
+/// Stream `src` through `compression` into exactly `dst`.
+///
+/// Every branch keeps memory bounded: gzip via `flate2`'s reader adapter, LZMA
+/// by writing into a cursor over `dst`, and `None` by copying through directly.
+fn decompress_into<R: Read>(
+    src: R,
+    compression: CompressionAlgorithm,
+    dst: &mut [u8],
+) -> Result<usize> {
+    let written = match compression {
+        CompressionAlgorithm::None => read_exact_and_no_more(src, dst)?,
+        CompressionAlgorithm::Gzip => {
+            read_exact_and_no_more(flate2::read::GzDecoder::new(src), dst)?
+        }
+        CompressionAlgorithm::Lzma => {
+            let mut cursor = std::io::Cursor::new(&mut dst[..]);
+            lzma_rs::lzma_decompress(&mut BufReader::new(src), &mut cursor).map_err(|e| {
+                VaultError::CompressionError(format!("LZMA decompression failed: {e}"))
+            })?;
+            usize::try_from(cursor.position()).unwrap_or(usize::MAX)
+        }
+    };
+    Ok(written)
+}
+
+/// Read exactly `dst.len()` bytes, then require the reader to be exhausted.
+///
+/// The second half matters more than it looks. A chunked stream verifies its MAC
+/// on the read that returns `Ok(0)`, so stopping as soon as `dst` is full would
+/// skip the only check that detects truncation, reordering, or extension. It
+/// also catches a model that is larger than the size the vault recorded.
+fn read_exact_and_no_more<R: Read>(mut src: R, dst: &mut [u8]) -> Result<usize> {
+    src.read_exact(dst).map_err(|e| {
+        if e.kind() == std::io::ErrorKind::UnexpectedEof {
+            VaultError::IntegrityError(format!(
+                "model is shorter than the {} bytes the vault recorded",
+                dst.len()
+            ))
+        } else {
+            VaultError::IoError(e)
+        }
+    })?;
+
+    let mut extra = [0u8; 1];
+    if src.read(&mut extra)? != 0 {
+        return Err(VaultError::IntegrityError(format!(
+            "model is longer than the {} bytes the vault recorded",
+            dst.len()
+        )));
+    }
+
+    Ok(dst.len())
 }
 
 /// Storage statistics
