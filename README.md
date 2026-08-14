@@ -12,7 +12,7 @@
 [![License](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue.svg)](LICENSE)
 [![Security](https://img.shields.io/badge/crypto-AES--256--GCM%20%2B%20Argon2id-green.svg)](SECURITY.md)
 [![CMMC](https://img.shields.io/badge/CMMC%202.0%20L2-controls%20supported-blue.svg)](docs/SECURITY_HARDENING.md)
-[![Tests](https://img.shields.io/badge/tests-2%2C227%20passing-brightgreen.svg)](reports/)
+[![Tests](https://img.shields.io/badge/tests-2%2C272%20passing-brightgreen.svg)](reports/)
 [![Coverage](https://img.shields.io/badge/coverage-85.4%25-brightgreen.svg)](docs/PERFORMANCE.md)
 [![Version](https://img.shields.io/badge/version-7.0.0-blue.svg)](CHANGELOG.md)
 [![crates.io](https://img.shields.io/crates/v/ironvault.svg)](https://crates.io/crates/ironvault)
@@ -21,6 +21,24 @@
 [![Agent-ready](https://img.shields.io/badge/agent--ready-AGENTS.md-blueviolet.svg)](AGENTS.md)
 
 A production-ready secure vault, built on FIPS-approved cryptographic algorithms, for storing and managing AI models. Every capability is exposed through **three parallel surfaces — CLI, REST/GraphQL, and MCP** — with a single source of truth (`iv introspect`) and self-describing manifests in [`.well-known/`](.well-known/). Built for autonomous agents, scriptable for CI, friendly for humans.
+
+---
+
+## Upgrading from 6.x?
+
+**7.0 is breaking in three places.**
+
+| | |
+| --- | --- |
+| `iv versions`, `iv lineage`, `iv stats` | now require the passphrase. They read the version index, which is not encrypted, so they used to answer without one. Set `IRONVAULT_PASSPHRASE` as `iv list` has always needed. |
+| `compliance.fips_mode` | removed. It defaulted to `true`, was documented as enforcing, and was read by nothing. Existing config files still load — the key is ignored. |
+| `FipsCrypto` | removed. Use `VaultCrypto`, which it has aliased since 6.1.0. |
+
+**Security:** upgrade from any version at or below 6.2.0.
+[GHSA-38rc-wv9q-cq4c](https://github.com/nervosys/IronVault/security/advisories/GHSA-38rc-wv9q-cq4c)
+(High, CVSS 8.6) — `Vault::unlock` accepted any passphrase, so `POST /api/v1/auth/token`
+issued an admin token to an unauthenticated caller. Model contents were never exposed;
+the inventory, audit log and ACL configuration were. Fixed in 6.2.1.
 
 ---
 
@@ -93,7 +111,7 @@ curl  http://host:8080/api/v1/...     # REST (see openapi.yaml)
 
 ### Stability contract for agents
 
-- **JSON output:** every read-style subcommand accepts `--format json`. Output schema versioned alongside the crate.
+- **JSON output:** `list`, `versions`, `lineage`, `stats`, `compliance`, `search`, `scan`, `diff`, `license-scan` and `introspect` accept `--format json`. Output schema versioned alongside the crate. The grouped read subcommands (`cloud list`, `database list`, `acl list`) are text-only for now — this line used to claim every read command supported the flag, which was false for five of them until 6.2.0.
 - **Exit codes:** `0` success · `1` general error · `2` authentication failed · `3` not found · `4` permission denied · `5` integrity / verification failure · `6` invalid input (including usage errors) · `7` configuration error · `8` compliance violation. Non-zero ⇒ failure, always. Enforced by [`VaultError::exit_code`](src/error.rs) and pinned by tests.
 - **Idempotent reads:** `list`, `get`, `search`, `versions`, `lineage`, `stats`, `compliance`, `introspect`, `*/show`, `*/list` are side-effect free.
 - **Destructive ops gated:** `delete`, `policy apply`, `gc`, `vault-import` accept `--dry-run` (where applicable) or require an explicit name argument.
