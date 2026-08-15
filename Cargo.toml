@@ -44,8 +44,9 @@ zeroize = { version = "1.7", features = ["derive"] } # Secure memory zeroing
 
 # Compression
 # The GGUF wire format, shared with IronWorks so the writer here and the
-# reader there cannot drift. Path dep until it is published.
-gguf-quant = { path = "../IronWorks/crates/gguf-quant" }
+# reader there cannot drift. Depends on `half` and nothing else — this crate
+# must not drag an inference engine into the vault.
+gguf-quant = "0.1"
 flate2 = "1.0"  # Gzip/zlib compression
 lzma-rs = "0.3" # LZMA compression
 

@@ -2297,6 +2297,8 @@ dependencies = [
 [[package]]
 name = "gguf-quant"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d1703843127025fea07150a38812a5938083babe8fcac4eec9825e193a8f70e0"
 dependencies = [
  "half",
 ]
