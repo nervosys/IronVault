@@ -43,6 +43,12 @@ pub mod federation_transport;
 pub mod formats;
 pub mod gc;
 pub mod gguf;
+/// HuggingFace safetensors to GGUF conversion (llama architecture).
+pub mod hf_gguf;
+
+/// The GGUF wire format crate, re-exported so callers can name tensor types
+/// without adding their own dependency on it.
+pub use gguf_quant;
 pub mod interop;
 pub mod kms;
 pub mod license_scan;

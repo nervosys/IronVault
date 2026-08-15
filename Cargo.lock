@@ -2295,6 +2295,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "gguf-quant"
+version = "0.1.0"
+dependencies = [
+ "half",
+]
+
+[[package]]
 name = "ghash"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2799,6 +2806,7 @@ dependencies = [
  "directories",
  "flate2",
  "futures-util",
+ "gguf-quant",
  "hex",
  "hostname",
  "hyper",

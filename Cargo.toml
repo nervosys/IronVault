@@ -43,6 +43,9 @@ argon2 = "0.5"                                       # Alternative KDF (more sec
 zeroize = { version = "1.7", features = ["derive"] } # Secure memory zeroing
 
 # Compression
+# The GGUF wire format, shared with IronWorks so the writer here and the
+# reader there cannot drift. Path dep until it is published.
+gguf-quant = { path = "../IronWorks/crates/gguf-quant" }
 flate2 = "1.0"  # Gzip/zlib compression
 lzma-rs = "0.3" # LZMA compression
 
