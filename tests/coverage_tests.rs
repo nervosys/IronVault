@@ -14342,7 +14342,10 @@ mod remaining_coverage_tests {
         #[test]
         fn safetensors_to_gguf_shim() {
             let converter = SafeTensorsToGgufConverter;
-            assert_eq!(converter.name(), "SafeTensors → GGUF (shim)");
+            assert_eq!(
+                converter.name(),
+                "SafeTensors → GGUF (shim; use `iv convert --from-dir` for the real one)"
+            );
             assert_eq!(converter.source_format(), ModelFormat::Safetensors);
             assert_eq!(converter.target_format(), ModelFormat::GGUF);
             let result = converter
@@ -14351,6 +14354,32 @@ mod remaining_coverage_tests {
             let plan: serde_json::Value = serde_json::from_slice(&result).unwrap();
             assert_eq!(plan["converter"], "safetensors_to_gguf");
             assert_eq!(plan["quantization"], "f16");
+            // The default is f16, which this repo converts natively — the plan
+            // must send the reader to `--from-dir`, not to a Python script that
+            // is no longer needed.
+            assert_eq!(plan["requires"].as_array().unwrap().len(), 0);
+            assert!(
+                plan["shell"].as_str().unwrap().contains("--from-dir"),
+                "f16 plan should name the native route: {}",
+                plan["shell"]
+            );
+        }
+
+        #[test]
+        fn safetensors_to_gguf_k_quant_plan_still_sends_you_to_llama_cpp() {
+            let converter = SafeTensorsToGgufConverter;
+            let opts = ConversionOptions {
+                quantization: Some("q6_k".to_string()),
+                ..ConversionOptions::default()
+            };
+            let result = converter.convert(b"dummy", &opts, None).unwrap();
+            let plan: serde_json::Value = serde_json::from_slice(&result).unwrap();
+            assert!(
+                plan["shell"].as_str().unwrap().contains("llama-quantize"),
+                "no K-quant encoder exists here: {}",
+                plan["shell"]
+            );
+            assert!(!plan["requires"].as_array().unwrap().is_empty());
         }
 
         #[test]

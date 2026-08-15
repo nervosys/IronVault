@@ -230,6 +230,14 @@ pub enum Commands {
         /// Only show conversion plan (don't execute)
         #[arg(long)]
         plan_only: bool,
+
+        /// Convert from a HuggingFace model directory on disk instead of a
+        /// vaulted model. Required for safetensors → GGUF: that conversion
+        /// needs `config.json` and `tokenizer.model` alongside the weights,
+        /// and a vaulted blob is one file with neither. The vault is not
+        /// opened at all in this mode.
+        #[arg(long, value_name = "DIR")]
+        from_dir: Option<PathBuf>,
     },
 
     /// List supported format conversions

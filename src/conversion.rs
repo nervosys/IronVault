@@ -1604,12 +1604,19 @@ impl Converter for OnnxToCoreMLConverter {
     }
 }
 
-/// Shim: SafeTensors → GGUF (needs `llama-cpp-python` or `gguf` Python package).
+/// Shim: SafeTensors → GGUF, for the *byte-array* pipeline only.
+///
+/// 🚨 A real converter lives in [`crate::hf_gguf::convert_hf_to_gguf`], and
+/// `iv convert --from-dir <hf_dir> -t gguf` reaches it. This shim cannot: the
+/// [`Converter`] trait takes `&[u8]` and returns `Vec<u8>`, while a GGUF needs
+/// the whole HuggingFace *directory* — `config.json` and `tokenizer.model` as
+/// well as the weights — and streams a checkpoint too large to hold twice.
+/// So this arm stays a plan, and the plan now points at the real route.
 pub struct SafeTensorsToGgufConverter;
 
 impl Converter for SafeTensorsToGgufConverter {
     fn name(&self) -> &str {
-        "SafeTensors → GGUF (shim)"
+        "SafeTensors → GGUF (shim; use `iv convert --from-dir` for the real one)"
     }
 
     fn produces_plan(&self) -> bool {
@@ -1630,20 +1637,34 @@ impl Converter for SafeTensorsToGgufConverter {
     ) -> Result<Vec<u8>> {
         let quant = options.quantization.as_deref().unwrap_or("f16");
 
+        // Llama to f16/bf16/f32 needs no Python at all — that is `--from-dir`.
+        // Anything else does, and saying which is which is the point of a plan.
+        let native = matches!(quant, "f16" | "fp16" | "bf16" | "f32" | "fp32");
         let plan = serde_json::json!({
             "converter": "safetensors_to_gguf",
-            "requires": ["gguf", "numpy", "safetensors"],
+            "requires": if native { vec![] } else { vec!["gguf", "numpy", "safetensors"] },
             "quantization": quant,
-            "shell": format!(
-                "python -m gguf.convert --src input_path --dst output_path --type {quant}"
-            ),
-            "python": format!(
+            "shell": if native {
+                "iv convert <name> -t gguf --from-dir <hf_model_dir> -o out.gguf".to_string()
+            } else {
+                format!("python convert_hf_to_gguf.py --outtype f16 model_dir && llama-quantize out.gguf out-{quant}.gguf {quant}")
+            },
+            "python": if native {
                 concat!(
-                    "# Use llama.cpp convert scripts\n",
-                    "# python convert_hf_to_gguf.py --outtype {} model_dir\n",
-                ),
-                quant,
-            ),
+                    "# No Python needed for llama → f16/bf16/f32.\n",
+                    "# iv convert <name> -t gguf --from-dir <hf_model_dir> -o out.gguf\n",
+                ).to_string()
+            } else {
+                format!(
+                    concat!(
+                        "# No K-quant encoder exists here, and non-llama architectures\n",
+                        "# need per-architecture mapping. Both go through llama.cpp:\n",
+                        "# python convert_hf_to_gguf.py --outtype f16 model_dir\n",
+                        "# llama-quantize out.gguf out-{}.gguf {}\n",
+                    ),
+                    quant, quant,
+                )
+            },
         });
 
         serde_json::to_vec_pretty(&plan).map_err(|e| {

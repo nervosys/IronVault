@@ -211,6 +211,7 @@ fn run() -> Result<()> {
             opset,
             validate,
             plan_only,
+            from_dir,
         } => convert::handle_convert(
             name,
             to_format,
@@ -220,6 +221,7 @@ fn run() -> Result<()> {
             opset,
             validate,
             plan_only,
+            from_dir,
             config,
             use_sqlite,
         ),
