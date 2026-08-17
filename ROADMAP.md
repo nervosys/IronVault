@@ -1,8 +1,16 @@
 # IronVault — Roadmap
 
-> Last updated: 2026-07-29
-> Current version: **3.0.0** (one honest exit-code contract, enforced)
-> Status: Production release — 2,160+ Rust tests + 84 Python tests, 11 proptest strategies, 8 fuzz targets, 5 benchmark suites, clippy clean across every feature combination the crate declares, `cargo audit` / `cargo deny` clean with zero suppressions
+> Last updated: 2026-08-17
+> Current version: **7.2.0**
+> Status: Production release — 2,294 Rust tests + Python tests, proptest strategies, fuzz targets, benchmark suites, clippy clean across every feature combination the crate declares
+
+**This file stops at v3.0.0.** Releases 4.0 through 7.2 — the IronVault
+rename, TLS enforcement, the `unlock` passphrase fix
+([GHSA-38rc-wv9q-cq4c](https://github.com/nervosys/IronVault/security/advisories/GHSA-38rc-wv9q-cq4c)),
+streaming reads, and HuggingFace→GGUF conversion — are recorded in
+[CHANGELOG.md](CHANGELOG.md), which is the authoritative history. What follows
+is kept as the record of how the project got to 3.0, not as a statement of
+where it is now.
 
 ---
 

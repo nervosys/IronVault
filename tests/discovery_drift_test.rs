@@ -1,4 +1,5 @@
-//! Pins `.well-known/mcp-manifest.json` to what the crate actually registers.
+//! Pins the discovery surface -- the `.well-known/` manifests and the prose
+//! documents that describe them -- to what the crate actually is.
 //!
 //! The REST spec got [`openapi_drift_test`] in 5.1.0 after it drifted to 14
 //! documented paths with no handler. The third surface never got the
@@ -256,4 +257,37 @@ fn the_plugin_logo_exists_in_this_repository() {
         "logo_url points at `{path}`, which does not exist in the repository, \
          so the published URL 404s."
     );
+}
+
+/// Documents that state the current version must state the current version.
+///
+/// `test_well_known_manifests_declare_the_crate_version` pins the `.well-known`
+/// manifests. Prose was never pinned, and drifted further than any manifest
+/// did: AGENTS.md's identity table and ROADMAP.md's header both still said
+/// 3.0.0 at 7.2.0 -- four majors, in the two documents a reader checks first
+/// to find out what this project is.
+#[test]
+fn prose_documents_state_the_current_crate_version() {
+    let crate_version = env!("CARGO_PKG_VERSION");
+
+    let checks: &[(&str, &str)] = &[
+        ("AGENTS.md", "| **Version**    | "),
+        ("ROADMAP.md", "> Current version: **"),
+    ];
+
+    for (rel, marker) in checks {
+        let text = std::fs::read_to_string(manifest_dir().join(rel))
+            .unwrap_or_else(|e| panic!("{rel} is readable: {e}"));
+
+        let line = text
+            .lines()
+            .find(|l| l.starts_with(marker))
+            .unwrap_or_else(|| panic!("{rel} still has a line starting `{marker}`"));
+
+        assert!(
+            line.contains(crate_version),
+            "{rel} says `{}` but the crate is {crate_version}",
+            line.trim(),
+        );
+    }
 }
