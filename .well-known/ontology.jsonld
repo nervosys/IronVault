@@ -82,7 +82,7 @@
       "FIPS 140-3 / CMMC 2.0 / MITRE ATT&CK compliance",
       "Model Cards (Google/HuggingFace standard)",
       "RAG system with document store, knowledge base, rule engine",
-      "MCP (Model Context Protocol) server with tool registry",
+      "MCP (Model Context Protocol) tool primitives (library; no transport ships)",
       "Cloud storage (AWS S3, Azure Blob, GCS)",
       "REST API (Axum) and GraphQL (async-graphql)",
       "Blockchain-based audit trail with Merkle proofs",
