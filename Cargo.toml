@@ -37,9 +37,18 @@ exclude = [
 
 [dependencies]
 # Cryptography - FIPS-approved algorithms (implementations are not CMVP-validated)
-aes-gcm = "0.10"                                     # AES-GCM encryption
+aes-gcm = "0.11"                                     # AES-GCM encryption
 sha2 = "0.10"                                        # SHA-256 hashing
 argon2 = "0.5"                                       # Alternative KDF (more secure than PBKDF2)
+# The CSPRNG behind salts, nonces and key seeds. Named directly rather than
+# taken from whichever crypto crate happens to re-export one: 0.10 got it from
+# `aes_gcm::aead`, 0.11 dropped that re-export, and the compiler found every
+# use site only because they were all in two files. 0.6 is the version
+# `argon2` already pulls in through `password_hash`, so this adds no crate to
+# the build, and its `RngCore` is infallible -- `rand_core` 0.9 would make
+# `VaultCrypto::generate_random` fallible, which is a better shape but a
+# breaking change to a public method.
+rand_core = { version = "0.6.4", features = ["getrandom"] }
 zeroize = { version = "1.7", features = ["derive"] } # Secure memory zeroing
 
 # Compression
