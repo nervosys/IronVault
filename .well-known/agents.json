@@ -66,10 +66,11 @@
     },
     {
       "type": "mcp",
-      "description": "Model Context Protocol server with built-in tools spanning vault lifecycle, model conversion, signing, scanning, diffing, quantization, evaluation, backup, multi-vault, RAG, ACL, policies, lineage-graph, plugins, profiles, webhooks, GC, validation, and license scanning. Extensible via ToolRegistry.",
+      "description": "Model Context Protocol tooling, provided as a library surface rather than a running server: this crate ships no MCP transport. MCPServer and MCPTool (ironvault::rag) let a host process expose vault capabilities as MCP tools, and mcp-manifest.json is the 86-tool surface to register against. Extensible via MCPServer::register_tool.",
       "protocol_version": "2024-11-05",
       "manifest": ".well-known/mcp-manifest.json",
-      "builtin_tools": ["search_documents", "add_document", "chunk_text", "execute_rule", "vault_init", "vault_store", "vault_get", "vault_list", "vault_versions", "vault_lineage", "vault_stats", "model_convert", "model_analyze", "model_deduplicate", "model_sign", "model_verify", "model_scan", "model_diff", "model_validate", "model_pull", "license_scan", "tag_add", "tag_remove", "tag_list", "model_search", "quant_set", "quant_estimate", "quant_list", "eval_record", "eval_list", "eval_compare", "backup_schedule", "backup_run", "backup_history", "vaults_register", "vaults_activate", "vaults_list", "policy_set", "policy_apply", "lineage_graph_add", "lineage_graph_show", "plugin_install", "plugin_list", "profile_create", "profile_activate", "webhook_add", "webhook_test", "acl_grant", "acl_check", "gc_run", "compliance_check", "cloud_push", "cloud_pull", "cloud_list"],
+      "builtin_tools": ["search_documents", "add_document", "chunk_text", "execute_rule"],
+      "declared_tools": {"count": 86, "manifest": ".well-known/mcp-manifest.json", "note": "Definitions, not shipped implementations -- register them in your host process."},
       "extensible": true
     },
     {

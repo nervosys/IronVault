@@ -112,6 +112,46 @@ fn the_builtin_tool_set_has_not_changed_silently() {
     );
 }
 
+/// `agents.json` is the machine-readable one, so overstating there is worse
+/// than overstating in prose: an agent parses `builtin_tools` and believes it.
+/// It listed 54 -- a third number, agreeing with neither the manifest's 86 nor
+/// the 4 that exist -- and described an "MCP server" the crate does not ship.
+#[test]
+fn agents_json_lists_only_the_tools_that_are_really_built_in() {
+    let raw = std::fs::read_to_string(manifest_dir().join(".well-known/agents.json"))
+        .expect(".well-known/agents.json is readable");
+    let doc: serde_json::Value = serde_json::from_str(&raw).expect("agents.json is valid JSON");
+
+    let mcp = doc["agent_interfaces"]
+        .as_array()
+        .expect("agent_interfaces is an array")
+        .iter()
+        .find(|i| i["type"] == "mcp")
+        .expect("an mcp interface entry exists");
+
+    let listed: BTreeSet<String> = mcp["builtin_tools"]
+        .as_array()
+        .expect("builtin_tools is an array")
+        .iter()
+        .map(|v| v.as_str().expect("tool names are strings").to_string())
+        .collect();
+
+    let expected: BTreeSet<String> = BUILTIN_TOOLS.iter().map(|s| (*s).to_string()).collect();
+
+    assert_eq!(
+        listed, expected,
+        "agents.json `builtin_tools` must list exactly the tools \
+         register_builtin_tools installs. The declared surface belongs in \
+         `declared_tools`, which points at the manifest."
+    );
+
+    assert_eq!(
+        mcp["declared_tools"]["count"].as_u64(),
+        Some(DECLARED_TOOL_COUNT as u64),
+        "agents.json `declared_tools.count` must match the manifest."
+    );
+}
+
 #[test]
 fn the_readme_and_agents_md_do_not_advertise_declared_tools_as_shipped() {
     // The exact sentence this guards against: "86 MCP tools", which read as an
