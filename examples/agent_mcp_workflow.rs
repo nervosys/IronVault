@@ -5,8 +5,14 @@
 //! an LLM/agent can call directly. Every tool has a JSON Schema input and
 //! returns a `ToolResult { success, data, error, metadata }`.
 //!
-//! This mirrors what `.well-known/mcp-manifest.json` advertises, so an agent
-//! that has been onboarded against the manifest can drive this server unchanged.
+//! The three tools below are illustrative, not the manifest's surface. They
+//! are named `vault.store` / `vault.list` / `vault.search`, while
+//! `.well-known/mcp-manifest.json` declares `vault_init`, `model_convert` and
+//! 84 others — so an agent onboarded against the manifest will not find these
+//! by name, and this file used to claim the opposite. `register_builtin_tools`
+//! is the only shipped tool set; it covers the four RAG tools. Everything else
+//! the manifest declares is a surface a host process is expected to register
+//! itself, using exactly the pattern shown here.
 //!
 //! Run with:  `cargo run --example agent_mcp_workflow`
 
