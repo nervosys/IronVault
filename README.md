@@ -12,7 +12,7 @@
 [![License](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue.svg)](LICENSE)
 [![Security](https://img.shields.io/badge/crypto-AES--256--GCM%20%2B%20Argon2id-green.svg)](SECURITY.md)
 [![CMMC](https://img.shields.io/badge/CMMC%202.0%20L2-controls%20supported-blue.svg)](docs/SECURITY_HARDENING.md)
-[![Tests](https://img.shields.io/badge/tests-2%2C294%20passing-brightgreen.svg)](reports/)
+[![Tests](https://img.shields.io/badge/tests-2%2C303%20passing-brightgreen.svg)](reports/)
 [![Coverage](https://img.shields.io/badge/coverage-85.4%25-brightgreen.svg)](docs/PERFORMANCE.md)
 [![Version](https://img.shields.io/badge/version-7.2.0-blue.svg)](CHANGELOG.md)
 [![crates.io](https://img.shields.io/crates/v/ironvault.svg)](https://crates.io/crates/ironvault)
