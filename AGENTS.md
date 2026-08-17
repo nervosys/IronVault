@@ -51,7 +51,7 @@ passphrase. See [docs/KMS.md](docs/KMS.md) for the URI table and backend setup.
 
 | Guarantee         | Detail                                                                                                                                  |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| JSON output       | Every read subcommand accepts `--format json`. Schemas evolve with semver; breaking changes bump the major version of `ironvault`. |
+| JSON output       | `list`, `versions`, `lineage`, `stats`, `compliance`, `search`, `scan`, `diff`, `license-scan` and `introspect` accept `--format json`. The grouped reads (`cloud list`, `database list`, `acl list`) are text-only. Schemas evolve with semver; breaking changes bump the major version of `ironvault`. |
 | Exit codes        | `0` ok · `1` general · `2` auth failed · `3` not found · `4` permission denied · `5` integrity · `6` invalid input · `7` config · `8` compliance |
 | Idempotent reads  | `list`, `get`, `search`, `versions`, `lineage`, `stats`, `compliance`, `introspect`, every `*/show` and `*/list` are side-effect free   |
 | Destructive gates | `delete`, `policy apply`, `gc`, `vault-import` either require explicit names or accept `--dry-run`                                      |
@@ -67,7 +67,7 @@ passphrase. See [docs/KMS.md](docs/KMS.md) for the URI table and backend setup.
 | **Name**       | IronVault                           |
 | **Binary**     | `iv`                                    |
 | **Crate**      | `ironvault`                         |
-| **Version**    | 3.0.0                                    |
+| **Version**    | 7.2.0                                    |
 | **Language**   | Rust (edition 2021, MSRV 1.89)           |
 | **License**    | AGPL-3.0-or-later                        |
 | **Repository** | https://github.com/nervosys/IronVault |
@@ -229,7 +229,7 @@ iv policy apply-all [--dry-run]              # Apply all policies
 
 # Cross-model lineage DAG
 iv lineage-graph add --child <C> --parents <P>... --kind <KIND>
-iv lineage-graph show                        # Display lineage graph
+iv lineage-graph show <MODEL>                # Display lineage for a model
 iv lineage-graph ancestors <MODEL>           # Show ancestors
 iv lineage-graph descendants <MODEL>         # Show descendants
 
@@ -246,12 +246,12 @@ iv profile remove <NAME>                     # Remove profile
 iv profile list                              # List all profiles
 iv profile activate <NAME>                   # Activate profile
 iv profile deactivate                        # Deactivate current profile
-iv profile show                              # Show active profile
+iv profile show <NAME>                       # Show a profile's details
 
 # Quantization pipeline
 iv quantize set <MODEL> --method <METHOD> [--version V] [--bits N]
 iv quantize remove <MODEL> [--version V]     # Remove quantization profile
-iv quantize list [MODEL]                     # List quantization profiles
+iv quantize list                             # List quantization profiles
 iv quantize estimate <MODEL> --method <METHOD>  # Estimate output size
 
 # Evaluation harness
