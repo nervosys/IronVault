@@ -77,9 +77,15 @@ never unset.
 
 `versions.json` holds model names, sizes, formats, timestamps and checkpoint
 IDs in the clear. Anything that can read the vault directory can read that,
-with or without the passphrase — which is why `iv versions` and `iv lineage`
-answer without unlocking. Over the REST API the same data is behind
+with or without the passphrase. Over the REST API the same data is behind
 `require_auth`, so this is local exposure, not remote.
+
+Through 6.x the CLI handed the same inventory out directly: `iv versions`,
+`iv lineage` and `iv stats` answered with no passphrase at all, because the
+file they read is not encrypted. **7.0 made all three require it.** That does
+not encrypt the index — the exposure above is unchanged for anyone who can
+read the directory — but the tool no longer prints the inventory for a caller
+who cannot open the vault.
 
 If model *names* are themselves sensitive in your deployment, treat the vault
 directory as sensitive and rely on filesystem permissions (0600/0700, applied
