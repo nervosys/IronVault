@@ -396,43 +396,48 @@ fn parse_sentencepiece(data: &[u8]) -> Result<(Vec<String>, Vec<f32>, Vec<i32>)>
             .ok_or_else(|| VaultError::ConversionError("tokenizer.model: piece overruns".into()))?;
 
         let (mut piece, mut score, mut ty) = (String::new(), 0.0f32, 1i32);
-        let mut p = pos;
-        while p < end {
-            let (t, n) = varint(data, p).ok_or_else(|| {
+        let mut cursor = pos;
+        while cursor < end {
+            let (piece_tag, after_tag) = varint(data, cursor).ok_or_else(|| {
                 VaultError::ConversionError("tokenizer.model: bad piece varint".into())
             })?;
-            p = n;
-            match (t >> 3, t & 7) {
+            cursor = after_tag;
+            match (piece_tag >> 3, piece_tag & 7) {
                 (1, 2) => {
-                    let (l, n) = varint(data, p).ok_or_else(|| {
+                    let (str_len, str_start) = varint(data, cursor).ok_or_else(|| {
                         VaultError::ConversionError("tokenizer.model: bad piece len".into())
                     })?;
-                    let s = n + l as usize;
-                    if s > end {
+                    let str_end = str_start + str_len as usize;
+                    if str_end > end {
                         return Err(VaultError::ConversionError(
                             "tokenizer.model: piece string overruns".into(),
                         ));
                     }
-                    piece = String::from_utf8_lossy(&data[n..s]).into_owned();
-                    p = s;
+                    piece = String::from_utf8_lossy(&data[str_start..str_end]).into_owned();
+                    cursor = str_end;
                 }
                 (2, 5) => {
-                    if p + 4 > end {
+                    if cursor + 4 > end {
                         return Err(VaultError::ConversionError(
                             "tokenizer.model: score overruns".into(),
                         ));
                     }
-                    score = f32::from_le_bytes([data[p], data[p + 1], data[p + 2], data[p + 3]]);
-                    p += 4;
+                    score = f32::from_le_bytes([
+                        data[cursor],
+                        data[cursor + 1],
+                        data[cursor + 2],
+                        data[cursor + 3],
+                    ]);
+                    cursor += 4;
                 }
                 (3, 0) => {
-                    let (v, n) = varint(data, p).ok_or_else(|| {
+                    let (raw_ty, after_ty) = varint(data, cursor).ok_or_else(|| {
                         VaultError::ConversionError("tokenizer.model: bad type".into())
                     })?;
-                    ty = v as i32;
-                    p = n;
+                    ty = raw_ty as i32;
+                    cursor = after_ty;
                 }
-                (_, w) => p = skip_field(data, p, w)?,
+                (_, wire) => cursor = skip_field(data, cursor, wire)?,
             }
         }
 
@@ -820,7 +825,7 @@ pub fn convert_hf_to_gguf(
             } else {
                 cfg.num_key_value_heads as usize
             };
-            if rows % (heads * 2) != 0 {
+            if !rows.is_multiple_of(heads * 2) {
                 return Err(VaultError::ConversionError(format!(
                     "{gname}: {rows} rows is not divisible by 2x{heads} heads"
                 )));

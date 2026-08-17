@@ -476,8 +476,26 @@ fn build_commands(compact: bool) -> Value {
                     None,
                     desc(compact, "Show plan only")
                 ),
+                arg(
+                    "--from-dir",
+                    "",
+                    "path",
+                    false,
+                    None,
+                    desc(
+                        compact,
+                        "HuggingFace checkpoint directory; required for the native \
+                         safetensors → GGUF path. The vault is not opened."
+                    )
+                ),
             ],
-            ex(compact, &["iv convert my-llm -t gguf -q q4_k_m --validate"])
+            ex(
+                compact,
+                &[
+                    "iv convert my-llm -t gguf -q q4_k_m --validate",
+                    "iv convert tinyllama --from-dir ./TinyLlama-1.1B -t gguf",
+                ]
+            )
         ),
         cmd(
             "list-conversions",

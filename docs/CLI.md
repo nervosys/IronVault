@@ -480,6 +480,10 @@ iv convert <MODEL> --to-format <FORMAT> [OPTIONS]
 - `-o, --output <PATH>` - Output file path (optional, defaults to model_name.{extension})
 - `-v, --version <VERSION>` - Version number (latest if not specified)
 - `-q, --quantization <LEVEL>` - Quantization level for GGUF conversion (q4_0, q4_k_m, q8_0, etc.)
+- `--opset <N>` - ONNX opset version (default 17)
+- `--validate` - Validate the conversion output
+- `--plan-only` - Print the conversion plan without executing it
+- `--from-dir <DIR>` - Convert a HuggingFace checkpoint directory on disk instead of a vaulted model. Required for the native SafeTensors → GGUF path, which needs `config.json` and `tokenizer.model` alongside the weights. The vault is not opened, so no passphrase is needed.
 
 **Supported Formats:**
 - `safetensors` - Safetensors format
@@ -500,7 +504,10 @@ iv convert <MODEL> --to-format <FORMAT> [OPTIONS]
 # Convert PyTorch to Safetensors
 iv convert llama-2-7b --to-format safetensors
 
-# Convert to GGUF with quantization
+# HuggingFace checkpoint → GGUF F16, pure Rust, no Python
+iv convert tinyllama --from-dir ./TinyLlama-1.1B --to-format gguf
+
+# GGUF K-quants still need llama-quantize; this prints a plan, not a file
 iv convert gpt2-model --to-format gguf --quantization q4_k_m
 
 # Convert specific version to ONNX
@@ -515,24 +522,34 @@ iv convert resnet50 --to-format coreml --output resnet50.mlmodel
 
 **How it Works:**
 
-The convert command provides guidance on converting between formats:
+Some conversions run here and write a real file; the rest write a plan and no
+target-format file, because a converter that guesses produces something that
+loads and is wrong.
 
-1. **Automatic Detection**: Detects source format from vault metadata
-2. **Conversion Paths**: Shows recommended tools and commands for conversion
-3. **Guidance Output**: Provides step-by-step instructions with specific tools:
-   - **PyTorch → Safetensors**: Uses `safetensors.torch.save_file()`
-   - **PyTorch → ONNX**: Uses `torch.onnx.export()`
-   - **Safetensors → GGUF**: Uses llama.cpp `convert.py` with quantization
-   - **ONNX → TensorRT**: Uses `trtexec` compiler
-   - **PyTorch → Core ML**: Uses `coremltools.convert()`
-   - **PyTorch → TFLite**: Uses `ai_edge_torch`
+**Native (pure Rust, produces a file):**
+- **PyTorch ↔ Safetensors** and **Safetensors ↔ raw**
+- **HuggingFace → GGUF** via `--from-dir` — llama architecture, F16/BF16/F32.
+  Streams: peak memory is the largest single tensor, not the model.
+- **GGUF / ONNX → metadata JSON** (header and metadata parsers)
+
+**Plan-only (needs an external Python toolchain, writes `<output>.plan.json`):**
+- **PyTorch → ONNX**: `torch.onnx.export()`
+- **ONNX → TensorRT**: the `trtexec` compiler
+- **ONNX → Core ML**: `coremltools.convert()`
+- **PyTorch → TFLite**: `ai_edge_torch`
+- **GGUF K-quants and non-llama architectures**: llama.cpp
+
+The source format is detected from vault metadata, and multi-step paths (e.g.
+PyTorch → ONNX → TensorRT) are found by search but stop at the first plan-only
+step.
 
 **Common Conversion Workflows:**
 
 ```bash
 # Training → Production (LLM)
-iv convert my-llm --to-format safetensors        # PyTorch → Safetensors
-iv convert my-llm --to-format gguf -q q4_k_m     # Safetensors → GGUF
+iv convert my-llm --to-format safetensors        # PyTorch → Safetensors (native)
+iv convert my-llm --from-dir ./hf-checkpoint -t gguf  # → GGUF F16 (native)
+iv convert my-llm --to-format gguf -q q4_k_m     # K-quant: plan for llama-quantize
 
 # Research → Mobile
 iv convert my-model --to-format onnx             # PyTorch → ONNX

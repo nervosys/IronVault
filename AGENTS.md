@@ -78,7 +78,7 @@ IronVault is an **encrypted AI/ML model management system**. It provides:
 
 1. **Encrypted Storage** — AES-256-GCM encryption with Argon2id key derivation. FIPS-approved algorithms, but not a FIPS-validated module; see the compliance table below
 2. **Version Control** — Sequential versioning with parent lineage trees and instant rollback
-3. **Format Conversion** — 23+ formats detected. Native pure-Rust conversion for SafeTensors ↔ PyTorch and SafeTensors ↔ raw; PyTorch→ONNX, ONNX→TensorRT, ONNX→CoreML and SafeTensors→GGUF require an external Python toolchain and return a plan (`converted: false`) instead of a file
+3. **Format Conversion** — 23+ formats detected. Native pure-Rust conversion for SafeTensors ↔ PyTorch, SafeTensors ↔ raw, and HuggingFace → GGUF (`iv convert --from-dir`; llama architecture, F16/BF16/F32); PyTorch→ONNX, ONNX→TensorRT, ONNX→CoreML and GGUF K-quants require an external Python toolchain and return a plan (`converted: false`) instead of a file
 4. **Compliance** — reports posture against FIPS 140-3, CMMC 2.0 Level 2 and MITRE ATT&CK. It reports; it does not certify
 5. **RAG System** — Document store, knowledge base, rule engine with MCP tool integration
 6. **Cloud Storage** — Push/pull to AWS S3, Azure Blob, Google Cloud Storage
@@ -138,6 +138,7 @@ iv compliance [--verbose]                # FIPS/CMMC/MITRE check
 
 # Format conversion
 iv convert <MODEL> --to-format <FMT> [--quantization q4_k_m] [--validate]
+iv convert <NAME> --from-dir <HF_DIR> -t gguf   # HuggingFace → GGUF, no vault
 iv list-conversions                      # Show conversion paths
 
 # Cloud storage
@@ -294,7 +295,13 @@ SafeTensors ↔ PyTorch
 SafeTensors ↔ raw
 GGUF        → metadata JSON   (header parser)
 ONNX        → metadata JSON   (metadata extractor)
+HuggingFace → GGUF            (`iv convert --from-dir`; llama only, F16/BF16/F32)
 ```
+
+`HuggingFace → GGUF` is not a registered converter and is not reachable from
+the `Converter` trait: a GGUF needs the whole checkpoint directory —
+`config.json` and `tokenizer.model` as well as the weights — where the trait
+takes a single `&[u8]`. It is its own CLI route, and it never opens the vault.
 
 **Plan-only (needs an external Python toolchain — produces no file):**
 
@@ -302,7 +309,9 @@ ONNX        → metadata JSON   (metadata extractor)
 PyTorch     → ONNX            (torch, onnx)
 ONNX        → TensorRT        (tensorrt / trtexec)
 ONNX        → Core ML         (coremltools)
-SafeTensors → GGUF            (gguf / llama-cpp-python; q4_0, q4_k_m, q5_k_m, q8_0)
+SafeTensors → GGUF            (K-quants and non-llama architectures only, via
+                               llama.cpp; for llama at F16/BF16/F32 use
+                               `iv convert --from-dir`, which needs no Python)
 ```
 
 Multi-step paths (e.g. PyTorch → ONNX → TensorRT) are found by BFS but stop at
@@ -450,6 +459,10 @@ iv store my-llm ./model.safetensors -d "Fine-tuned LLaMA" --framework pytorch --
 
 ### Convert for edge deployment
 ```bash
+# HuggingFace checkpoint → GGUF F16, pure Rust, streaming
+iv convert tinyllama --from-dir ./TinyLlama-1.1B --to-format gguf
+
+# K-quants stay llama-quantize's job; this returns a plan, not a file
 iv convert my-llm --to-format gguf --quantization q4_k_m --validate
 ```
 

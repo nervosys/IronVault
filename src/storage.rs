@@ -329,7 +329,7 @@ impl Storage {
 
     /// Decrypt and decompress a stored file directly into `dst`.
     ///
-    /// The streaming counterpart to [`LocalStorage::retrieve_auto`], which reads
+    /// The streaming counterpart to [`Storage::retrieve_auto`], which reads
     /// the whole ciphertext, allocates the whole plaintext, and then allocates
     /// again to decompress — roughly 3× the model in peak residency. This holds
     /// one 4 MiB chunk plus whatever the decompressor needs, whatever the model

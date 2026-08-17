@@ -150,7 +150,7 @@ mapping.
 
 - **Agent-first** — three coequal surfaces (CLI / REST+GraphQL / MCP), one schema, self-describing via `introspect` and `.well-known/`
 - **Secure by default** — AES-256-GCM with Argon2id KDF; aligned to CMMC 2.0 L2 and MITRE ATT&CK control families. Not a FIPS-validated module — see [Security & Compliance](#security--compliance)
-- **Format-agnostic** — auto-detect 23+ formats; convert natively between SafeTensors, PyTorch, and raw. Conversions that need a Python toolchain (→ ONNX, → TensorRT, → Core ML, → GGUF) return a runnable plan rather than a silently wrong file
+- **Format-agnostic** — auto-detect 23+ formats; convert natively between SafeTensors, PyTorch, and raw, and HuggingFace → GGUF (llama architecture, F16/BF16/F32) with no Python at all. Conversions that still need a Python toolchain (→ ONNX, → TensorRT, → Core ML, GGUF K-quants) return a runnable plan rather than a silently wrong file
 - **Provenance built-in** — SHA-256 checksums, HMAC signatures, an automatic append-only audit log, license & pickle scanning (plus a Merkle-chained block store available as a library primitive)
 - **Operational** — version control, retention policies, garbage collection, multi-vault, profiles, plugins, scheduled backups
 - **Integrated** — REST + GraphQL APIs, 86 MCP tools, Python bindings, Ollama / LM Studio interop, HuggingFace / Ollama / URL pull
@@ -209,8 +209,9 @@ iv store llama-7b ./model.safetensors \
 iv pull hf:mistralai/Mistral-7B-v0.1 --store --name mistral-7b
 iv pull ollama:llama3 --store --name llama3
 
-# 4. Convert SafeTensors → GGUF Q4_K_M for edge deployment
-iv convert llama-7b --to-format gguf --quantization q4_k_m --validate
+# 4. Convert a HuggingFace checkpoint to GGUF (no Python required)
+iv convert tinyllama --from-dir ./TinyLlama-1.1B --to-format gguf
+# K-quants are llama-quantize's job: convert to F16 first, then quantize.
 
 # 5. Sign, scan, and tag
 iv sign llama-7b --identity "trainer@company.com"
@@ -255,7 +256,7 @@ All features below are fully implemented, tested, and exposed via both CLI and l
 
 | Feature                  | CLI                | Notes                                                 |
 | ------------------------ | ------------------ | ----------------------------------------------------- |
-| Format conversion (10×)  | `iv convert`      | Native: PyTorch ↔ SafeTensors, ↔ raw. Plan-only (needs Python): → ONNX/TensorRT/Core ML/GGUF |
+| Format conversion (10×)  | `iv convert`      | Native: PyTorch ↔ SafeTensors, ↔ raw; HuggingFace → GGUF via `--from-dir` (llama, F16/BF16/F32). Plan-only (needs Python): → ONNX/TensorRT/Core ML, GGUF K-quants |
 | GGUF quantization        | `--quantization …` | Q4_0, Q4_K_M, Q5_K_M, Q8_0, F16, F32                  |
 | Quantization profiles    | `iv quantize`     | Per-model method selection, size estimation           |
 | ONNX → TensorRT/OpenVINO | `iv convert`      | Edge & GPU deployment paths                           |

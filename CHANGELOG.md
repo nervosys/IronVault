@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+Turns SafeTensors → GGUF from a plan into a conversion.
+
+### Added
+
+- `hf_gguf::convert_hf_to_gguf` — real HuggingFace-to-GGUF conversion. It
+  streams: the safetensors header carries every shape, so all tensors are
+  declared before any data is read, then converted and written one at a time.
+  Peak residency is the largest single tensor, not the model.
+- `iv convert --from-dir <DIR>` routes to it. This is its own route rather than
+  a registry entry because a GGUF needs the whole HuggingFace directory —
+  `config.json` and `tokenizer.model` as well as the weights — not the `&[u8]`
+  the `Converter` trait takes. It never opens the vault and never asks for a
+  passphrase.
+
+### Scope, deliberately narrow
+
+Llama architecture only, to F16/BF16/F32. Any other `model_type` is refused
+**by name**, with the `llama.cpp` command to use instead — a converter that
+guesses produces a GGUF that loads and generates wrong text. No K-quants:
+convert to F16 and run `llama-quantize`, which is how llama.cpp splits the job.
+
+### Changed
+
+- The registry shim's plan is no longer a lie. For f16/bf16/f32 it requires no
+  Python packages and points at `--from-dir`; only K-quants and other
+  architectures still route to llama.cpp.
+
+### Fixed
+
+- `ironvault.__version__` in the Python package said `7.0.0` while the crate and
+  the distribution metadata said `7.1.0`. The published 7.1.0 wheel carries the
+  wrong constant; `importlib.metadata.version("ironvault")` was correct
+  throughout.
+
 ## [7.1.0] - 2026-08-14
 
 Adds a streaming read path. Until now every way of getting a model *out* of the
@@ -33,7 +69,7 @@ owns, and cannot pay ~3× the model in peak residency to get there.
   Note the stream MAC can only be checked once the last chunk has been read, so
   **a caller that stops early has verified nothing about the stream as a whole**;
   read to EOF. `read_model_into` does.
-- `storage::LocalStorage::retrieve_into` — decrypt-and-decompress into a caller's
+- `storage::Storage::retrieve_into` — decrypt-and-decompress into a caller's
   buffer. All three compression settings stream: gzip through `flate2`'s reader
   adapter, LZMA into a cursor over the destination, and `None` straight through.
   Legacy (pre-5.0, non-chunked) files still buffer the decrypt, because a single

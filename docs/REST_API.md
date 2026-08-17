@@ -3,7 +3,7 @@
 
 # REST API Reference
 
-Version 7.0.0 of the IronVault REST API.
+Version 7.1.0 of the IronVault REST API.
 
 The API is behind the `api` cargo feature and is served by `iv serve`:
 
