@@ -19,13 +19,14 @@ pub mod compression;
 pub mod streaming;
 
 use aes_gcm::{
-    aead::{Aead, KeyInit, OsRng},
-    Aes256Gcm,
+    aead::{Aead, KeyInit},
+    Aes256Gcm, Nonce,
 };
 use argon2::{
-    password_hash::{rand_core::RngCore, PasswordHasher, SaltString},
+    password_hash::{PasswordHasher, SaltString},
     Argon2, ParamsBuilder, Version,
 };
+use rand_core::{OsRng, RngCore};
 use sha2::{Digest, Sha256};
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
@@ -218,8 +219,16 @@ impl VaultCrypto {
         let ciphertext = &encrypted_data[NONCE_SIZE..];
 
         // Decrypt and verify
+        // 0.11 takes a fixed-width nonce rather than `&[u8]`, so the length is
+        // checked here instead of assumed. The guard above already guarantees
+        // it, which is why this arm is unreachable -- but an unreachable arm
+        // that returns an error costs nothing, and a panic here would be a
+        // denial of service reachable from any stored file.
+        let nonce = Nonce::try_from(&encrypted_data[..NONCE_SIZE])
+            .map_err(|_| VaultError::CryptoError("Malformed nonce".to_string()))?;
+
         let plaintext = cipher
-            .decrypt((&encrypted_data[..NONCE_SIZE]).into(), ciphertext)
+            .decrypt(&nonce, ciphertext)
             .map_err(|_| VaultError::AuthenticationFailed)?;
 
         Ok(plaintext)

@@ -163,8 +163,7 @@ impl ModelSigner {
     /// Uses the OS CSPRNG to create a random 32-byte seed, then derives
     /// the "public key" as SHA-256(seed) for identification.
     pub fn generate_keypair(identity: Option<&str>) -> Result<SigningKeyPair> {
-        use aes_gcm::aead::rand_core::RngCore;
-        use aes_gcm::aead::OsRng;
+        use rand_core::{OsRng, RngCore};
 
         let mut seed = [0u8; 32];
         OsRng.fill_bytes(&mut seed);
