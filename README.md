@@ -20,7 +20,7 @@
 [![Clippy](https://img.shields.io/badge/clippy-clean-brightgreen.svg)](validate.ps1)
 [![Agent-ready](https://img.shields.io/badge/agent--ready-AGENTS.md-blueviolet.svg)](AGENTS.md)
 
-A production-ready secure vault, built on FIPS-approved cryptographic algorithms, for storing and managing AI models. Every capability is exposed through **three parallel surfaces — CLI, REST/GraphQL, and MCP** — with a single source of truth (`iv introspect`) and self-describing manifests in [`.well-known/`](.well-known/). Built for autonomous agents, scriptable for CI, friendly for humans.
+A production-ready secure vault, built on FIPS-approved cryptographic algorithms, for storing and managing AI models. Every capability is exposed through **two shipped surfaces — CLI and REST/GraphQL** — plus MCP primitives you register in your own host process, with a single source of truth (`iv introspect`) and self-describing manifests in [`.well-known/`](.well-known/). Built for autonomous agents, scriptable for CI, friendly for humans.
 
 ---
 
@@ -82,7 +82,7 @@ iv introspect --format json          # entire CLI schema, machine-readable
 | File                                                 | Purpose                                                           |
 | ---------------------------------------------------- | ----------------------------------------------------------------- |
 | [`agents.json`](.well-known/agents.json)             | Capability catalog (35 capabilities), taxonomy, interface inventory   |
-| [`mcp-manifest.json`](.well-known/mcp-manifest.json) | **86 MCP tools** with full JSON Schema inputs, resources, prompts |
+| [`mcp-manifest.json`](.well-known/mcp-manifest.json) | An **86-tool surface definition** with full JSON Schema inputs, resources, prompts. Four ship as built-ins; the rest are yours to register — see below |
 | [`openapi.yaml`](.well-known/openapi.yaml)           | OpenAPI 3.1 — **56 REST endpoints**, checked against the router in CI          |
 | [`ontology.jsonld`](.well-known/ontology.jsonld)     | JSON-LD ontology — every concept, class, and relationship         |
 | [`ai-plugin.json`](.well-known/ai-plugin.json)       | OpenAI-compatible plugin manifest cross-linking the above         |
@@ -106,7 +106,8 @@ iv introspect --format jsonld > schema.jsonld
 # 2. Speak any surface
 iv <subcommand> --format json        # local CLI, JSON out
 curl  http://host:8080/api/v1/...     # REST (see openapi.yaml)
-# or call MCP tools from mcp-manifest.json over your MCP client
+# MCP: register the tools you need in your host process (4 ship built-in),
+# using mcp-manifest.json as the schema — see docs/MCP_TOOLS.md
 ```
 
 ### Stability contract for agents
@@ -139,7 +140,7 @@ mapping.
 | [AGENTS.md](AGENTS.md) — canonical context                       | [Quick Start](#quick-start)                         | [Security & Compliance](#security--compliance) |
 | [`.well-known/`](.well-known/) — discovery manifests             | [Installation](#installation)                       | [Build & Validate](#build--validate)           |
 | [`iv introspect`](#for-ai-agents--read-this-first) — CLI schema | [CLI Reference](docs/CLI.md)                        | [Architecture](#architecture)                  |
-| [MCP tools](docs/MCP_TOOLS.md) — 86 tools                        | [Rust API Quickstart](#rust-library-api-quickstart) | [Performance](docs/PERFORMANCE.md)             |
+| [MCP tools](docs/MCP_TOOLS.md) — 4 built-in, 86 declared         | [Rust API Quickstart](#rust-library-api-quickstart) | [Performance](docs/PERFORMANCE.md)             |
 | [OpenAPI 3.1](.well-known/openapi.yaml) — 56 endpoints           | [REST API Reference](docs/REST_API.md)              | [Deployment](#deployment)                      |
 |                                                                  | [Demos](#interactive-demos)                         |                                                |
 |                                                                  | [Telemetry](docs/TELEMETRY.md) — opt-in, disclosed  | [Contributing](CONTRIBUTING.md)                |
@@ -148,12 +149,12 @@ mapping.
 
 ## Why IronVault?
 
-- **Agent-first** — three coequal surfaces (CLI / REST+GraphQL / MCP), one schema, self-describing via `introspect` and `.well-known/`
+- **Agent-first** — two shipped surfaces (CLI / REST+GraphQL) plus MCP primitives, one schema, self-describing via `introspect` and `.well-known/`
 - **Secure by default** — AES-256-GCM with Argon2id KDF; aligned to CMMC 2.0 L2 and MITRE ATT&CK control families. Not a FIPS-validated module — see [Security & Compliance](#security--compliance)
 - **Format-agnostic** — auto-detect 23+ formats; convert natively between SafeTensors, PyTorch, and raw, and HuggingFace → GGUF (llama architecture, F16/BF16/F32) with no Python at all. Conversions that still need a Python toolchain (→ ONNX, → TensorRT, → Core ML, GGUF K-quants) return a runnable plan rather than a silently wrong file
 - **Provenance built-in** — SHA-256 checksums, HMAC signatures, an automatic append-only audit log, license & pickle scanning (plus a Merkle-chained block store available as a library primitive)
 - **Operational** — version control, retention policies, garbage collection, multi-vault, profiles, plugins, scheduled backups
-- **Integrated** — REST + GraphQL APIs, 86 MCP tools, Python bindings, Ollama / LM Studio interop, HuggingFace / Ollama / URL pull
+- **Integrated** — REST + GraphQL APIs, MCP tool primitives, Python bindings, Ollama / LM Studio interop, HuggingFace / Ollama / URL pull
 - **Quality** — 2,227 Rust + 84 Python tests, 0 clippy warnings, fuzz targets, property-based tests, criterion benchmarks
 
 ---

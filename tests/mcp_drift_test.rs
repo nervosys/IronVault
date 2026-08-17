@@ -1,0 +1,132 @@
+//! Pins `.well-known/mcp-manifest.json` to what the crate actually registers.
+//!
+//! The REST spec got [`openapi_drift_test`] in 5.1.0 after it drifted to 14
+//! documented paths with no handler. The third surface never got the
+//! equivalent guard, and drifted further: the manifest declares 86 tools, the
+//! crate registers 4, and the README advertised the 86 as shipped until 7.2.
+//!
+//! The gap is not itself a bug — MCP here is a library surface, and the
+//! manifest is the schema a host process registers against. What was a bug is
+//! that nothing held the documentation to the real number, so the two could
+//! diverge in silence. That is what this test fixes.
+//!
+//! It deliberately does *not* demand that every declared tool be implemented.
+//! It demands that the counts stay pinned, so growing either side without
+//! saying so fails the build.
+
+use std::collections::BTreeSet;
+
+fn manifest_dir() -> std::path::PathBuf {
+    std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+}
+
+/// Tools `MCPServer::register_builtin_tools` installs.
+///
+/// Hard-coded rather than derived: the point is that changing the set has to
+/// be a deliberate edit here, visible in review, not an invisible consequence
+/// of editing `src/rag/mcp.rs`.
+const BUILTIN_TOOLS: &[&str] = &[
+    "search_documents",
+    "add_document",
+    "chunk_text",
+    "execute_rule",
+];
+
+/// What the manifest declares. A surface definition, not an inventory of
+/// shipped code — see the module docs.
+const DECLARED_TOOL_COUNT: usize = 86;
+
+fn manifest_tool_names() -> BTreeSet<String> {
+    let raw = std::fs::read_to_string(manifest_dir().join(".well-known/mcp-manifest.json"))
+        .expect(".well-known/mcp-manifest.json is readable");
+    let doc: serde_json::Value =
+        serde_json::from_str(&raw).expect(".well-known/mcp-manifest.json is valid JSON");
+
+    doc["tools"]
+        .as_array()
+        .expect("mcp-manifest.json has a `tools` array")
+        .iter()
+        .map(|t| {
+            t["name"]
+                .as_str()
+                .expect("every tool has a string `name`")
+                .to_string()
+        })
+        .collect()
+}
+
+#[test]
+fn the_manifest_declares_the_documented_number_of_tools() {
+    let names = manifest_tool_names();
+
+    assert_eq!(
+        names.len(),
+        DECLARED_TOOL_COUNT,
+        "mcp-manifest.json declares {} tools, but this test, the README and \
+         AGENTS.md all say {}. Update every one of them together -- the last \
+         time these drifted, the README advertised 86 shipped tools against 4 \
+         that existed.",
+        names.len(),
+        DECLARED_TOOL_COUNT,
+    );
+}
+
+#[test]
+fn every_builtin_tool_is_declared_in_the_manifest() {
+    let declared = manifest_tool_names();
+
+    for tool in BUILTIN_TOOLS {
+        assert!(
+            declared.contains(*tool),
+            "`{tool}` is registered by MCPServer::register_builtin_tools but is \
+             not in mcp-manifest.json. A tool an agent can actually call, that \
+             the discovery document omits, is the drift that matters most: \
+             callers never learn it exists."
+        );
+    }
+}
+
+#[test]
+fn the_builtin_tool_set_has_not_changed_silently() {
+    // `register_builtin_tools` is the only shipped registration site. If it
+    // grows, the counts in README.md ("4 built-in, 86 declared"), AGENTS.md
+    // and the MCP tools table need to grow with it.
+    let src = std::fs::read_to_string(manifest_dir().join("src/rag/mcp.rs"))
+        .expect("src/rag/mcp.rs is readable");
+
+    let body = src
+        .split_once("pub fn register_builtin_tools")
+        .expect("register_builtin_tools still exists")
+        .1;
+
+    let registered = body.matches("self.register_tool(").count();
+
+    assert_eq!(
+        registered,
+        BUILTIN_TOOLS.len(),
+        "register_builtin_tools now installs {} tools, not {}. Update \
+         BUILTIN_TOOLS here, the `MCP Tools` table in AGENTS.md, and the \
+         `4 built-in` counts in README.md.",
+        registered,
+        BUILTIN_TOOLS.len(),
+    );
+}
+
+#[test]
+fn the_readme_and_agents_md_do_not_advertise_declared_tools_as_shipped() {
+    // The exact sentence this guards against: "86 MCP tools", which read as an
+    // inventory of working tools rather than a schema to register against.
+    for rel in ["README.md", "AGENTS.md"] {
+        let text = std::fs::read_to_string(manifest_dir().join(rel))
+            .unwrap_or_else(|e| panic!("{rel} is readable: {e}"));
+
+        assert!(
+            !text.contains("86 MCP tools"),
+            "{rel} says \"86 MCP tools\". Only {} ship; the other {} are \
+             definitions a host process registers itself. Say \"86-tool \
+             surface definition\" or \"4 built-in, 86 declared\".",
+            BUILTIN_TOOLS.len(),
+            DECLARED_TOOL_COUNT - BUILTIN_TOOLS.len(),
+        );
+    }
+}
