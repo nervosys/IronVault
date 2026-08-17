@@ -170,3 +170,40 @@ fn the_readme_and_agents_md_do_not_advertise_declared_tools_as_shipped() {
         );
     }
 }
+
+/// The CLI's JSON-LD `@context` and the published ontology must mint the same
+/// IRIs, or a consumer joining `iv introspect --format jsonld` with
+/// `.well-known/ontology.jsonld` sees two unrelated vocabularies.
+///
+/// They diverged exactly that way once before. The fix carried a comment
+/// saying the two "must match" and nothing that made it so, which is why they
+/// could then be reconciled onto a domain the project does not own without
+/// anything noticing. This is the part that makes it so.
+#[test]
+fn the_cli_and_the_ontology_mint_the_same_vocabulary_iri() {
+    let ontology_raw = std::fs::read_to_string(manifest_dir().join(".well-known/ontology.jsonld"))
+        .expect(".well-known/ontology.jsonld is readable");
+    let ontology: serde_json::Value =
+        serde_json::from_str(&ontology_raw).expect("ontology.jsonld is valid JSON");
+
+    let published = ontology["@context"]["iv"]
+        .as_str()
+        .expect("ontology.jsonld binds an `iv` prefix");
+
+    let introspect = std::fs::read_to_string(manifest_dir().join("src/cli/handlers/introspect.rs"))
+        .expect("src/cli/handlers/introspect.rs is readable");
+
+    assert!(
+        introspect.contains(&format!("\"iv\": \"{published}\"")),
+        "introspect.rs does not bind `iv` to {published}, the IRI \
+         ontology.jsonld publishes. Joining the CLI's JSON-LD with the \
+         published ontology would yield two unrelated vocabularies."
+    );
+
+    assert!(
+        published.starts_with("https://nervosys.ai/"),
+        "the vocabulary is minted under {published}. It belongs on a domain \
+         the project controls: nervosys.com is a parked Afternic listing with \
+         a null MX, so anyone could buy it and serve these IRIs."
+    );
+}

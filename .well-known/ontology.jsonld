@@ -1,7 +1,7 @@
 {
   "@context": {
     "@vocab": "https://schema.org/",
-    "iv": "https://nervosys.com/ontology/iv#",
+    "iv": "https://nervosys.ai/ontology/iv#",
     "mcp": "https://modelcontextprotocol.io/schema#",
     "dcterms": "http://purl.org/dc/terms/",
     "skos": "http://www.w3.org/2004/02/skos/core#",
@@ -12,7 +12,7 @@
     "hydra": "http://www.w3.org/ns/hydra/core#"
   },
 
-  "@id": "https://nervosys.com/ontology/iv",
+  "@id": "https://nervosys.ai/ontology/iv",
   "@type": "owl:Ontology",
   "name": "IronVault Agent Ontology",
   "description": "Comprehensive machine-readable ontology for IronVault — designed for autonomous agent observability. Describes entities, states, transitions, events, affordances, constraints, metrics, and causal models so that agents can reason about the system without reading source code.",
@@ -72,7 +72,7 @@
     "author": {
       "@type": "Organization",
       "name": "NERVOSYS",
-      "url": "https://nervosys.com"
+      "url": "https://nervosys.ai"
     },
     "featureList": [
       "AES-256-GCM encrypted model storage",
