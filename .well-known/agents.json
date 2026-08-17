@@ -1,5 +1,5 @@
 {
-  "$schema": "https://nervosys.com/schemas/agents-discovery-v1.json",
+  "$schema": "https://nervosys.ai/schemas/agents-discovery-v1.json",
   "schema_version": "1.0",
   "project": {
     "id": "ironvault",

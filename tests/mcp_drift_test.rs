@@ -207,3 +207,53 @@ fn the_cli_and_the_ontology_mint_the_same_vocabulary_iri() {
          a null MX, so anyone could buy it and serve these IRIs."
     );
 }
+
+/// No discovery manifest may reference `nervosys.com`.
+///
+/// It is a parked Afternic listing, not this project's domain. Two references
+/// survived the first sweep for it because `.well-known/` is a dot-directory
+/// and ripgrep skips those unless asked: the vocabulary namespace, and
+/// `agents.json`'s own `$schema`. A test does not have that blind spot.
+#[test]
+fn no_manifest_points_at_the_parked_domain() {
+    for rel in [
+        ".well-known/agents.json",
+        ".well-known/ai-plugin.json",
+        ".well-known/mcp-manifest.json",
+        ".well-known/ontology.jsonld",
+        ".well-known/openapi.yaml",
+    ] {
+        let text = std::fs::read_to_string(manifest_dir().join(rel))
+            .unwrap_or_else(|e| panic!("{rel} is readable: {e}"));
+
+        assert!(
+            !text.contains("nervosys.com"),
+            "{rel} references nervosys.com, which NERVOSYS does not own -- it \
+             resolves to Afternic nameservers with a null MX. The domain is \
+             nervosys.ai."
+        );
+    }
+}
+
+/// `ai-plugin.json` advertises a logo to plugin hosts. It pointed at
+/// `.well-known/logo.png`, which has never existed in this repository, so the
+/// URL returned 404 to anything that fetched it.
+#[test]
+fn the_plugin_logo_exists_in_this_repository() {
+    let raw = std::fs::read_to_string(manifest_dir().join(".well-known/ai-plugin.json"))
+        .expect(".well-known/ai-plugin.json is readable");
+    let doc: serde_json::Value = serde_json::from_str(&raw).expect("ai-plugin.json is valid JSON");
+
+    let url = doc["logo_url"].as_str().expect("logo_url is a string");
+
+    let path = url
+        .split("/master/")
+        .nth(1)
+        .unwrap_or_else(|| panic!("logo_url {url} is not a raw.githubusercontent master URL"));
+
+    assert!(
+        manifest_dir().join(path).exists(),
+        "logo_url points at `{path}`, which does not exist in the repository, \
+         so the published URL 404s."
+    );
+}
