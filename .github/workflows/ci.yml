@@ -442,11 +442,40 @@ jobs:
       working-directory: website
       run: npm run build
 
+    # The browser download is the one step here that reaches the network for
+    # something large, and it is the step that hung for 91 minutes on ae39fc9
+    # against a job that normally finishes in one. Caching it means the usual
+    # run does not download at all.
+    #
+    # Keyed on the pinned Playwright version rather than the whole lockfile:
+    # the browser build is tied to that version, so an unrelated dependency
+    # bump should not throw the browsers away.
+    - name: Resolve Playwright version
+      id: pw
+      working-directory: website
+      run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+    - name: Cache Playwright browsers
+      id: pw-cache
+      uses: actions/cache@v6
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-playwright-${{ steps.pw.outputs.version }}
+
     # Only chromium: the toggle's logic is storage plus a media query, and
     # nothing here is engine-specific enough to pay for three browsers.
+    #
+    # On a cache hit only the apt dependencies are installed; the browser
+    # itself is already on disk. `--with-deps` is not cacheable, so it always
+    # runs, but it is seconds rather than a download.
     - name: Install Playwright browser
       working-directory: website
-      run: npx playwright install --with-deps chromium
+      run: |
+        if [ "${{ steps.pw-cache.outputs.cache-hit }}" = "true" ]; then
+          npx playwright install-deps chromium
+        else
+          npx playwright install --with-deps chromium
+        fi
 
     - name: End-to-end tests
       working-directory: website
