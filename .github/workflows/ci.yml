@@ -28,6 +28,7 @@ jobs:
   test:
     name: Test Suite
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -73,6 +74,7 @@ jobs:
   feature-matrix:
     name: Feature Combinations
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -114,6 +116,7 @@ jobs:
   msrv:
     name: MSRV (1.89)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
     - uses: actions/checkout@v7
 
@@ -137,6 +140,7 @@ jobs:
   docs:
     name: Documentation
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
     - uses: actions/checkout@v7
 
@@ -163,6 +167,7 @@ jobs:
   python:
     name: Python Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v7
 
@@ -185,6 +190,7 @@ jobs:
   fuzz:
     name: Fuzz Testing
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: github.event_name == 'push'
     steps:
     - uses: actions/checkout@v7
@@ -232,6 +238,7 @@ jobs:
   security:
     name: Security Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v7
 
@@ -247,6 +254,7 @@ jobs:
   coverage:
     name: Code Coverage
     runs-on: ubuntu-latest
+    timeout-minutes: 50
 
     steps:
     - uses: actions/checkout@v7
@@ -278,6 +286,7 @@ jobs:
   integration:
     name: CLI Integration Tests
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -306,6 +315,7 @@ jobs:
   deny:
     name: Dependency Checks
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v7
 
@@ -321,6 +331,7 @@ jobs:
   benchmarks:
     name: Benchmark Tracking
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     if: github.event_name == 'push'
     permissions:
       contents: write
@@ -373,6 +384,7 @@ jobs:
   mkdocs:
     name: MkDocs Build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
     - uses: actions/checkout@v7
@@ -399,6 +411,7 @@ jobs:
   website:
     name: Website
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     # The website had no CI job at all, which is why its linter drifted to 866
     # problems unnoticed and a `require()` call sat in a component. Building it
