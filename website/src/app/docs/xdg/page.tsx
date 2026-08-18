@@ -91,14 +91,19 @@ export IRONVAULT_VAULT_DIR=/custom/vault/path`}</CodeBlock>
   └── conversions/         # Conversion cache`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="rust-api">Rust API</h2>
-      <CodeBlock language="rust">{`use ironvault::xdg::XdgDirs;
+      <CodeBlock language="rust">{`use ironvault::VaultConfig;
 
-let dirs = XdgDirs::new("ironvault")?;
+// VaultConfig resolves the XDG layout on construction, honouring
+// IRONVAULT_HOME and IRONVAULT_CONFIG.
+let config = VaultConfig::new()?;
 
-println!("Config: {}", dirs.config_dir().display());
-println!("Data:   {}", dirs.data_dir().display());
-println!("Cache:  {}", dirs.cache_dir().display());
-println!("State:  {}", dirs.state_dir().display());`}</CodeBlock>
+println!("Config: {}", config.dirs.config_dir.display());
+println!("Data:   {}", config.dirs.data_dir.display());
+println!("Cache:  {}", config.dirs.cache_dir.display());
+println!("Vaults: {}", config.dirs.vault_dir.display());
+
+// vault_dir is the directory vaults live *in*; join a name for one vault:
+println!("Default vault: {}", config.get_vault_path(None).display());`}</CodeBlock>
     </>
   );
 }

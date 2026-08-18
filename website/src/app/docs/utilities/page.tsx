@@ -56,26 +56,33 @@ iv export --output vault-backup.tar.gz
 iv import vault-backup.tar.gz --target-vault restored-vault`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="rust-api">Rust API</h2>
-      <CodeBlock language="rust">{`use ironvault::utils::{
-    ModelAnalyzer, CacheManager, ArchiveManager
-};
+      <CodeBlock language="rust">{`use ironvault::formats::{ModelFormat, ModelMetadata};
+use ironvault::utils::{ModelAnalyzer, ModelArchive, RetrievalOptimizer};
+use std::path::Path;
 
-// Analyze model
-let analyzer = ModelAnalyzer::new();
-let info = analyzer.analyze(&model_data, "safetensors")?;
+// Analyze a model. analyze() is an associated function and takes the
+// model's metadata, not a format string.
+let metadata = ModelMetadata::new("my-model".to_string(), ModelFormat::Safetensors);
+let analysis = ModelAnalyzer::analyze(&model_data, &metadata);
 println!(
-    "Format: {}, Size: {}, Tensors: {}",
-    info.format, info.size_formatted, info.tensor_count
+    "Format: {:?}, {:.1} MB, estimated params: {:?}",
+    analysis.format, analysis.size_mb, analysis.estimated_parameters
 );
 
-// Cache management
-let cache = CacheManager::new()?;
-let usage = cache.usage()?;
-println!("Cache: {} / {}", usage.used_formatted, usage.limit_formatted);
+// Retrieval cache, bounded in bytes
+let mut cache = RetrievalOptimizer::new(512 * 1024 * 1024);
+cache.cache_model("my-model".to_string(), model_data.clone())?;
+if let Some(bytes) = cache.get_cached("my-model") {
+    println!("cache hit: {} bytes", bytes.len());
+}
+let stats = cache.cache_stats();
+println!("Cache: {} entries, {} / {} bytes", stats.total_entries, stats.total_size, stats.max_size);
 
-// Archive a model
-let archive = ArchiveManager::new()?;
-archive.archive_model("my-model", &vault)?;`}</CodeBlock>
+// Archive models into a tar
+let bytes_written = ModelArchive::create_tar(
+    vec![("my-model".to_string(), model_data)],
+    Path::new("./models.tar"),
+)?;`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="env">Environment Variables</h2>
       <div className="overflow-x-auto">
