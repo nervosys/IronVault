@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nervosys.ai/schemas/agents-discovery-v1.json",
+  "title": "Agent Discovery Manifest v1",
+  "description": "Schema for the `.well-known/agents.json` agent-discovery manifest: what a project is, which interfaces it exposes, what it can do, and where the rest of its machine-readable surface lives.",
+  "type": "object",
+  "required": ["schema_version", "project", "discovery", "agent_interfaces", "capabilities"],
+  "properties": {
+    "$schema": { "type": "string", "format": "uri" },
+    "schema_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+    "project": {
+      "type": "object",
+      "required": ["id", "name", "version", "description", "homepage", "license"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+" },
+        "description": { "type": "string", "minLength": 1 },
+        "homepage": { "type": "string", "format": "uri" },
+        "documentation": { "type": "string", "format": "uri" },
+        "license": { "type": "string", "minLength": 1 },
+        "languages": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "binary": { "type": "string" },
+        "package_registry": { "type": "string" },
+        "package_name": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "discovery": {
+      "type": "object",
+      "description": "Paths to the rest of the machine-readable surface, relative to the repository root. A path listed here must exist: a discovery document pointing at nothing is worse than one that omits the pointer.",
+      "required": ["ontology", "mcp_manifest", "openapi"],
+      "additionalProperties": { "type": "string" }
+    },
+    "agent_interfaces": {
+      "type": "array",
+      "description": "The surfaces an agent can drive. Only claims that hold for a released build belong here.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["type", "description"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["cli", "mcp", "rest_api", "graphql", "rust_library", "python_bindings"]
+          },
+          "description": { "type": "string", "minLength": 1 },
+          "install": { "type": "string" },
+          "feature_flag": { "type": "string" },
+          "binary": { "type": "string" },
+          "help": { "type": "string" },
+          "introspect": { "type": "string" },
+          "exit_codes": {
+            "type": "object",
+            "description": "Exit code to meaning. One table per project; restating it elsewhere is how copies drift apart.",
+            "patternProperties": { "^[0-9]+$": { "type": "string" } },
+            "additionalProperties": false
+          },
+          "environment_variables": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "description"],
+              "properties": {
+                "name": { "type": "string" },
+                "description": { "type": "string" }
+              },
+              "additionalProperties": true
+            }
+          },
+          "protocol_version": { "type": "string" },
+          "manifest": { "type": "string" },
+          "builtin_tools": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tools the shipped code actually registers -- not the declared surface."
+          },
+          "declared_tools": {
+            "type": "object",
+            "description": "A surface defined for consumers to implement, kept distinct from what ships. Listing declarations as built-ins tells an agent it can call things that do not exist.",
+            "required": ["count", "manifest"],
+            "properties": {
+              "count": { "type": "integer", "minimum": 0 },
+              "manifest": { "type": "string" },
+              "note": { "type": "string" }
+            },
+            "additionalProperties": true
+          },
+          "extensible": { "type": "boolean" },
+          "default_port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+          "auth": { "type": "string" },
+          "start_command": { "type": "string" },
+          "endpoint": { "type": "string" },
+          "playground": { "type": ["string", "boolean"] },
+          "crate": { "type": "string" },
+          "docs_rs": { "type": "string", "format": "uri" },
+          "key_types": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": true
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "description": "What the project can do, keyed by capability id.",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["description"],
+        "properties": {
+          "description": { "type": "string", "minLength": 1 },
+          "commands": { "type": "array", "items": { "type": "string" } },
+          "endpoints": { "type": "array", "items": { "type": "string" } },
+          "feature_flag": { "type": "string" },
+          "enabled_by_default": { "type": "boolean" },
+          "rest_note": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "taxonomy": {
+      "type": "object",
+      "properties": {
+        "domain": { "type": "string" },
+        "subdomain": { "type": "array", "items": { "type": "string" } },
+        "related_projects": { "type": "array", "items": { "type": "string" } },
+        "use_cases": { "type": "array", "items": { "type": "string" } },
+        "target_users": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

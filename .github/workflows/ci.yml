@@ -187,6 +187,13 @@ jobs:
     - name: Run Python tests
       run: python -m pytest tests/test_ironvault.py -v
 
+    # agents.json carried a `$schema` pointer that nothing checked, aimed for
+    # most of its life at a domain the project does not own. The schema is now
+    # published under website/public/schemas/; this is what keeps the manifest
+    # honest against it, and checks every path in `discovery` exists.
+    - name: Validate the agent discovery manifest
+      run: python scripts/validate_agents_json.py
+
   fuzz:
     name: Fuzz Testing
     runs-on: ubuntu-latest
