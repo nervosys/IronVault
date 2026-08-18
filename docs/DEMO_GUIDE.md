@@ -90,7 +90,7 @@ chmod +x demo.sh
 ```
 ✓ FIPS 140-3 encryption (AES-256-GCM)
 ✓ Argon2id key derivation
-✓ BLAKE3 checksums
+✓ SHA-256 checksums
 ✓ Compliance checks (CMMC, MITRE)
 ✓ Audit logging
 ✓ Key management

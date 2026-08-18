@@ -291,3 +291,66 @@ fn prose_documents_state_the_current_crate_version() {
         );
     }
 }
+
+/// No example may restate the exit-code contract.
+///
+/// `test_published_exit_code_tables_match_the_implementation` pins the four
+/// published tables to `VaultError::exit_code`. It does not look at
+/// `examples/`, which is how `agent_bootstrap.rs` kept a fifth table reading
+/// "0 ok · 1 user · 2 not-found · 3 integrity · 4 permission" -- wrong about
+/// three codes and silent on authentication -- in the example AGENTS.md names
+/// as the canonical agent integration pattern.
+///
+/// v3.0.0 existed to delete four mutually contradictory tables. The way they
+/// stay deleted is for there to be one, referenced rather than copied.
+#[test]
+fn no_example_restates_the_exit_code_contract() {
+    let labels = [
+        "ok",
+        "user",
+        "auth",
+        "not-found",
+        "not found",
+        "integrity",
+        "permission",
+        "invalid",
+        "config",
+        "compliance",
+        "general",
+        "success",
+    ];
+
+    let dir = manifest_dir().join("examples");
+    for entry in std::fs::read_dir(&dir).expect("examples/ is readable") {
+        let path = entry.expect("readable dir entry").path();
+        if path.extension().and_then(|e| e.to_str()) != Some("rs") {
+            continue;
+        }
+        let text = std::fs::read_to_string(&path).expect("example is readable");
+
+        for line in text.lines() {
+            let lower = line.to_lowercase();
+            // A restated table pairs digits with code labels more than once on
+            // a line. A single "exits 1" in prose is fine.
+            let pairs = labels
+                .iter()
+                .filter(|l| {
+                    lower.split(*l).count() > 1
+                        && lower.split(*l).next().is_some_and(|before| {
+                            before.ends_with(' ')
+                                && before.trim_end().ends_with(|c: char| c.is_ascii_digit())
+                        })
+                })
+                .count();
+
+            assert!(
+                pairs < 2,
+                "{} restates the exit-code contract:\n  {}\nReference \
+                 `VaultError::exit_code` instead -- the published tables are \
+                 pinned to it by test_published_exit_code_tables_match_the_implementation.",
+                path.file_name().unwrap().to_string_lossy(),
+                line.trim(),
+            );
+        }
+    }
+}

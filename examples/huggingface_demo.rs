@@ -37,7 +37,7 @@ fn main() -> ironvault::Result<()> {
     println!("✅ Vault initialized with:");
     println!("   • AES-256-GCM encryption (FIPS 140-3)");
     println!("   • Argon2id key derivation");
-    println!("   • BLAKE3 integrity checksums");
+    println!("   • SHA-256 integrity checksums");
     println!("   • zstd compression\n");
 
     // Step 3: Unlock vault
@@ -218,7 +218,7 @@ fn main() -> ironvault::Result<()> {
     println!("   ✓ Multiple model versions (original, fine-tuned, quantized)");
     println!("   ✓ Format detection (Safetensors)");
     println!("   ✓ Metadata tracking (82M parameters, text-generation)");
-    println!("   ✓ Data integrity verification (BLAKE3 checksums)");
+    println!("   ✓ Data integrity verification (SHA-256 checksums)");
     println!("   ✓ Efficient retrieval and decompression");
     println!("\nProduction features available:");
     println!("   • 23+ model formats (PyTorch, ONNX, GGUF, etc.)");
