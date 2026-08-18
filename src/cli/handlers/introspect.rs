@@ -36,7 +36,13 @@ pub fn handle_introspect(format: String, compact: bool) -> Result<()> {
                     // JSON-LD and the published ontology minted distinct IRIs
                     // for the same terms — consumers that joined them saw two
                     // unrelated vocabularies.
-                    "iv": "https://nervosys.com/ontology/iv#",
+                    //
+                    // Both were then reconciled onto `nervosys.com`, which is
+                    // not this project's domain: it resolves to Afternic
+                    // nameservers and a null MX, i.e. a parked listing. The
+                    // vocabulary is now minted under `nervosys.ai`, which the
+                    // organisation actually controls.
+                    "iv": "https://nervosys.ai/ontology/iv#",
                     "schema": "https://schema.org/",
                     "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
                 }),

@@ -1,0 +1,356 @@
+//! Pins the discovery surface -- the `.well-known/` manifests and the prose
+//! documents that describe them -- to what the crate actually is.
+//!
+//! The REST spec got [`openapi_drift_test`] in 5.1.0 after it drifted to 14
+//! documented paths with no handler. The third surface never got the
+//! equivalent guard, and drifted further: the manifest declares 86 tools, the
+//! crate registers 4, and the README advertised the 86 as shipped until 7.2.
+//!
+//! The gap is not itself a bug — MCP here is a library surface, and the
+//! manifest is the schema a host process registers against. What was a bug is
+//! that nothing held the documentation to the real number, so the two could
+//! diverge in silence. That is what this test fixes.
+//!
+//! It deliberately does *not* demand that every declared tool be implemented.
+//! It demands that the counts stay pinned, so growing either side without
+//! saying so fails the build.
+
+use std::collections::BTreeSet;
+
+fn manifest_dir() -> std::path::PathBuf {
+    std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+}
+
+/// Tools `MCPServer::register_builtin_tools` installs.
+///
+/// Hard-coded rather than derived: the point is that changing the set has to
+/// be a deliberate edit here, visible in review, not an invisible consequence
+/// of editing `src/rag/mcp.rs`.
+const BUILTIN_TOOLS: &[&str] = &[
+    "search_documents",
+    "add_document",
+    "chunk_text",
+    "execute_rule",
+];
+
+/// What the manifest declares. A surface definition, not an inventory of
+/// shipped code — see the module docs.
+const DECLARED_TOOL_COUNT: usize = 86;
+
+fn manifest_tool_names() -> BTreeSet<String> {
+    let raw = std::fs::read_to_string(manifest_dir().join(".well-known/mcp-manifest.json"))
+        .expect(".well-known/mcp-manifest.json is readable");
+    let doc: serde_json::Value =
+        serde_json::from_str(&raw).expect(".well-known/mcp-manifest.json is valid JSON");
+
+    doc["tools"]
+        .as_array()
+        .expect("mcp-manifest.json has a `tools` array")
+        .iter()
+        .map(|t| {
+            t["name"]
+                .as_str()
+                .expect("every tool has a string `name`")
+                .to_string()
+        })
+        .collect()
+}
+
+#[test]
+fn the_manifest_declares_the_documented_number_of_tools() {
+    let names = manifest_tool_names();
+
+    assert_eq!(
+        names.len(),
+        DECLARED_TOOL_COUNT,
+        "mcp-manifest.json declares {} tools, but this test, the README and \
+         AGENTS.md all say {}. Update every one of them together -- the last \
+         time these drifted, the README advertised 86 shipped tools against 4 \
+         that existed.",
+        names.len(),
+        DECLARED_TOOL_COUNT,
+    );
+}
+
+#[test]
+fn every_builtin_tool_is_declared_in_the_manifest() {
+    let declared = manifest_tool_names();
+
+    for tool in BUILTIN_TOOLS {
+        assert!(
+            declared.contains(*tool),
+            "`{tool}` is registered by MCPServer::register_builtin_tools but is \
+             not in mcp-manifest.json. A tool an agent can actually call, that \
+             the discovery document omits, is the drift that matters most: \
+             callers never learn it exists."
+        );
+    }
+}
+
+#[test]
+fn the_builtin_tool_set_has_not_changed_silently() {
+    // `register_builtin_tools` is the only shipped registration site. If it
+    // grows, the counts in README.md ("4 built-in, 86 declared"), AGENTS.md
+    // and the MCP tools table need to grow with it.
+    let src = std::fs::read_to_string(manifest_dir().join("src/rag/mcp.rs"))
+        .expect("src/rag/mcp.rs is readable");
+
+    let body = src
+        .split_once("pub fn register_builtin_tools")
+        .expect("register_builtin_tools still exists")
+        .1;
+
+    let registered = body.matches("self.register_tool(").count();
+
+    assert_eq!(
+        registered,
+        BUILTIN_TOOLS.len(),
+        "register_builtin_tools now installs {} tools, not {}. Update \
+         BUILTIN_TOOLS here, the `MCP Tools` table in AGENTS.md, and the \
+         `4 built-in` counts in README.md.",
+        registered,
+        BUILTIN_TOOLS.len(),
+    );
+}
+
+/// `agents.json` is the machine-readable one, so overstating there is worse
+/// than overstating in prose: an agent parses `builtin_tools` and believes it.
+/// It listed 54 -- a third number, agreeing with neither the manifest's 86 nor
+/// the 4 that exist -- and described an "MCP server" the crate does not ship.
+#[test]
+fn agents_json_lists_only_the_tools_that_are_really_built_in() {
+    let raw = std::fs::read_to_string(manifest_dir().join(".well-known/agents.json"))
+        .expect(".well-known/agents.json is readable");
+    let doc: serde_json::Value = serde_json::from_str(&raw).expect("agents.json is valid JSON");
+
+    let mcp = doc["agent_interfaces"]
+        .as_array()
+        .expect("agent_interfaces is an array")
+        .iter()
+        .find(|i| i["type"] == "mcp")
+        .expect("an mcp interface entry exists");
+
+    let listed: BTreeSet<String> = mcp["builtin_tools"]
+        .as_array()
+        .expect("builtin_tools is an array")
+        .iter()
+        .map(|v| v.as_str().expect("tool names are strings").to_string())
+        .collect();
+
+    let expected: BTreeSet<String> = BUILTIN_TOOLS.iter().map(|s| (*s).to_string()).collect();
+
+    assert_eq!(
+        listed, expected,
+        "agents.json `builtin_tools` must list exactly the tools \
+         register_builtin_tools installs. The declared surface belongs in \
+         `declared_tools`, which points at the manifest."
+    );
+
+    assert_eq!(
+        mcp["declared_tools"]["count"].as_u64(),
+        Some(DECLARED_TOOL_COUNT as u64),
+        "agents.json `declared_tools.count` must match the manifest."
+    );
+}
+
+#[test]
+fn the_readme_and_agents_md_do_not_advertise_declared_tools_as_shipped() {
+    // The exact sentence this guards against: "86 MCP tools", which read as an
+    // inventory of working tools rather than a schema to register against.
+    for rel in ["README.md", "AGENTS.md"] {
+        let text = std::fs::read_to_string(manifest_dir().join(rel))
+            .unwrap_or_else(|e| panic!("{rel} is readable: {e}"));
+
+        assert!(
+            !text.contains("86 MCP tools"),
+            "{rel} says \"86 MCP tools\". Only {} ship; the other {} are \
+             definitions a host process registers itself. Say \"86-tool \
+             surface definition\" or \"4 built-in, 86 declared\".",
+            BUILTIN_TOOLS.len(),
+            DECLARED_TOOL_COUNT - BUILTIN_TOOLS.len(),
+        );
+    }
+}
+
+/// The CLI's JSON-LD `@context` and the published ontology must mint the same
+/// IRIs, or a consumer joining `iv introspect --format jsonld` with
+/// `.well-known/ontology.jsonld` sees two unrelated vocabularies.
+///
+/// They diverged exactly that way once before. The fix carried a comment
+/// saying the two "must match" and nothing that made it so, which is why they
+/// could then be reconciled onto a domain the project does not own without
+/// anything noticing. This is the part that makes it so.
+#[test]
+fn the_cli_and_the_ontology_mint_the_same_vocabulary_iri() {
+    let ontology_raw = std::fs::read_to_string(manifest_dir().join(".well-known/ontology.jsonld"))
+        .expect(".well-known/ontology.jsonld is readable");
+    let ontology: serde_json::Value =
+        serde_json::from_str(&ontology_raw).expect("ontology.jsonld is valid JSON");
+
+    let published = ontology["@context"]["iv"]
+        .as_str()
+        .expect("ontology.jsonld binds an `iv` prefix");
+
+    let introspect = std::fs::read_to_string(manifest_dir().join("src/cli/handlers/introspect.rs"))
+        .expect("src/cli/handlers/introspect.rs is readable");
+
+    assert!(
+        introspect.contains(&format!("\"iv\": \"{published}\"")),
+        "introspect.rs does not bind `iv` to {published}, the IRI \
+         ontology.jsonld publishes. Joining the CLI's JSON-LD with the \
+         published ontology would yield two unrelated vocabularies."
+    );
+
+    assert!(
+        published.starts_with("https://nervosys.ai/"),
+        "the vocabulary is minted under {published}. It belongs on a domain \
+         the project controls: nervosys.com is a parked Afternic listing with \
+         a null MX, so anyone could buy it and serve these IRIs."
+    );
+}
+
+/// No discovery manifest may reference `nervosys.com`.
+///
+/// It is a parked Afternic listing, not this project's domain. Two references
+/// survived the first sweep for it because `.well-known/` is a dot-directory
+/// and ripgrep skips those unless asked: the vocabulary namespace, and
+/// `agents.json`'s own `$schema`. A test does not have that blind spot.
+#[test]
+fn no_manifest_points_at_the_parked_domain() {
+    for rel in [
+        ".well-known/agents.json",
+        ".well-known/ai-plugin.json",
+        ".well-known/mcp-manifest.json",
+        ".well-known/ontology.jsonld",
+        ".well-known/openapi.yaml",
+    ] {
+        let text = std::fs::read_to_string(manifest_dir().join(rel))
+            .unwrap_or_else(|e| panic!("{rel} is readable: {e}"));
+
+        assert!(
+            !text.contains("nervosys.com"),
+            "{rel} references nervosys.com, which NERVOSYS does not own -- it \
+             resolves to Afternic nameservers with a null MX. The domain is \
+             nervosys.ai."
+        );
+    }
+}
+
+/// `ai-plugin.json` advertises a logo to plugin hosts. It pointed at
+/// `.well-known/logo.png`, which has never existed in this repository, so the
+/// URL returned 404 to anything that fetched it.
+#[test]
+fn the_plugin_logo_exists_in_this_repository() {
+    let raw = std::fs::read_to_string(manifest_dir().join(".well-known/ai-plugin.json"))
+        .expect(".well-known/ai-plugin.json is readable");
+    let doc: serde_json::Value = serde_json::from_str(&raw).expect("ai-plugin.json is valid JSON");
+
+    let url = doc["logo_url"].as_str().expect("logo_url is a string");
+
+    let path = url
+        .split("/master/")
+        .nth(1)
+        .unwrap_or_else(|| panic!("logo_url {url} is not a raw.githubusercontent master URL"));
+
+    assert!(
+        manifest_dir().join(path).exists(),
+        "logo_url points at `{path}`, which does not exist in the repository, \
+         so the published URL 404s."
+    );
+}
+
+/// Documents that state the current version must state the current version.
+///
+/// `test_well_known_manifests_declare_the_crate_version` pins the `.well-known`
+/// manifests. Prose was never pinned, and drifted further than any manifest
+/// did: AGENTS.md's identity table and ROADMAP.md's header both still said
+/// 3.0.0 at 7.2.0 -- four majors, in the two documents a reader checks first
+/// to find out what this project is.
+#[test]
+fn prose_documents_state_the_current_crate_version() {
+    let crate_version = env!("CARGO_PKG_VERSION");
+
+    let checks: &[(&str, &str)] = &[
+        ("AGENTS.md", "| **Version**    | "),
+        ("ROADMAP.md", "> Current version: **"),
+    ];
+
+    for (rel, marker) in checks {
+        let text = std::fs::read_to_string(manifest_dir().join(rel))
+            .unwrap_or_else(|e| panic!("{rel} is readable: {e}"));
+
+        let line = text
+            .lines()
+            .find(|l| l.starts_with(marker))
+            .unwrap_or_else(|| panic!("{rel} still has a line starting `{marker}`"));
+
+        assert!(
+            line.contains(crate_version),
+            "{rel} says `{}` but the crate is {crate_version}",
+            line.trim(),
+        );
+    }
+}
+
+/// No example may restate the exit-code contract.
+///
+/// `test_published_exit_code_tables_match_the_implementation` pins the four
+/// published tables to `VaultError::exit_code`. It does not look at
+/// `examples/`, which is how `agent_bootstrap.rs` kept a fifth table reading
+/// "0 ok · 1 user · 2 not-found · 3 integrity · 4 permission" -- wrong about
+/// three codes and silent on authentication -- in the example AGENTS.md names
+/// as the canonical agent integration pattern.
+///
+/// v3.0.0 existed to delete four mutually contradictory tables. The way they
+/// stay deleted is for there to be one, referenced rather than copied.
+#[test]
+fn no_example_restates_the_exit_code_contract() {
+    let labels = [
+        "ok",
+        "user",
+        "auth",
+        "not-found",
+        "not found",
+        "integrity",
+        "permission",
+        "invalid",
+        "config",
+        "compliance",
+        "general",
+        "success",
+    ];
+
+    let dir = manifest_dir().join("examples");
+    for entry in std::fs::read_dir(&dir).expect("examples/ is readable") {
+        let path = entry.expect("readable dir entry").path();
+        if path.extension().and_then(|e| e.to_str()) != Some("rs") {
+            continue;
+        }
+        let text = std::fs::read_to_string(&path).expect("example is readable");
+
+        for line in text.lines() {
+            let lower = line.to_lowercase();
+            // A restated table pairs digits with code labels more than once on
+            // a line. A single "exits 1" in prose is fine.
+            let pairs = labels
+                .iter()
+                .filter(|l| {
+                    lower.split(*l).count() > 1
+                        && lower.split(*l).next().is_some_and(|before| {
+                            before.ends_with(' ')
+                                && before.trim_end().ends_with(|c: char| c.is_ascii_digit())
+                        })
+                })
+                .count();
+
+            assert!(
+                pairs < 2,
+                "{} restates the exit-code contract:\n  {}\nReference \
+                 `VaultError::exit_code` instead -- the published tables are \
+                 pinned to it by test_published_exit_code_tables_match_the_implementation.",
+                path.file_name().unwrap().to_string_lossy(),
+                line.trim(),
+            );
+        }
+    }
+}

@@ -15,7 +15,7 @@
   "mcp_manifest": ".well-known/mcp-manifest.json",
   "agents_discovery": ".well-known/agents.json",
   "ontology": ".well-known/ontology.jsonld",
-  "logo_url": "https://raw.githubusercontent.com/nervosys/IronVault/master/.well-known/logo.png",
-  "contact_email": "ai@nervosys.com",
+  "logo_url": "https://raw.githubusercontent.com/nervosys/IronVault/master/media/banner_light.png",
+  "contact_email": "dev@nervosys.ai",
   "legal_info_url": "https://github.com/nervosys/IronVault/blob/master/LICENSE"
 }

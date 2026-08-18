@@ -6,12 +6,23 @@
 //!      readable CLI schema (commands, flags, types, examples, exit codes).
 //!   2. Parse it. Pick a capability. Build an argv. Invoke. Parse JSON output.
 //!
-//! Every read-only `iv` subcommand accepts `--format json` and emits
-//! structured output suitable for an LLM tool-calling loop. Errors come
-//! back as `{ "code", "message", "hint" }` on stderr with stable exit codes
-//! (0 ok · 1 user · 2 not-found · 3 integrity · 4 permission).
+//! The read-only `iv` subcommands listed in README.md's stability contract
+//! accept `--format json` and emit structured output suitable for an LLM
+//! tool-calling loop. (The grouped reads -- `cloud list`, `database list`,
+//! `acl list` -- do not; they are text-only.) Errors come back as
+//! `{ "code", "message", "hint" }` on stderr with stable exit codes.
+//!
+//! The exit-code contract is `VaultError::exit_code` in `src/error.rs`, and
+//! is published in README.md, AGENTS.md, docs/CLI.md and
+//! `.well-known/agents.json`. It is deliberately not restated here: this file
+//! carried a fifth table that disagreed with all of them, which is the exact
+//! defect v3.0.0 set out to remove.
 //!
 //! Run with:  `cargo run --example agent_bootstrap`
+//!
+//! Unlike the other two agent examples, this one shells out to `iv`, so the
+//! binary must be on PATH -- `cargo install --path .` first, or point PATH at
+//! `target/release`. Without it the example exits 1 and says so.
 //!
 //! Requires the `iv` binary on `PATH` (build it first with `cargo build --release`
 //! and add `target/release/` to PATH, or just run `cargo install --path .`).

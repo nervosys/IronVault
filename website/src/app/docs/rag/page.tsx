@@ -42,30 +42,35 @@ let chunks = kb.retrieve("transformer architecture", 3)?;`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="mcp">MCP Tools</h2>
       <p className="text-[var(--color-text-secondary)] mb-4">
-        Model Context Protocol server for AI agent integrations. Register custom tools for agent execution.
+        Model Context Protocol tooling as a library: <code>MCPServer</code> runs in your own
+        process, there is no transport or daemon. Four built-in RAG tools are available on
+        request; register your own for anything else.
       </p>
-      <CodeBlock language="rust">{`use ironvault::rag::{McpServer, McpTool, ToolResult};
+      <CodeBlock language="rust">{`use ironvault::rag::{MCPServer, MCPTool, ToolContext, ToolResult};
+use serde_json::json;
 
-let mut server = McpServer::new("vault-agent");
+let mut server = MCPServer::new();
 
-// Built-in tools are registered automatically
-// - search_documents: Semantic search across documents
-// - chunk_text: Split text into chunks
-// - add_document: Add a document to the store
-// - execute_rule: Run a rule engine action
+// The four built-in RAG tools are opt-in, not automatic:
+//   search_documents, add_document, chunk_text, execute_rule
+server.register_builtin_tools()?;
 
-// Register a custom tool
-server.register(McpTool::new(
-    "analyze-model",
-    "Analyze a stored model",
-    |params| {
-        // Tool logic
-        Ok(ToolResult::success("Analysis complete"))
+// Register a custom tool. The executor receives the call's params
+// and a ToolContext.
+server.register_tool(
+    MCPTool::new(
+        "analyze-model".to_string(),
+        "Analyze a stored model".to_string(),
+    )
+    .add_parameter("name", "string", "Model name", true),
+    |params, _ctx: &ToolContext| {
+        let name = params.get("name").and_then(|v| v.as_str()).unwrap_or_default();
+        Ok(ToolResult::success(json!({ "analyzed": name })))
     },
-));
+)?;
 
 // Execute a tool
-let result = server.execute("search_documents", &params)?;`}</CodeBlock>
+let result = server.execute_tool("analyze-model", json!({ "name": "llama-7b" }), &ctx)?;`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="built-in-tools">Built-in Tools</h2>
       <div className="overflow-x-auto">

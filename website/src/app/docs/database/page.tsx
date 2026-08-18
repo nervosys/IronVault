@@ -62,40 +62,34 @@ iv database import --path ./db --input backup.json
 iv database stats --path ./db`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="sqlite-api">SQLite Rust API</h2>
-      <CodeBlock language="rust">{`use ironvault::rag::sqlite_store::SqliteDocumentStore;
-use ironvault::rag::document_store::DocumentStore;
+      <CodeBlock language="rust">{`// requires --features sqlite
+use ironvault::rag::{Database, SQLiteDatabase};
+use std::collections::HashMap;
+use std::path::Path;
 
-// Open or create a SQLite database
-let store = SqliteDocumentStore::new("./knowledge.db")?;
+let mut db = SQLiteDatabase::new(Path::new("./knowledge.db"))?;
 
-// Store a document with metadata
-let doc_id = store.store_document(
-    "Transformer Architecture",
-    "The transformer model relies entirely on self-attention...",
-    serde_json::json!({ "source": "paper", "year": 2017 }),
-)?;
+let mut row = HashMap::new();
+row.insert("id".to_string(), "doc-1".to_string());
+row.insert("title".to_string(), "Transformer Architecture".to_string());
+row.insert("body".to_string(), "Relies entirely on self-attention...".to_string());
+db.insert("documents", row)?;
 
-// Full-text search
-let results = store.search("self-attention mechanism", 5)?;
-
-// Retrieve by ID
-let doc = store.get_document(&doc_id)?;`}</CodeBlock>
+let rows = db.query("SELECT * FROM documents")?;`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="sled-api">Sled Rust API</h2>
-      <CodeBlock language="rust">{`use ironvault::rag::kv_store::SledDocumentStore;
-use ironvault::rag::document_store::DocumentStore;
+      <CodeBlock language="rust">{`// requires --features kv-store
+use ironvault::rag::{Database, SledDatabase};
+use std::collections::HashMap;
+use std::path::Path;
 
-// Open or create a Sled database
-let store = SledDocumentStore::new("./knowledge_sled")?;
+let mut db = SledDatabase::new(Path::new("./knowledge_sled"))?;
 
-// Same DocumentStore trait — identical interface
-let doc_id = store.store_document(
-    "RLHF Training",
-    "Reinforcement Learning from Human Feedback...",
-    serde_json::json!({ "topic": "alignment" }),
-)?;
-
-let results = store.search("reward model", 5)?;`}</CodeBlock>
+// Same Database trait — identical interface
+let mut row = HashMap::new();
+row.insert("id".to_string(), "doc-2".to_string());
+row.insert("body".to_string(), "Reinforcement Learning from Human Feedback...".to_string());
+db.insert("documents", row)?;`}</CodeBlock>
       <Callout type="tip" title="Swappable backends">
         Both backends implement the same <code className="text-xs px-1 bg-[var(--color-bg-secondary)] rounded">DocumentStore</code> trait,
         so you can switch between SQLite and Sled by changing one line.
@@ -107,30 +101,39 @@ let results = store.search("reward model", 5)?;`}</CodeBlock>
         search command uses cosine similarity over these embeddings to return
         the most relevant chunks.
       </p>
-      <CodeBlock language="rust">{`use ironvault::rag::embeddings;
+      <CodeBlock language="rust">{`use ironvault::rag::{cosine_similarity, Document, DocumentStore};
+use std::collections::HashMap;
 
-// Generate embeddings for a text chunk
-let vector = embeddings::generate("transformer attention")?;
+let mut store = DocumentStore::new();
 
-// Compute cosine similarity
-let score = embeddings::cosine_similarity(&vec_a, &vec_b);`}</CodeBlock>
+store.add_document(Document {
+    id: "doc-1".to_string(),
+    content: "transformer attention".to_string(),
+    metadata: HashMap::new(),
+    embedding: Some(vec![0.1, 0.2, 0.3]),
+    chunk_info: None,
+})?;
+
+// Nearest documents to a query vector
+let hits: Vec<(String, f32)> = store.search_similar(&[0.1, 0.2, 0.3], 5);
+
+// Or compare two vectors directly
+let score = cosine_similarity(&[0.1, 0.2, 0.3], &[0.2, 0.1, 0.3]);`}</CodeBlock>
 
       <h2 className="text-2xl font-bold mt-10 mb-4" id="document-schema">Document Schema</h2>
       <CodeBlock language="rust">{`pub struct Document {
-    pub id: String,           // UUID
-    pub title: String,        // Human-readable title
-    pub content: String,      // Full document text
-    pub metadata: Value,      // Arbitrary JSON metadata
-    pub created_at: DateTime, // Timestamp
-    pub updated_at: DateTime, // Last modification
+    pub id: String,                          // Unique document identifier
+    pub content: String,                     // Document text
+    pub metadata: HashMap<String, String>,   // Arbitrary string metadata
+    pub embedding: Option<Vec<f32>>,         // Optional embedding vector
+    pub chunk_info: Option<ChunkInfo>,       // Set when the doc is a chunk
 }
 
 pub struct ChunkInfo {
-    pub chunk_id: String,     // UUID
-    pub doc_id: String,       // Parent document
-    pub content: String,      // Chunk text
-    pub embedding: Vec<f32>,  // Vector embedding
-    pub position: usize,      // Chunk index in document
+    pub parent_id: Option<String>,  // Parent document ID
+    pub chunk_index: usize,         // Index of this chunk
+    pub total_chunks: usize,        // Total chunks for the parent
+    pub overlap: usize,             // Overlap with adjacent chunks, in characters
 }`}</CodeBlock>
     </>
   );

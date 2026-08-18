@@ -28,6 +28,7 @@ jobs:
   test:
     name: Test Suite
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -73,6 +74,7 @@ jobs:
   feature-matrix:
     name: Feature Combinations
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -114,6 +116,7 @@ jobs:
   msrv:
     name: MSRV (1.89)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
     - uses: actions/checkout@v7
 
@@ -137,6 +140,7 @@ jobs:
   docs:
     name: Documentation
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
     - uses: actions/checkout@v7
 
@@ -163,6 +167,7 @@ jobs:
   python:
     name: Python Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v7
 
@@ -185,6 +190,7 @@ jobs:
   fuzz:
     name: Fuzz Testing
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: github.event_name == 'push'
     steps:
     - uses: actions/checkout@v7
@@ -232,6 +238,7 @@ jobs:
   security:
     name: Security Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v7
 
@@ -247,6 +254,7 @@ jobs:
   coverage:
     name: Code Coverage
     runs-on: ubuntu-latest
+    timeout-minutes: 50
 
     steps:
     - uses: actions/checkout@v7
@@ -278,6 +286,7 @@ jobs:
   integration:
     name: CLI Integration Tests
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -306,6 +315,7 @@ jobs:
   deny:
     name: Dependency Checks
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v7
 
@@ -321,6 +331,7 @@ jobs:
   benchmarks:
     name: Benchmark Tracking
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     if: github.event_name == 'push'
     permissions:
       contents: write
@@ -373,6 +384,7 @@ jobs:
   mkdocs:
     name: MkDocs Build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
     - uses: actions/checkout@v7
@@ -399,6 +411,7 @@ jobs:
   website:
     name: Website
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     # The website had no CI job at all, which is why its linter drifted to 866
     # problems unnoticed and a `require()` call sat in a component. Building it
@@ -429,11 +442,40 @@ jobs:
       working-directory: website
       run: npm run build
 
+    # The browser download is the one step here that reaches the network for
+    # something large, and it is the step that hung for 91 minutes on ae39fc9
+    # against a job that normally finishes in one. Caching it means the usual
+    # run does not download at all.
+    #
+    # Keyed on the pinned Playwright version rather than the whole lockfile:
+    # the browser build is tied to that version, so an unrelated dependency
+    # bump should not throw the browsers away.
+    - name: Resolve Playwright version
+      id: pw
+      working-directory: website
+      run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+    - name: Cache Playwright browsers
+      id: pw-cache
+      uses: actions/cache@v6
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-playwright-${{ steps.pw.outputs.version }}
+
     # Only chromium: the toggle's logic is storage plus a media query, and
     # nothing here is engine-specific enough to pay for three browsers.
+    #
+    # On a cache hit only the apt dependencies are installed; the browser
+    # itself is already on disk. `--with-deps` is not cacheable, so it always
+    # runs, but it is seconds rather than a download.
     - name: Install Playwright browser
       working-directory: website
-      run: npx playwright install --with-deps chromium
+      run: |
+        if [ "${{ steps.pw-cache.outputs.cache-hit }}" = "true" ]; then
+          npx playwright install-deps chromium
+        else
+          npx playwright install --with-deps chromium
+        fi
 
     - name: End-to-end tests
       working-directory: website

@@ -1,7 +1,7 @@
 # AGENTS.md — AI Agent Discovery Guide
 
 > Machine-readable project context for AI agents, LLM assistants, and automated tools.
-> IronVault is **designed agent-first** — every capability is reachable from CLI, REST/GraphQL, and MCP, all derived from a single introspectable schema.
+> IronVault is **designed agent-first** — every capability is reachable from the CLI and REST/GraphQL, both derived from a single introspectable schema. MCP is a library surface: four built-in tools plus `MCPServer::register_tool` for the rest.
 
 ## Bootstrap in three commands
 
@@ -9,7 +9,7 @@
 # 1. Get the full CLI schema (commands, flags, types, examples)
 iv introspect --format json
 
-# 2. List the 86 MCP tools (JSON Schema inputs)
+# 2. List the declared MCP tool surface (86 definitions; 4 ship as built-ins)
 cat .well-known/mcp-manifest.json | jq '.tools[] | {name, description}'
 
 # 3. List the 56 REST endpoints
@@ -51,13 +51,13 @@ passphrase. See [docs/KMS.md](docs/KMS.md) for the URI table and backend setup.
 
 | Guarantee         | Detail                                                                                                                                  |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| JSON output       | Every read subcommand accepts `--format json`. Schemas evolve with semver; breaking changes bump the major version of `ironvault`. |
+| JSON output       | `list`, `versions`, `lineage`, `stats`, `compliance`, `search`, `scan`, `diff`, `license-scan` and `introspect` accept `--format json`. The grouped reads (`cloud list`, `database list`, `acl list`) are text-only. Schemas evolve with semver; breaking changes bump the major version of `ironvault`. |
 | Exit codes        | `0` ok · `1` general · `2` auth failed · `3` not found · `4` permission denied · `5` integrity · `6` invalid input · `7` config · `8` compliance |
 | Idempotent reads  | `list`, `get`, `search`, `versions`, `lineage`, `stats`, `compliance`, `introspect`, every `*/show` and `*/list` are side-effect free   |
 | Destructive gates | `delete`, `policy apply`, `gc`, `vault-import` either require explicit names or accept `--dry-run`                                      |
 | Error envelope    | Errors emit JSON `{ "code": "...", "message": "...", "hint": "..." }` on stderr; never bare strings                                     |
 | No surprise I/O   | The CLI never makes network calls except `iv pull`, `iv cloud *`, and opt-in telemetry (off by default; honors `DO_NOT_TRACK=1`)      |
-| URI scheme        | `iv://vault/model@version` resolves through any of the three surfaces                                                                 |
+| URI scheme        | `iv://vault/model@version` resolves through the CLI and the REST/GraphQL API                                                                  |
 | Conversion honesty | `iv convert` and `POST /api/v1/convert` never emit a file or payload in the target format unless the bytes really are that format. When external tooling is required the REST response sets `converted: false` and carries a `plan`; the CLI writes `<output>.plan.json` and produces no target-format file |
 
 ## Project Identity
@@ -67,7 +67,7 @@ passphrase. See [docs/KMS.md](docs/KMS.md) for the URI table and backend setup.
 | **Name**       | IronVault                           |
 | **Binary**     | `iv`                                    |
 | **Crate**      | `ironvault`                         |
-| **Version**    | 3.0.0                                    |
+| **Version**    | 7.2.0                                    |
 | **Language**   | Rust (edition 2021, MSRV 1.89)           |
 | **License**    | AGPL-3.0-or-later                        |
 | **Repository** | https://github.com/nervosys/IronVault |
@@ -118,7 +118,7 @@ IronVault is an **encrypted AI/ML model management system**. It provides:
 | ---------------------------------------------------------------- | ------------------------------------------------------------- |
 | [`.well-known/ai-plugin.json`](.well-known/ai-plugin.json)       | OpenAI-compatible plugin manifest                             |
 | [`.well-known/ontology.jsonld`](.well-known/ontology.jsonld)     | JSON-LD ontology — all concepts, entities, relationships      |
-| [`.well-known/mcp-manifest.json`](.well-known/mcp-manifest.json) | MCP tool definitions with JSON Schema inputs                  |
+| [`.well-known/mcp-manifest.json`](.well-known/mcp-manifest.json) | MCP tool *definitions* with JSON Schema inputs; 4 of 86 ship  |
 | [`.well-known/openapi.yaml`](.well-known/openapi.yaml)           | OpenAPI 3.1 specification for REST/GraphQL API                |
 | [`.well-known/agents.json`](.well-known/agents.json)             | Agent discovery metadata — interfaces, capabilities, taxonomy |
 
@@ -229,7 +229,7 @@ iv policy apply-all [--dry-run]              # Apply all policies
 
 # Cross-model lineage DAG
 iv lineage-graph add --child <C> --parents <P>... --kind <KIND>
-iv lineage-graph show                        # Display lineage graph
+iv lineage-graph show <MODEL>                # Display lineage for a model
 iv lineage-graph ancestors <MODEL>           # Show ancestors
 iv lineage-graph descendants <MODEL>         # Show descendants
 
@@ -246,12 +246,12 @@ iv profile remove <NAME>                     # Remove profile
 iv profile list                              # List all profiles
 iv profile activate <NAME>                   # Activate profile
 iv profile deactivate                        # Deactivate current profile
-iv profile show                              # Show active profile
+iv profile show <NAME>                       # Show a profile's details
 
 # Quantization pipeline
 iv quantize set <MODEL> --method <METHOD> [--version V] [--bits N]
 iv quantize remove <MODEL> [--version V]     # Remove quantization profile
-iv quantize list [MODEL]                     # List quantization profiles
+iv quantize list                             # List quantization profiles
 iv quantize estimate <MODEL> --method <METHOD>  # Estimate output size
 
 # Evaluation harness
