@@ -1,7 +1,7 @@
 # IronVault — Roadmap
 
 > Last updated: 2026-08-17
-> Current version: **7.2.1**
+> Current version: **8.0.0**
 > Status: Production release — 2,294 Rust tests + Python tests, proptest strategies, fuzz targets, benchmark suites, clippy clean across every feature combination the crate declares
 
 **This file stops at v3.0.0.** Releases 4.0 through 7.2 — the IronVault

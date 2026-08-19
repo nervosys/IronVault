@@ -472,17 +472,26 @@ jobs:
     # Only chromium: the toggle's logic is storage plus a media query, and
     # nothing here is engine-specific enough to pay for three browsers.
     #
-    # On a cache hit only the apt dependencies are installed; the browser
-    # itself is already on disk. `--with-deps` is not cacheable, so it always
-    # runs, but it is seconds rather than a download.
+    # Deliberately not `--with-deps`. That flag runs `apt-get update` first,
+    # and that is what hung this job for 91 minutes on ae39fc9 and again for
+    # the full 20-minute timeout on 06d8f07. Both times the log stops mid
+    # apt fetch:
+    #
+    #   Get:5 https://archive.ubuntu.com/ubuntu noble-security InRelease
+    #   ...17 minutes of nothing...
+    #
+    # The browser download was never the problem; it had not started. The
+    # ubuntu-latest image already carries the libraries headless chromium
+    # needs, so the apt round trip bought a hang and little else. If a library
+    # does turn out to be missing, the e2e run fails with a named symbol
+    # rather than stalling, which is the better failure.
+    #
+    # The step timeout is belt and braces: a stalled download now fails in six
+    # minutes instead of consuming the job's whole budget.
     - name: Install Playwright browser
       working-directory: website
-      run: |
-        if [ "${{ steps.pw-cache.outputs.cache-hit }}" = "true" ]; then
-          npx playwright install-deps chromium
-        else
-          npx playwright install --with-deps chromium
-        fi
+      timeout-minutes: 6
+      run: npx playwright install chromium
 
     - name: End-to-end tests
       working-directory: website

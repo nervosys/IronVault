@@ -14,13 +14,36 @@
 [![CMMC](https://img.shields.io/badge/CMMC%202.0%20L2-controls%20supported-blue.svg)](docs/SECURITY_HARDENING.md)
 [![Tests](https://img.shields.io/badge/tests-2%2C304%20passing-brightgreen.svg)](reports/)
 [![Coverage](https://img.shields.io/badge/coverage-85.4%25-brightgreen.svg)](docs/PERFORMANCE.md)
-[![Version](https://img.shields.io/badge/version-7.2.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-8.0.0-blue.svg)](CHANGELOG.md)
 [![crates.io](https://img.shields.io/crates/v/ironvault.svg)](https://crates.io/crates/ironvault)
 [![PyPI](https://img.shields.io/pypi/v/ironvault.svg)](https://pypi.org/project/ironvault/)
 [![Clippy](https://img.shields.io/badge/clippy-clean-brightgreen.svg)](validate.ps1)
 [![Agent-ready](https://img.shields.io/badge/agent--ready-AGENTS.md-blueviolet.svg)](AGENTS.md)
 
 A production-ready secure vault, built on FIPS-approved cryptographic algorithms, for storing and managing AI models. Every capability is exposed through **two shipped surfaces — CLI and REST/GraphQL** — plus MCP primitives you register in your own host process, with a single source of truth (`iv introspect`) and self-describing manifests in [`.well-known/`](.well-known/). Built for autonomous agents, scriptable for CI, friendly for humans.
+
+---
+
+## Upgrading to 8.0? Read this first
+
+**8.0 encrypts the version index, and the migration cannot be undone.**
+
+Through 7.x, `versions.json` was plaintext: model names, sizes, formats,
+timestamps, checksums and metadata were readable by anything that could read
+the vault directory, with or without the passphrase. 8.0 seals it with
+AES-256-GCM under the vault key.
+
+| | |
+| --- | --- |
+| **Migration is automatic and one-way** | The index is re-sealed the first time an 8.0 binary unlocks the vault. There is no command to run and no preview flag. **After that, 7.x can no longer read that vault.** Take a backup first if you need a rollback path. |
+| `iv gc`, `iv browse`, `iv vault-export`, `iv vault-import` | now require the passphrase — they read the index. For `gc` this is load-bearing: it deletes blobs the index does not reference, so an unreadable index would make every blob look orphaned. |
+| Non-interactive callers | a passphrase-gated command with no `IRONVAULT_PASSPHRASE` and no terminal now **fails with exit 7** instead of blocking on a prompt. Scripts that relied on the old behaviour were hanging, not working. |
+| Bundles | `iv vault-export` seals the inventory inside the bundle too. Two exports of an unchanged vault are no longer byte-identical, because each seal uses a fresh nonce. |
+| Four public functions | `gc::gc`, `tui::browse`, `vault_bundle::export_vault` and `vault_bundle::import_vault` take the vault key. `VersionControl::new` no longer loads the index — call `unlock(&key)`. |
+
+**Not covered:** the SQLite backend (`--sqlite`) still stores the same metadata
+unencrypted, and `data/` file names and sizes remain visible on both backends.
+See [SECURITY.md](SECURITY.md).
 
 ---
 
