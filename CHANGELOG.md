@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.2.1] - 2026-08-18
+
+A security patch for a dependency, and nothing else.
+
+### Fixed
+
+- **`h2` upgraded to 0.4.16 for [RUSTSEC-2026-0258](https://rustsec.org/advisories/RUSTSEC-2026-0258)**
+  ("h2 unbounded empty DATA frames"). `h2` is the HTTP/2 implementation under
+  `hyper` and `axum`, which is what `iv serve` runs on, so the denial of
+  service was reachable against a served vault by anyone able to open a
+  connection to it.
+
+### Who needed this
+
+- **The 7.2.0 release binaries did.** They are built `--features api`, so
+  `h2` 0.4.15 is statically linked into all five. Replace them with 7.2.1.
+- **crates.io consumers did not.** A library crate ships no lockfile, so Cargo
+  resolves `h2` itself and `^0.4` already picks 0.4.16.
+- **PyPI wheels did not.** They build `["pyo3/extension-module", "python"]`,
+  which pulls in neither `hyper` nor `h2`.
+
+The advisory is a denial of service, not disclosure or execution, and
+`iv serve` refuses to bind a non-loopback address without TLS — which bounds
+who can reach it, and is why this is a patch release rather than a withdrawal.
+
 ## [7.2.0] - 2026-08-17
 
 Turns SafeTensors → GGUF from a plan into a conversion.

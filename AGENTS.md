@@ -67,7 +67,7 @@ passphrase. See [docs/KMS.md](docs/KMS.md) for the URI table and backend setup.
 | **Name**       | IronVault                           |
 | **Binary**     | `iv`                                    |
 | **Crate**      | `ironvault`                         |
-| **Version**    | 7.2.0                                    |
+| **Version**    | 7.2.1                                    |
 | **Language**   | Rust (edition 2021, MSRV 1.89)           |
 | **License**    | AGPL-3.0-or-later                        |
 | **Repository** | https://github.com/nervosys/IronVault |
