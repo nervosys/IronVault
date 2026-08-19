@@ -37,7 +37,7 @@ exclude = [
 
 [dependencies]
 # Cryptography - FIPS-approved algorithms (implementations are not CMVP-validated)
-aes-gcm = "0.10"                                     # AES-GCM encryption
+aes-gcm = "0.11"                                     # AES-GCM encryption
 sha2 = "0.10"                                        # SHA-256 hashing
 argon2 = "0.5"                                       # Alternative KDF (more secure than PBKDF2)
 zeroize = { version = "1.7", features = ["derive"] } # Secure memory zeroing
