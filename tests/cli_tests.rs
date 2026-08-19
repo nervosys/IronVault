@@ -1012,6 +1012,30 @@ fn test_cli_profile_help() {
 // v1.4.0 Feature — Functional Tests
 // ──────────────────────────────────────────────────────────────
 
+/// A passphrase-gated command with no passphrase and no terminal must fail,
+/// not wait.
+///
+/// `rpassword` opens the console device directly, so falling through to the
+/// prompt in a non-interactive context blocked forever. A CI job would stall
+/// until its timeout with no output, which reads as a slow build rather than a
+/// misconfiguration -- and that is exactly how it presented: the suite hung on
+/// `iv gc` instead of failing.
+#[test]
+fn test_cli_without_passphrase_or_tty_fails_instead_of_hanging() {
+    let dir = tempdir().unwrap();
+
+    iv().args(["list"])
+        .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+        .env_remove("IRONVAULT_PASSPHRASE")
+        .write_stdin("")
+        .assert()
+        .failure()
+        .stderr(
+            predicate::str::contains("No passphrase available")
+                .and(predicate::str::contains("IRONVAULT_PASSPHRASE")),
+        );
+}
+
 #[test]
 fn test_cli_gc_dry_run_on_vault() {
     let dir = tempdir().unwrap();

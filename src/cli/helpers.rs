@@ -59,6 +59,16 @@ pub fn prompt_passphrase(prompt: &str) -> Result<Vec<u8>> {
                 return Err(err.into());
             }
         }
+
+        // Nothing on stdin, and no terminal to ask. Falling through to the
+        // prompt here used to hang forever rather than fail: `rpassword` opens
+        // the console device directly, so on Windows it waits on a keyboard
+        // that no one is sitting at. A CI job or cron entry would stall until
+        // its timeout with no output, which reads as a slow build rather than
+        // a misconfiguration. Fail with something actionable instead.
+        return Err(ironvault::VaultError::ConfigError(format!(
+            "No passphrase available and no terminal to prompt on. Set ${PASSPHRASE_ENV} (a literal value or a KMS URI) or pipe the passphrase on stdin."
+        )));
     }
 
     print!("{}", prompt);

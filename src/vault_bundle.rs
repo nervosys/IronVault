@@ -97,6 +97,10 @@ pub struct BundleManifest {
 
 // ── Export ────────────────────────────────────────────────────────────────────
 
+/// Marks a sealed `versions.json` inside a bundle. Bundles written before
+/// the index was sealed have plaintext JSON there instead.
+const SEALED_VERSIONS_MAGIC: &[u8] = b"IRONVAULT-VERSIONS-v1\n";
+
 /// Export selected models from a vault into a portable archive.
 ///
 /// The output is a tar file containing:
@@ -104,10 +108,6 @@ pub struct BundleManifest {
 ///   - `versions.json` — version metadata for included models
 ///   - `data/<uuid>.vault` — encrypted blobs
 ///   - `tags.json` — tag data for included models (if any)
-/// Marks a sealed `versions.json` inside a bundle. Bundles written before
-/// the index was sealed have plaintext JSON there instead.
-const SEALED_VERSIONS_MAGIC: &[u8] = b"IRONVAULT-VERSIONS-v1\n";
-
 pub fn export_vault(
     vault_path: &Path,
     output: &Path,
