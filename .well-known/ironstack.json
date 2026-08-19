@@ -1,0 +1,202 @@
+{
+  "ironstack": "1",
+  "id": "ironvault",
+  "product": "IronVault",
+  "layer": "model-plane",
+  "role": "Encrypted model storage, versioning, conversion, and lifecycle management across 23+ formats.",
+  "surfaces": [
+    "cli",
+    "rest",
+    "graphql",
+    "mcp",
+    "python"
+  ],
+  "ontology": {
+    "command": "iv introspect",
+    "document": ".well-known/ontology.jsonld",
+    "schema": 1
+  },
+  "capabilities": [
+    {
+      "name": "vault.list",
+      "description": "List all models in the vault. Metadata only; nothing is decrypted.",
+      "requires_grant": false,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "vault.versions",
+      "description": "Show versions of a model.",
+      "requires_grant": false,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "vault.lineage",
+      "description": "Show version ancestry tree.",
+      "requires_grant": false,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "vault.stats",
+      "description": "Show vault storage statistics.",
+      "requires_grant": false,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "utility.cache",
+      "description": "Show cache statistics.",
+      "requires_grant": false,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "conversion.list-conversions",
+      "description": "List supported format conversion paths.",
+      "requires_grant": false,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "agent.introspect",
+      "description": "Output the CLI schema for agent discovery.",
+      "requires_grant": false,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "security.compliance",
+      "description": "Run FIPS/CMMC/MITRE compliance checks. Reports; does not change the vault.",
+      "requires_grant": false,
+      "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "utility.analyze",
+      "description": "Analyze model compression efficiency. Reads model content to measure it.",
+      "requires_grant": false,
+      "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "utility.deduplicate",
+      "description": "Find duplicate models in the vault. Scans the whole vault.",
+      "requires_grant": false,
+      "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "vault.init",
+      "description": "Initialize a new encrypted vault.",
+      "requires_grant": true,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "vault.store",
+      "description": "Store a model in the vault with encryption.",
+      "requires_grant": true,
+      "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "vault.get",
+      "description": "Retrieve and DECRYPT a model out of the vault to a path the caller names.",
+      "requires_grant": true,
+      "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "utility.export",
+      "description": "Export a model with its metadata.",
+      "requires_grant": true,
+      "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "utility.archive",
+      "description": "Archive models to TAR or ZIP.",
+      "requires_grant": true,
+      "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "utility.extract",
+      "description": "Extract models from an archive.",
+      "requires_grant": true,
+      "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "conversion.convert",
+      "description": "Convert a model between formats.",
+      "requires_grant": true,
+      "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "vault.delete",
+      "description": "Delete a model version.",
+      "requires_grant": true,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "security.change-passphrase",
+      "description": "Change the vault encryption passphrase.",
+      "requires_grant": true,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "api.serve",
+      "description": "Start the REST/GraphQL API server, exposing the vault over the network.",
+      "requires_grant": true,
+      "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    }
+  ],
+  "note": "UNLIKE the other manifests in this stack, neither field here is derived: IronVault's CLI schema enumerates its commands but declares no effect, safety or authority data, so both requires_grant and budgeted are judgements made from the command semantics and are stated as such rather than presented as the tool's own position. The commands and their descriptions are IronVault's; the classification is not. The rule applied: a grant is required to decrypt, write, delete, change credentials, or expose the vault over the network. That makes `get` and `export` granted alongside the obvious mutators, because in an encrypted vault the operation that matters most is the one that takes plaintext out -- a manifest that granted `delete` but not `get` would guard the wrong door. `list`, `versions`, `lineage` and `stats` read metadata without decrypting anything and need no grant. Budgets follow size and duration: store, get, export, archive, extract and convert all move or transform whole models; analyze, deduplicate and compliance read across the vault to produce a report; serve runs until stopped. delete and change-passphrase are granted but unbudgeted -- single decisions, where the danger is that one was unauthorised rather than that many were made. This file should be replaced by a derived one if IronVault ever declares effects in its own schema, the way abt, Rodeo, Botnet, MAGE and HyperMachine do. Until then it is the weakest-grounded manifest in the stack and should be read that way."
+}
