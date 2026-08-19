@@ -974,7 +974,12 @@ fn test_benchmark_display() {
 #[test]
 fn test_gc_on_empty_dir() {
     let tmp = tempdir().unwrap();
-    let result = gc::gc(tmp.path(), true);
+    let key = ironvault::crypto::VaultCrypto::new()
+        .unwrap()
+        .derive_key(b"gc-empty-dir".to_vec(), Some(vec![5u8; 16]))
+        .unwrap()
+        .0;
+    let result = gc::gc(tmp.path(), true, &key);
     // Should either succeed with 0 cleaned or return an error gracefully
     assert!(result.is_ok() || result.is_err());
 }

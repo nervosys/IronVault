@@ -8,6 +8,23 @@
 //! Consolidated coverage tests - merged from 12 incremental coverage files.
 //! Each original file is a uniquely named module to avoid name collisions.
 
+/// Construct and unlock a `VersionControl`.
+///
+/// The index is sealed from 8.0, so a bare `VersionControl::new` answers from
+/// an empty map and refuses writes. Every test below wants a working index,
+/// which means a key; the passphrase and salt are fixed because these tests
+/// are about version bookkeeping, not key derivation.
+fn open_vc(path: &std::path::Path) -> ironvault::version::VersionControl {
+    let key = ironvault::crypto::VaultCrypto::new()
+        .unwrap()
+        .derive_key(b"coverage-tests".to_vec(), Some(vec![11u8; 16]))
+        .unwrap()
+        .0;
+    let mut vc = ironvault::version::VersionControl::new(path).unwrap();
+    vc.unlock(&key).unwrap();
+    vc
+}
+
 #[allow(unused_imports)]
 mod comprehensive_coverage_tests {
     //! Comprehensive coverage tests — Part 2
@@ -456,7 +473,7 @@ mod comprehensive_coverage_tests {
         #[test]
         fn test_version_repo_add_list() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             let v = VersionRepo::add_version(
                 &mut vc, "m1", "f.enc", "pytorch", 1000, 500, "cksum", None, None,
@@ -471,7 +488,7 @@ mod comprehensive_coverage_tests {
         #[test]
         fn test_version_repo_get_version_latest_and_specific() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             VersionRepo::add_version(&mut vc, "m", "f1.enc", "pt", 100, 50, "c1", None, None)
                 .unwrap();
@@ -493,7 +510,7 @@ mod comprehensive_coverage_tests {
         #[test]
         fn test_version_repo_get_lineage() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             VersionRepo::add_version(&mut vc, "m", "f1.enc", "pt", 100, 50, "c1", None, None)
                 .unwrap();
@@ -507,7 +524,7 @@ mod comprehensive_coverage_tests {
         #[test]
         fn test_version_repo_delete() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             VersionRepo::add_version(&mut vc, "m", "f.enc", "pt", 100, 50, "ck", None, None)
                 .unwrap();
@@ -518,7 +535,7 @@ mod comprehensive_coverage_tests {
         #[test]
         fn test_version_repo_delete_nonexistent() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
             let deleted = VersionRepo::delete_version(&mut vc, "m", 99).unwrap();
             assert!(!deleted);
         }
@@ -526,7 +543,7 @@ mod comprehensive_coverage_tests {
         #[test]
         fn test_version_repo_update_and_get_metadata() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             VersionRepo::add_version(&mut vc, "m", "f.enc", "pt", 100, 50, "ck", None, None)
                 .unwrap();
@@ -545,7 +562,7 @@ mod comprehensive_coverage_tests {
         #[test]
         fn test_version_with_initial_metadata() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             let mut meta = HashMap::new();
             meta.insert("key".to_string(), "val".to_string());
@@ -559,7 +576,7 @@ mod comprehensive_coverage_tests {
         #[test]
         fn test_version_cleanup_old() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             for i in 0..5 {
                 vc.add_version(
@@ -583,7 +600,7 @@ mod comprehensive_coverage_tests {
         #[test]
         fn test_version_verify_checksum() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             let data = b"hello";
             let crypto = VaultCrypto::new().unwrap();
@@ -598,14 +615,14 @@ mod comprehensive_coverage_tests {
         #[test]
         fn test_version_verify_checksum_missing() {
             let tmp = tempfile::tempdir().unwrap();
-            let vc = VersionControl::new(tmp.path()).unwrap();
+            let vc = crate::open_vc(tmp.path());
             assert!(!VersionRepo::verify_checksum(&vc, "no_model", 1, b"data"));
         }
 
         #[test]
         fn test_version_list_models() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             vc.add_version("model_a", "f1.enc", "pt", 100, 50, "c1", None, None)
                 .unwrap();
@@ -620,7 +637,7 @@ mod comprehensive_coverage_tests {
         #[test]
         fn test_version_parent_lineage() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             vc.add_version("m", "f1.enc", "pt", 100, 50, "c1", None, None)
                 .unwrap();
@@ -636,7 +653,7 @@ mod comprehensive_coverage_tests {
         #[test]
         fn test_version_vault_path() {
             let tmp = tempfile::tempdir().unwrap();
-            let vc = VersionControl::new(tmp.path()).unwrap();
+            let vc = crate::open_vc(tmp.path());
             assert_eq!(vc.vault_path(), tmp.path());
         }
     }
@@ -4485,7 +4502,7 @@ mod coverage_gap_tests {
 
     fn setup_version_control_with_models(count: u32) -> (tempfile::TempDir, VersionControl) {
         let tmp = tempdir().unwrap();
-        let mut vc = VersionControl::new(tmp.path()).unwrap();
+        let mut vc = crate::open_vc(tmp.path());
         for i in 1..=count {
             vc.add_version(
                 "test_model",
@@ -4529,7 +4546,7 @@ mod coverage_gap_tests {
     #[test]
     fn test_cleanup_old_versions_nonexistent_model() {
         let tmp = tempdir().unwrap();
-        let mut vc = VersionControl::new(tmp.path()).unwrap();
+        let mut vc = crate::open_vc(tmp.path());
 
         let deleted = vc.cleanup_old_versions("not_here", 3).unwrap();
         assert!(deleted.is_empty());
@@ -4538,7 +4555,7 @@ mod coverage_gap_tests {
     #[test]
     fn test_verify_checksum_correct_data() {
         let tmp = tempdir().unwrap();
-        let mut vc = VersionControl::new(tmp.path()).unwrap();
+        let mut vc = crate::open_vc(tmp.path());
 
         let data = b"test model data for checksum";
         let checksum = hex::encode(VaultCrypto::hash_sha256(data));
@@ -4561,7 +4578,7 @@ mod coverage_gap_tests {
     #[test]
     fn test_verify_checksum_wrong_data() {
         let tmp = tempdir().unwrap();
-        let mut vc = VersionControl::new(tmp.path()).unwrap();
+        let mut vc = crate::open_vc(tmp.path());
 
         let data = b"original data";
         let checksum = hex::encode(VaultCrypto::hash_sha256(data));
@@ -4584,7 +4601,7 @@ mod coverage_gap_tests {
     #[test]
     fn test_verify_checksum_nonexistent_version() {
         let tmp = tempdir().unwrap();
-        let vc = VersionControl::new(tmp.path()).unwrap();
+        let vc = crate::open_vc(tmp.path());
         assert!(!vc.verify_checksum("no_model", 1, b"doesn't matter"));
     }
 
@@ -4682,7 +4699,7 @@ mod coverage_gap_tests {
     #[test]
     fn test_version_control_vault_path_getter() {
         let tmp = tempdir().unwrap();
-        let vc = VersionControl::new(tmp.path()).unwrap();
+        let vc = crate::open_vc(tmp.path());
         assert_eq!(vc.vault_path(), tmp.path());
     }
 }
@@ -6706,7 +6723,7 @@ mod coverage_ultimate_tests {
         #[test]
         fn test_version_control_new_and_get_latest() {
             let dir = tempdir().unwrap();
-            let mut vc = VersionControl::new(dir.path()).unwrap();
+            let mut vc = crate::open_vc(dir.path());
 
             // Add versions using the VersionRepo trait
             vc.add_version("model_a", "f.enc", "pytorch", 100, 50, "abc", None, None)
@@ -10495,7 +10512,7 @@ mod final_coverage_tests {
         #[test]
         fn cleanup_old_versions_deletes_excess() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             // Add 5 versions (add_version takes: name, file_path, format, size, compressed_size, checksum, metadata, parent)
             for i in 0..5u32 {
@@ -10529,7 +10546,7 @@ mod final_coverage_tests {
         #[test]
         fn cleanup_old_versions_keeps_all_when_under_limit() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             let data = b"data";
             let cksum = checksum(data);
@@ -10553,7 +10570,7 @@ mod final_coverage_tests {
         #[test]
         fn cleanup_old_versions_nonexistent_model() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             let deleted = vc.cleanup_old_versions("nope", 2).unwrap();
             assert!(deleted.is_empty());
@@ -10562,7 +10579,7 @@ mod final_coverage_tests {
         #[test]
         fn verify_checksum_correct() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             let data = b"test data for checksum";
             let cksum = checksum(data);
@@ -10584,7 +10601,7 @@ mod final_coverage_tests {
         #[test]
         fn verify_checksum_incorrect() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             let data = b"original data";
             let cksum = checksum(data);
@@ -10606,7 +10623,7 @@ mod final_coverage_tests {
         #[test]
         fn verify_checksum_nonexistent_version() {
             let tmp = tempfile::tempdir().unwrap();
-            let vc = VersionControl::new(tmp.path()).unwrap();
+            let vc = crate::open_vc(tmp.path());
 
             assert!(!vc.verify_checksum("nope", 1, b"data"));
         }
@@ -10614,7 +10631,7 @@ mod final_coverage_tests {
         #[test]
         fn delete_version() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             let data1 = b"v1";
             let cksum1 = checksum(data1);
@@ -10653,7 +10670,7 @@ mod final_coverage_tests {
         #[test]
         fn delete_nonexistent_version() {
             let tmp = tempfile::tempdir().unwrap();
-            let mut vc = VersionControl::new(tmp.path()).unwrap();
+            let mut vc = crate::open_vc(tmp.path());
 
             let deleted = vc.delete_version("nope", 1).unwrap();
             assert!(!deleted);

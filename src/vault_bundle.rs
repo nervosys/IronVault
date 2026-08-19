@@ -104,14 +104,20 @@ pub struct BundleManifest {
 ///   - `versions.json` — version metadata for included models
 ///   - `data/<uuid>.vault` — encrypted blobs
 ///   - `tags.json` — tag data for included models (if any)
+/// Marks a sealed `versions.json` inside a bundle. Bundles written before
+/// the index was sealed have plaintext JSON there instead.
+const SEALED_VERSIONS_MAGIC: &[u8] = b"IRONVAULT-VERSIONS-v1\n";
+
 pub fn export_vault(
     vault_path: &Path,
     output: &Path,
     model_filter: Option<&[String]>,
+    key: &crate::crypto::SecureKey,
 ) -> Result<ExportReport> {
     use crate::version::VersionControl;
 
-    let vc = VersionControl::new(vault_path)?;
+    let mut vc = VersionControl::new(vault_path)?;
+    vc.unlock(key)?;
     let all_models = vc.list_models_owned();
 
     let models_to_export: Vec<String> = if let Some(filter) = model_filter {
@@ -170,9 +176,23 @@ pub fn export_vault(
     let encoder = flate2::write::GzEncoder::new(out_file, flate2::Compression::default());
     let mut tar_builder = tar::Builder::new(encoder);
 
-    // Write versions.json
-    let versions_json = serde_json::to_string_pretty(&version_data)?;
-    let versions_bytes = versions_json.as_bytes();
+    // Write versions.json, sealed with the vault key.
+    //
+    // Sealing the vault's own index is pointless if `iv vault-export` writes
+    // the same inventory to a portable file in the clear. The blobs beside it
+    // are already ciphertext under this key, so a bundle was never usable
+    // without the key anyway -- only its metadata was readable, which is the
+    // gap this closes.
+    //
+    // The cost is byte-level reproducibility: AES-GCM uses a fresh nonce, so
+    // two exports of an unchanged vault no longer produce identical bundles.
+    // The payload digest still verifies the bundle it was written for.
+    let versions_plain = serde_json::to_vec(&version_data)?;
+    let sealed_versions = crate::crypto::VaultCrypto::new()?.encrypt(&versions_plain, key)?;
+    let mut versions_blob = Vec::with_capacity(SEALED_VERSIONS_MAGIC.len() + sealed_versions.len());
+    versions_blob.extend_from_slice(SEALED_VERSIONS_MAGIC);
+    versions_blob.extend_from_slice(&sealed_versions);
+    let versions_bytes: &[u8] = &versions_blob;
     let mut header = tar::Header::new_gnu();
     header.set_size(versions_bytes.len() as u64);
     header.set_mode(0o600);
@@ -253,6 +273,7 @@ pub fn import_vault(
     vault_path: &Path,
     archive_path: &Path,
     overwrite: bool,
+    key: &crate::crypto::SecureKey,
 ) -> Result<ImportReport> {
     use crate::version::VersionControl;
 
@@ -286,10 +307,20 @@ pub fn import_vault(
     }
     let manifest: BundleManifest = serde_json::from_str(&fs::read_to_string(&manifest_path)?)?;
 
-    // Read exported versions
+    // Read exported versions. Bundles written before the index was sealed
+    // carry plaintext JSON here; both are accepted, distinguished by the
+    // marker rather than by guessing.
     let versions_path = temp_dir.path().join("versions.json");
+    let versions_raw = fs::read(&versions_path)?;
     let imported_versions: HashMap<String, Vec<crate::version::ModelVersion>> =
-        serde_json::from_str(&fs::read_to_string(&versions_path)?)?;
+        if let Some(ciphertext) = versions_raw.strip_prefix(SEALED_VERSIONS_MAGIC) {
+            let plain = crate::crypto::VaultCrypto::new()?
+                .decrypt(ciphertext, key)
+                .map_err(|_| VaultError::AuthenticationFailed)?;
+            serde_json::from_slice(&plain)?
+        } else {
+            serde_json::from_slice(&versions_raw)?
+        };
 
     // Reject a hostile bundle before touching the target vault, so a bad path
     // late in the archive cannot leave a half-merged vault behind.
@@ -339,8 +370,11 @@ pub fn import_vault(
         false
     };
 
-    // Merge into target vault
+    // Merge into target vault. Unlocking first matters twice over: the
+    // existing index has to be read to detect collisions, and every write
+    // below has to be sealed with the target vault's key.
     let mut vc = VersionControl::new(vault_path)?;
+    vc.unlock(key)?;
     let existing_models: Vec<String> = vc.list_models_owned();
     let data_dir = vault_path.join("data");
     fs::create_dir_all(&data_dir)?;
@@ -429,6 +463,14 @@ pub struct ImportReport {
 
 #[cfg(test)]
 mod tests {
+    fn test_key() -> crate::crypto::SecureKey {
+        crate::crypto::VaultCrypto::new()
+            .unwrap()
+            .derive_key(b"bundle-test-passphrase".to_vec(), Some(vec![3u8; 16]))
+            .unwrap()
+            .0
+    }
+
     use super::*;
 
     // ── Blob path validation ─────────────────────────────────────────────
@@ -580,7 +622,7 @@ mod tests {
         let bundle = tmp.path().join("evil.ivault");
         craft_bundle(&bundle, "../versions.json", &[], None, 2);
 
-        let err = import_vault(&vault, &bundle, true).unwrap_err();
+        let err = import_vault(&vault, &bundle, true, &test_key()).unwrap_err();
         assert!(
             err.to_string().contains("single file name"),
             "expected a path-validation refusal, got: {err}"
@@ -607,7 +649,7 @@ mod tests {
             2,
         );
 
-        let err = import_vault(&vault, &bundle, true).unwrap_err();
+        let err = import_vault(&vault, &bundle, true, &test_key()).unwrap_err();
         assert!(
             err.to_string().contains("integrity check"),
             "expected an integrity failure, got: {err}"
@@ -633,7 +675,7 @@ mod tests {
             2,
         );
 
-        let report = import_vault(&vault, &bundle, true).unwrap();
+        let report = import_vault(&vault, &bundle, true, &test_key()).unwrap();
         assert!(report.checksum_verified);
         assert_eq!(report.versions_imported, 1);
         assert_eq!(
@@ -659,7 +701,7 @@ mod tests {
             1,
         );
 
-        let report = import_vault(&vault, &bundle, true).unwrap();
+        let report = import_vault(&vault, &bundle, true, &test_key()).unwrap();
         assert!(!report.checksum_verified);
         assert_eq!(report.versions_imported, 1);
     }
@@ -723,7 +765,7 @@ mod tests {
             "fixture must be a plain tar or this proves nothing"
         );
 
-        let report = import_vault(&vault, &bundle, true).unwrap();
+        let report = import_vault(&vault, &bundle, true, &test_key()).unwrap();
         assert!(
             report.checksum_verified,
             "a pre-5.1 bundle must still verify, not merely parse"
@@ -767,7 +809,7 @@ mod tests {
         let raw = fs::read(&bundle).unwrap();
         assert_eq!(&raw[..2], &[0x1f, 0x8b], "fixture should be gzip");
 
-        let report = import_vault(&vault, &bundle, true).unwrap();
+        let report = import_vault(&vault, &bundle, true, &test_key()).unwrap();
         assert!(report.checksum_verified);
         assert_eq!(
             fs::read(vault.join("data").join("blob.vault")).unwrap(),

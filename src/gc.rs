@@ -32,8 +32,13 @@ pub struct GcReport {
 /// Scan a vault directory for orphaned blobs and temp files.
 ///
 /// When `dry_run` is true the report is produced but nothing is deleted.
-pub fn gc(vault_path: &Path, dry_run: bool) -> Result<GcReport> {
-    let vc = VersionControl::new(vault_path)?;
+pub fn gc(vault_path: &Path, dry_run: bool, key: &crate::crypto::SecureKey) -> Result<GcReport> {
+    let mut vc = VersionControl::new(vault_path)?;
+    // The key is not optional here and must not become so. A locked index
+    // reads as empty, every blob would then be unreferenced, and this function
+    // deletes unreferenced blobs -- so running it without the key would delete
+    // every model in the vault.
+    vc.unlock(key)?;
 
     // 1. Collect every file_path referenced by any version.
     let models = vc.list_models_owned();
@@ -105,12 +110,22 @@ pub fn gc(vault_path: &Path, dry_run: bool) -> Result<GcReport> {
 mod tests {
     use super::*;
 
+    /// A key for the sealed index. gc refuses to run without one, which is
+    /// the point: a locked index reads empty and every blob looks orphaned.
+    fn test_key() -> crate::crypto::SecureKey {
+        crate::crypto::VaultCrypto::new()
+            .unwrap()
+            .derive_key(b"gc-test-passphrase".to_vec(), Some(vec![7u8; 16]))
+            .unwrap()
+            .0
+    }
+
     #[test]
     fn test_gc_empty_vault() {
         let dir = tempfile::tempdir().unwrap();
         fs::create_dir_all(dir.path().join("data")).unwrap();
         // Create a version control file so VersionControl::new() succeeds
-        let report = gc(dir.path(), true).unwrap();
+        let report = gc(dir.path(), true, &test_key()).unwrap();
         assert_eq!(report.orphaned_blobs.len(), 0);
         assert_eq!(report.temp_files.len(), 0);
         assert!(!report.deleted);
@@ -124,7 +139,7 @@ mod tests {
         fs::write(data.join("abc.tmp"), b"temp").unwrap();
         fs::write(data.join("xyz.part"), b"partial").unwrap();
 
-        let report = gc(dir.path(), true).unwrap();
+        let report = gc(dir.path(), true, &test_key()).unwrap();
         assert_eq!(report.temp_files.len(), 2);
         assert_eq!(report.reclaimable_bytes, 11); // 4 + 7
         assert!(!report.deleted);
@@ -137,7 +152,7 @@ mod tests {
         fs::create_dir_all(&data).unwrap();
         fs::write(data.join("orphan.vault"), b"stale").unwrap();
 
-        let report = gc(dir.path(), false).unwrap();
+        let report = gc(dir.path(), false, &test_key()).unwrap();
         assert_eq!(report.orphaned_blobs.len(), 1);
         assert!(report.deleted);
         // File should be gone

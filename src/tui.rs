@@ -13,8 +13,9 @@ use crate::version::VersionControl;
 // ── Public API ───────────────────────────────────────────────────────────────
 
 /// Render a terminal-based vault dashboard to stdout.
-pub fn browse(vault_path: &Path) -> Result<String> {
-    let vc = VersionControl::new(vault_path)?;
+pub fn browse(vault_path: &Path, key: &crate::crypto::SecureKey) -> Result<String> {
+    let mut vc = VersionControl::new(vault_path)?;
+    vc.unlock(key)?;
     let tags = TagStore::new(vault_path).ok();
 
     let models = vc.list_models_owned();
@@ -122,6 +123,14 @@ fn truncate(s: &str, max: usize) -> String {
 mod tests {
     use super::*;
 
+    fn test_key() -> crate::crypto::SecureKey {
+        crate::crypto::VaultCrypto::new()
+            .unwrap()
+            .derive_key(b"tui-test-passphrase".to_vec(), Some(vec![9u8; 16]))
+            .unwrap()
+            .0
+    }
+
     #[test]
     fn test_format_bytes() {
         assert_eq!(format_bytes(0), "0 B");
@@ -141,7 +150,7 @@ mod tests {
     fn test_browse_empty_vault() {
         let dir = tempfile::tempdir().unwrap();
         std::fs::create_dir_all(dir.path().join("data")).unwrap();
-        let output = browse(dir.path()).unwrap();
+        let output = browse(dir.path(), &test_key()).unwrap();
         assert!(output.contains("vault is empty"));
     }
 }

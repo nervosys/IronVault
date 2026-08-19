@@ -1021,8 +1021,12 @@ fn test_cli_gc_dry_run_on_vault() {
         .assert()
         .success();
 
+    // 8.0 requires the passphrase: gc reads the sealed index. Without this the
+    // binary blocks on the passphrase prompt and the test hangs rather than
+    // failing, which is how this was found.
     iv().args(["gc", "--dry-run"])
         .env("IRONVAULT_HOME", dir.path().to_str().unwrap())
+        .env("IRONVAULT_PASSPHRASE", "test-passphrase-12345")
         .assert()
         .success();
 }

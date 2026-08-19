@@ -9,8 +9,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
 
-use crate::crypto::VaultCrypto;
-use crate::error::Result;
+use crate::crypto::{SecureKey, VaultCrypto};
+use crate::error::{Result, VaultError};
 
 /// Represents a single model version/checkpoint
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -62,21 +62,35 @@ pub struct VersionControl {
     vault_path: PathBuf,
     version_file: PathBuf,
     pub(crate) versions: HashMap<String, Vec<ModelVersion>>,
+    /// The vault key, once [`VersionControl::unlock`] has been called.
+    ///
+    /// `None` means the index has not been read: every accessor answers from
+    /// an empty map rather than from the file. That is deliberate. The index
+    /// is sealed, so there is nothing to answer *with* until a key arrives,
+    /// and returning empty is safer than returning stale plaintext.
+    key: Option<SecureKey>,
+    crypto: VaultCrypto,
 }
 
 impl VersionControl {
     const VERSION_FILE: &'static str = "versions.json";
 
-    /// Create new version control instance
+    /// Marks a sealed index. Written ahead of the ciphertext so a reader can
+    /// tell a sealed file from a pre-8.0 plaintext one without guessing, and
+    /// so a human running `file` or `head` on it gets an answer.
+    const SEALED_MAGIC: &'static [u8] = b"IRONVAULT-VERSIONS-v1\n";
+
+    /// Create a version control instance. The index is **not** read yet --
+    /// call [`VersionControl::unlock`] with the vault key first.
     pub fn new(vault_path: &Path) -> Result<Self> {
         let version_file = vault_path.join(Self::VERSION_FILE);
-        let mut vc = Self {
+        Ok(Self {
             vault_path: vault_path.to_path_buf(),
             version_file,
             versions: HashMap::new(),
-        };
-        vc.load_versions()?;
-        Ok(vc)
+            key: None,
+            crypto: VaultCrypto::new()?,
+        })
     }
 
     /// Return the vault directory path
@@ -84,19 +98,82 @@ impl VersionControl {
         &self.vault_path
     }
 
-    /// Load version history from file
-    fn load_versions(&mut self) -> Result<()> {
-        if self.version_file.exists() {
-            let contents = fs::read_to_string(&self.version_file)?;
-            self.versions = serde_json::from_str(&contents)?;
+    /// Read the index with `key`, migrating a pre-8.0 plaintext file if found.
+    ///
+    /// Decryption is itself a key check: the index is sealed with AES-256-GCM,
+    /// so a wrong key fails the authentication tag rather than yielding
+    /// plausible garbage.
+    ///
+    /// # Errors
+    ///
+    /// [`VaultError::AuthenticationFailed`] if `key` does not open a sealed
+    /// index.
+    pub fn unlock(&mut self, key: &SecureKey) -> Result<()> {
+        self.key = Some(key.clone());
+
+        if !self.version_file.exists() {
+            self.versions = HashMap::new();
+            return Ok(());
         }
+
+        let bytes = fs::read(&self.version_file)?;
+
+        if let Some(ciphertext) = bytes.strip_prefix(Self::SEALED_MAGIC) {
+            let plaintext = self
+                .crypto
+                .decrypt(ciphertext, key)
+                .map_err(|_| VaultError::AuthenticationFailed)?;
+            self.versions = serde_json::from_slice(&plaintext)?;
+            return Ok(());
+        }
+
+        // Pre-8.0: the index was plaintext JSON. Read it, then seal it in
+        // place. Migration happens on the first unlock rather than on the
+        // first write, so a vault that is only ever read still gets sealed.
+        self.versions = serde_json::from_slice(&bytes)?;
+        self.save_versions()?;
         Ok(())
     }
 
-    /// Save version history to file
+    /// Re-seal the loaded index under `new_key`.
+    ///
+    /// Called by `change_passphrase`. The index is already in memory under the
+    /// old key, so this swaps the key and rewrites the file. Without it the
+    /// vault re-encrypts every blob, rewrites the key check, and then fails to
+    /// open its own index at the next unlock -- a passphrase change that locks
+    /// the owner out of their inventory.
+    ///
+    /// # Errors
+    ///
+    /// Propagates any write failure.
+    pub fn reseal(&mut self, new_key: &SecureKey) -> Result<()> {
+        self.key = Some(new_key.clone());
+        self.save_versions()
+    }
+
+    /// True once [`VersionControl::unlock`] has succeeded.
+    pub fn is_unlocked(&self) -> bool {
+        self.key.is_some()
+    }
+
+    /// Save version history, sealed with the vault key.
+    ///
+    /// # Errors
+    ///
+    /// [`VaultError::AuthenticationFailed`] if called before `unlock` -- a
+    /// write with no key would have to either drop the data or write it in the
+    /// clear, and both are worse than refusing.
     fn save_versions(&self) -> Result<()> {
-        let contents = serde_json::to_string_pretty(&self.versions)?;
-        fs::write(&self.version_file, contents)?;
+        let key = self.key.as_ref().ok_or(VaultError::AuthenticationFailed)?;
+
+        let plaintext = serde_json::to_vec(&self.versions)?;
+        let sealed = self.crypto.encrypt(&plaintext, key)?;
+
+        let mut out = Vec::with_capacity(Self::SEALED_MAGIC.len() + sealed.len());
+        out.extend_from_slice(Self::SEALED_MAGIC);
+        out.extend_from_slice(&sealed);
+
+        fs::write(&self.version_file, out)?;
         crate::permissions::restrict_file(&self.version_file)?;
 
         Ok(())
@@ -393,10 +470,29 @@ mod tests {
     use super::*;
     use tempfile::tempdir;
 
+    /// The index is sealed, so every test needs the same key to write it and
+    /// to read it back. Fixed salt and passphrase: these tests are about
+    /// version bookkeeping, not key derivation.
+    fn test_key() -> SecureKey {
+        VaultCrypto::new()
+            .unwrap()
+            .derive_key(b"version-tests".to_vec(), Some(vec![1u8; 16]))
+            .unwrap()
+            .0
+    }
+
+    /// Construct and unlock in one step, which is what every caller outside
+    /// these tests does via `Vault::unlock`.
+    fn open(path: &Path) -> VersionControl {
+        let mut vc = VersionControl::new(path).unwrap();
+        vc.unlock(&test_key()).unwrap();
+        vc
+    }
+
     #[test]
     fn test_version_control() {
         let temp_dir = tempdir().unwrap();
-        let mut vc = VersionControl::new(temp_dir.path()).unwrap();
+        let mut vc = open(temp_dir.path());
 
         let v1 = vc
             .add_version(
@@ -438,7 +534,7 @@ mod tests {
     fn test_version_control_list_versions() {
         // Covers line 175 — list_versions sorted path
         let temp_dir = tempdir().unwrap();
-        let mut vc = VersionControl::new(temp_dir.path()).unwrap();
+        let mut vc = open(temp_dir.path());
 
         vc.add_version("m", "f1.enc", "pt", 100, 50, "c1", None, None)
             .unwrap();
@@ -462,18 +558,18 @@ mod tests {
         // Covers line 72 — re-load existing versions.json
         let temp_dir = tempdir().unwrap();
         {
-            let mut vc = VersionControl::new(temp_dir.path()).unwrap();
+            let mut vc = open(temp_dir.path());
             vc.add_version("m", "f1.enc", "pt", 100, 50, "c1", None, None)
                 .unwrap();
         }
-        let vc2 = VersionControl::new(temp_dir.path()).unwrap();
+        let vc2 = open(temp_dir.path());
         assert_eq!(vc2.list_versions("m").len(), 1);
     }
 
     #[test]
     fn test_delete_version() {
         let temp_dir = tempdir().unwrap();
-        let mut vc = VersionControl::new(temp_dir.path()).unwrap();
+        let mut vc = open(temp_dir.path());
         vc.add_version("m", "f1.enc", "pt", 100, 50, "c1", None, None)
             .unwrap();
         vc.add_version("m", "f2.enc", "pt", 200, 100, "c2", None, Some(1))
@@ -498,7 +594,7 @@ mod tests {
     #[test]
     fn deleting_the_last_version_removes_the_model() {
         let temp_dir = tempdir().unwrap();
-        let mut vc = VersionControl::new(temp_dir.path()).unwrap();
+        let mut vc = open(temp_dir.path());
         vc.add_version("m", "f1.enc", "pt", 100, 50, "c1", None, None)
             .unwrap();
         vc.add_version("keep", "k1.enc", "pt", 10, 5, "k", None, None)
@@ -516,7 +612,7 @@ mod tests {
         assert_eq!(vc.list_versions("keep").len(), 1);
 
         // And the removal is persisted, not only in memory.
-        let reloaded = VersionControl::new(temp_dir.path()).unwrap();
+        let reloaded = open(temp_dir.path());
         assert_eq!(reloaded.list_models_owned(), vec!["keep".to_string()]);
 
         // Storing under the name again starts a fresh history.
@@ -531,7 +627,7 @@ mod tests {
     #[test]
     fn test_cleanup_old_versions() {
         let temp_dir = tempdir().unwrap();
-        let mut vc = VersionControl::new(temp_dir.path()).unwrap();
+        let mut vc = open(temp_dir.path());
         for i in 0..5 {
             vc.add_version(
                 "m",
@@ -564,7 +660,7 @@ mod tests {
     #[test]
     fn test_verify_checksum() {
         let temp_dir = tempdir().unwrap();
-        let mut vc = VersionControl::new(temp_dir.path()).unwrap();
+        let mut vc = open(temp_dir.path());
         let data = b"hello world";
         let checksum = hex::encode(crate::crypto::VaultCrypto::hash_sha256(data));
         vc.add_version(
@@ -588,7 +684,7 @@ mod tests {
     #[test]
     fn test_update_and_get_metadata() {
         let temp_dir = tempdir().unwrap();
-        let mut vc = VersionControl::new(temp_dir.path()).unwrap();
+        let mut vc = open(temp_dir.path());
         vc.add_version("m", "f.enc", "pt", 100, 50, "c1", None, None)
             .unwrap();
 
@@ -611,7 +707,7 @@ mod tests {
     #[test]
     fn test_get_lineage_chain() {
         let temp_dir = tempdir().unwrap();
-        let mut vc = VersionControl::new(temp_dir.path()).unwrap();
+        let mut vc = open(temp_dir.path());
         vc.add_version("m", "f1.enc", "pt", 100, 50, "c1", None, None)
             .unwrap();
         vc.add_version("m", "f2.enc", "pt", 200, 100, "c2", None, Some(1))
@@ -636,7 +732,7 @@ mod tests {
     #[test]
     fn test_add_version_with_metadata() {
         let temp_dir = tempdir().unwrap();
-        let mut vc = VersionControl::new(temp_dir.path()).unwrap();
+        let mut vc = open(temp_dir.path());
         let mut meta = std::collections::HashMap::new();
         meta.insert("framework".to_string(), "pytorch".to_string());
         let v = vc
@@ -650,7 +746,7 @@ mod tests {
         // Covers L297, L321-342, L345, L352, L355-356 — VersionRepo trait impl
         use crate::traits::VersionRepo;
         let temp_dir = tempdir().unwrap();
-        let mut vc = VersionControl::new(temp_dir.path()).unwrap();
+        let mut vc = open(temp_dir.path());
 
         // add_version via trait
         let v = VersionRepo::add_version(
@@ -722,7 +818,7 @@ mod tests {
     fn test_vault_path_method() {
         // Covers L83-84 — vault_path() getter
         let temp_dir = tempdir().unwrap();
-        let vc = VersionControl::new(temp_dir.path()).unwrap();
+        let vc = open(temp_dir.path());
         assert_eq!(vc.vault_path(), temp_dir.path());
     }
 
@@ -731,12 +827,12 @@ mod tests {
         // Covers L67-68 — loading versions from existing file
         let temp_dir = tempdir().unwrap();
         {
-            let mut vc = VersionControl::new(temp_dir.path()).unwrap();
+            let mut vc = open(temp_dir.path());
             vc.add_version("m", "f.enc", "pt", 100, 50, "c1", None, None)
                 .unwrap();
         }
         // Re-open: should load the saved versions
-        let vc2 = VersionControl::new(temp_dir.path()).unwrap();
+        let vc2 = open(temp_dir.path());
         let versions = vc2.list_versions("m");
         assert_eq!(versions.len(), 1);
     }

@@ -1286,9 +1286,12 @@ pub async fn garbage_collect(
 ) -> Result<Json<serde_json::Value>, ApiError> {
     let _claims = require_auth(&headers, &state)?;
     let vault = state.vault.read().await;
-    let vault_path = vault.get_config().get_vault_path(None);
-    let report =
-        crate::gc::gc(&vault_path, q.dry_run).map_err(|e| ApiError::internal(e.to_string()))?;
+    // Through the vault rather than the path: gc needs the key to read the
+    // sealed index, and a locked vault must fail here rather than mistake
+    // every blob for an orphan.
+    let report = vault
+        .gc(q.dry_run)
+        .map_err(|e| ApiError::internal(e.to_string()))?;
     Ok(Json(serde_json::json!({
         "dry_run": q.dry_run,
         "orphaned_blobs": report.orphaned_blobs,
@@ -2636,13 +2639,14 @@ pub async fn vault_export(
     let _claims = require_auth(&headers, &state)?;
 
     let vault = state.vault.read().await;
-    let vault_path = vault.get_config().get_vault_path(None);
-    drop(vault);
 
     let dir = tempfile::tempdir()
         .map_err(|e| ApiError::internal(format!("Could not create temp dir: {e}")))?;
     let out = dir.path().join("vault-export.tar.gz");
-    crate::vault_bundle::export_vault(&vault_path, &out, None)
+    // The guard is held across the call now: export needs the vault's key to
+    // open the sealed index, so it cannot work from a path alone.
+    vault
+        .export_bundle(&out, None)
         .map_err(|e| ApiError::internal(e.to_string()))?;
     let bytes = std::fs::read(&out)
         .map_err(|e| ApiError::internal(format!("Could not read bundle: {e}")))?;
@@ -2676,11 +2680,10 @@ pub async fn vault_import(
     }
 
     let vault = state.vault.read().await;
-    let vault_path = vault.get_config().get_vault_path(None);
-    drop(vault);
 
     let tmp = spill_to_temp(&body)?;
-    let report = crate::vault_bundle::import_vault(&vault_path, tmp.path(), false)
+    let report = vault
+        .import_bundle(tmp.path(), false)
         .map_err(|e| ApiError::bad_request(e.to_string()))?;
 
     Ok(Json(serde_json::json!({

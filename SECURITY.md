@@ -73,24 +73,43 @@ never unset.
 
 ### What the vault encrypts, and what it does not
 
-**Model contents are encrypted. The version index is not.**
+**Model contents and the version index are both encrypted.** From 8.0,
+`versions.json` is sealed with AES-256-GCM under the vault key, behind an
+`IRONVAULT-VERSIONS-v1` marker. Model names, sizes, formats, timestamps,
+checkpoint IDs, SHA-256 checksums, blob paths and user metadata are all
+ciphertext at rest.
 
-`versions.json` holds model names, sizes, formats, timestamps and checkpoint
-IDs in the clear. Anything that can read the vault directory can read that,
-with or without the passphrase. Over the REST API the same data is behind
-`require_auth`, so this is local exposure, not remote.
+Through 7.x that file was plaintext JSON. Anything able to read the vault
+directory could read the whole inventory without the passphrase — and for a
+vault the inventory is not incidental: a model named
+`acme-fraud-detection-v3` identifies a customer and a use case without
+decrypting a byte, and the recorded checksum confirms whether a *known* model
+is present.
 
-Through 6.x the CLI handed the same inventory out directly: `iv versions`,
-`iv lineage` and `iv stats` answered with no passphrase at all, because the
-file they read is not encrypted. **7.0 made all three require it.** That does
-not encrypt the index — the exposure above is unchanged for anyone who can
-read the directory — but the tool no longer prints the inventory for a caller
-who cannot open the vault.
+Three consequences worth stating plainly:
 
-If model *names* are themselves sensitive in your deployment, treat the vault
-directory as sensitive and rely on filesystem permissions (0600/0700, applied
-on creation) rather than on the passphrase. Encrypting the index is a
-storage-format change, not a configuration option.
+- **A wrong passphrase is refused, not answered.** Opening the index is an
+  AEAD decryption, so a wrong key fails the authentication tag. This is a
+  second, independent key check alongside `vault.keycheck`.
+- **A pre-8.0 index migrates on first unlock**, not on first write, so a vault
+  that is only ever read still gets sealed. The plaintext file is replaced in
+  place.
+- **`iv gc`, `iv browse`, `iv vault-export` and `iv vault-import` now require
+  the passphrase.** They read the index, and it cannot be read without the
+  key. For `gc` this is load-bearing rather than cosmetic: it deletes blobs
+  the index does not reference, so running it against an unreadable index
+  would treat every blob as an orphan.
+
+**The SQLite backend is not sealed.** `--sqlite` stores the same model names,
+sizes, timestamps and checksums in a plain database file. Sealing it requires
+SQLCipher or per-column encryption, which is a separate change; until then
+`--sqlite` trades index confidentiality for its ACID guarantees. Treat such a
+vault directory as sensitive and rely on filesystem permissions (0600/0700,
+applied on creation).
+
+What is still *not* encrypted, on either backend: file names and sizes in the
+`data/` directory. An observer can count blobs and see how large each is,
+which bounds how many models exist and roughly how big they are.
 
 ### Access Control
 - Passphrase-protected vault access, verified at unlock (see below)

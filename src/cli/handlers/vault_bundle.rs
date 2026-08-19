@@ -3,8 +3,16 @@
 use ironvault::{Result, VaultConfig};
 use std::path::PathBuf;
 
+use crate::cli::helpers::{build_vault, prompt_passphrase};
+
 pub fn handle_vault_export(output: PathBuf, config: VaultConfig) -> Result<()> {
-    let report = ironvault::vault_bundle::export_vault(&config.dirs.vault_dir, &output, None)?;
+    // 8.0 requires the passphrase: the bundle is built from the version index,
+    // which is sealed.
+    let passphrase = prompt_passphrase("Enter vault passphrase: ")?;
+    let mut vault = build_vault(config, false)?;
+    vault.unlock(passphrase)?;
+
+    let report = vault.export_bundle(&output, None)?;
     println!("Exported vault to {:?}", output);
     println!("  Models: {}", report.models_exported.len());
     println!("  Versions: {}", report.total_versions);
@@ -17,8 +25,20 @@ pub fn handle_vault_import(
     target: Option<PathBuf>,
     config: VaultConfig,
 ) -> Result<()> {
-    let dest = target.unwrap_or_else(|| config.dirs.vault_dir.clone());
-    let report = ironvault::vault_bundle::import_vault(&dest, &archive, false)?;
+    let passphrase = prompt_passphrase("Enter vault passphrase: ")?;
+    let mut vault = build_vault(config, false)?;
+    vault.unlock(passphrase)?;
+
+    let report = match target {
+        // Importing into the configured vault: the vault holds its own key.
+        None => vault.import_bundle(&archive, false)?,
+        // Importing elsewhere. The target's index is sealed with the target's
+        // key, so the passphrase entered above must be that vault's -- if it
+        // is not, unlocking the target index fails the AEAD tag and this
+        // returns `Authentication failed` rather than writing a mixed vault.
+        Some(dest) => vault.import_bundle_into(&dest, &archive, false)?,
+    };
+
     println!("Imported vault from {:?}", archive);
     println!("  Models: {}", report.models_imported);
     println!("  Versions imported: {}", report.versions_imported);

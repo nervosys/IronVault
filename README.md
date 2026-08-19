@@ -30,7 +30,7 @@ A production-ready secure vault, built on FIPS-approved cryptographic algorithms
 
 | | |
 | --- | --- |
-| `iv versions`, `iv lineage`, `iv stats` | now require the passphrase. They read the version index, which is not encrypted, so they used to answer without one. Set `IRONVAULT_PASSPHRASE` as `iv list` has always needed. |
+| `iv versions`, `iv lineage`, `iv stats` | now require the passphrase. They read the version index, which was plaintext through 7.x, so they used to answer without one. Set `IRONVAULT_PASSPHRASE` as `iv list` has always needed. (8.0 seals the index, so this is no longer a matter of policy.) |
 | `compliance.fips_mode` | removed. It defaulted to `true`, was documented as enforcing, and was read by nothing. Existing config files still load — the key is ignored. |
 | `FipsCrypto` | removed. Use `VaultCrypto`, which it has aliased since 6.1.0. |
 

@@ -25,11 +25,40 @@ pub enum VersionBackend {
     /// JSON file-based storage (default, backward-compatible).
     Json(VersionControl),
     /// SQLite database with WAL mode and ACID guarantees.
+    ///
+    /// **This backend stores the version index unencrypted.** The JSON backend
+    /// seals `versions.json` from 8.0; the SQLite one holds the same model
+    /// names, sizes, timestamps and checksums in a plain database file, and
+    /// sealing it means either SQLCipher or per-column encryption, neither of
+    /// which is a lockfile change. `--sqlite` therefore trades the index
+    /// confidentiality the default backend now has for its ACID guarantees.
     #[cfg(feature = "sqlite")]
     Sqlite(crate::version_sqlite::SqliteVersionRepo),
 }
 
 impl VersionBackend {
+    /// Hand the vault key to the backend so it can open its index.
+    ///
+    /// The JSON backend seals `versions.json` and needs the key to read it.
+    /// The SQLite backend does not seal its database yet -- see the note on
+    /// `Sqlite` -- so it has nothing to open and ignores the key.
+    fn unlock(&mut self, key: &crate::crypto::SecureKey) -> Result<()> {
+        match self {
+            Self::Json(vc) => vc.unlock(key),
+            #[cfg(feature = "sqlite")]
+            Self::Sqlite(_) => Ok(()),
+        }
+    }
+
+    /// Re-seal the index under a new key after a passphrase change.
+    fn reseal(&mut self, new_key: &crate::crypto::SecureKey) -> Result<()> {
+        match self {
+            Self::Json(vc) => vc.reseal(new_key),
+            #[cfg(feature = "sqlite")]
+            Self::Sqlite(_) => Ok(()),
+        }
+    }
+
     #[allow(clippy::too_many_arguments)]
     fn add_version(
         &mut self,
@@ -375,6 +404,92 @@ impl Vault {
         Ok(())
     }
 
+    /// The active vault key, for the operations that must open the sealed
+    /// version index.
+    ///
+    /// Deliberately not public: callers outside the crate go through
+    /// [`Vault::gc`], [`Vault::browse`], [`Vault::export_bundle`] and
+    /// [`Vault::import_bundle`], which hold the key for the duration of one
+    /// call rather than handing it out.
+    ///
+    /// # Errors
+    ///
+    /// [`VaultError::AuthenticationFailed`] if the vault is locked.
+    pub(crate) fn active_key(&self) -> Result<&SecureKey> {
+        self.active_key
+            .as_ref()
+            .ok_or(VaultError::AuthenticationFailed)
+    }
+
+    /// Collect orphaned blobs and temp files, deleting them unless `dry_run`.
+    ///
+    /// # Errors
+    ///
+    /// [`VaultError::AuthenticationFailed`] if the vault is locked. This is
+    /// load-bearing rather than incidental: the index is sealed, a locked one
+    /// reads as empty, and every blob would then look orphaned.
+    pub fn gc(&self, dry_run: bool) -> Result<crate::gc::GcReport> {
+        let path = self.config.get_vault_path(None);
+        crate::gc::gc(&path, dry_run, self.active_key()?)
+    }
+
+    /// Render the terminal dashboard for this vault.
+    ///
+    /// # Errors
+    ///
+    /// [`VaultError::AuthenticationFailed`] if the vault is locked.
+    pub fn browse(&self) -> Result<String> {
+        let path = self.config.get_vault_path(None);
+        crate::tui::browse(&path, self.active_key()?)
+    }
+
+    /// Write a portable bundle of this vault to `output`.
+    ///
+    /// # Errors
+    ///
+    /// [`VaultError::AuthenticationFailed`] if the vault is locked.
+    pub fn export_bundle(
+        &self,
+        output: &Path,
+        model_filter: Option<&[String]>,
+    ) -> Result<crate::vault_bundle::ExportReport> {
+        let path = self.config.get_vault_path(None);
+        crate::vault_bundle::export_vault(&path, output, model_filter, self.active_key()?)
+    }
+
+    /// Merge a bundle into this vault.
+    ///
+    /// # Errors
+    ///
+    /// [`VaultError::AuthenticationFailed`] if the vault is locked.
+    pub fn import_bundle(
+        &self,
+        archive: &Path,
+        overwrite: bool,
+    ) -> Result<crate::vault_bundle::ImportReport> {
+        let path = self.config.get_vault_path(None);
+        crate::vault_bundle::import_vault(&path, archive, overwrite, self.active_key()?)
+    }
+
+    /// Merge a bundle into a vault directory other than this one.
+    ///
+    /// The target's index is sealed with the target's key, so this vault's
+    /// passphrase must also be that vault's. If it is not, opening the target
+    /// index fails its authentication tag and nothing is written.
+    ///
+    /// # Errors
+    ///
+    /// [`VaultError::AuthenticationFailed`] if this vault is locked, or if its
+    /// key does not open the target's index.
+    pub fn import_bundle_into(
+        &self,
+        target: &Path,
+        archive: &Path,
+        overwrite: bool,
+    ) -> Result<crate::vault_bundle::ImportReport> {
+        crate::vault_bundle::import_vault(target, archive, overwrite, self.active_key()?)
+    }
+
     /// Path of any one stored blob, used to prove a key against real data.
     fn any_stored_version(&self) -> Option<String> {
         for name in self.version_backend.list_models() {
@@ -420,6 +535,12 @@ impl Vault {
         // `POST /api/v1/auth/token` issued an admin JWT that could read the
         // model list, the audit log, the ACLs and the policies.
         self.verify_key(&key, &vault_path)?;
+
+        // Open the version index. From 8.0 it is sealed with this same key, so
+        // this both makes the inventory readable and checks the key a second
+        // time, independently of `vault.keycheck`: a wrong key fails the
+        // index's AEAD tag. A pre-8.0 plaintext index is migrated here.
+        self.version_backend.unlock(&key)?;
 
         self.active_key = Some(key);
         self.unlocked_at = Some(chrono::Utc::now());
@@ -944,6 +1065,11 @@ impl Vault {
         let sealed = self.crypto.encrypt(Self::KEY_CHECK_MAGIC, &new_key)?;
         fs::write(&check_file, &sealed)?;
         crate::permissions::restrict_file(&check_file)?;
+
+        // Re-seal the version index too. Same failure as the key check above:
+        // without this the index stays sealed under the old key and the next
+        // unlock cannot read the inventory.
+        self.version_backend.reseal(&new_key)?;
 
         self.active_key = Some(new_key);
 

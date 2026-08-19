@@ -5,6 +5,59 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+**The version index is encrypted.** This is breaking, and the next release
+carrying it must be 8.0.0.
+
+### Changed — BREAKING
+
+- **`versions.json` is sealed** with AES-256-GCM under the vault key, behind an
+  `IRONVAULT-VERSIONS-v1` marker. Through 7.x it was plaintext JSON: model
+  names, sizes, formats, timestamps, checkpoint IDs, checksums, blob paths and
+  user metadata were readable by anything that could read the vault directory,
+  passphrase or not. Model *contents* were never exposed — those are
+  AEAD-sealed — but for a vault the inventory is not incidental. A model named
+  `acme-fraud-detection-v3` identifies a customer and a use case without
+  decrypting a byte.
+
+- **`iv gc`, `iv browse`, `iv vault-export` and `iv vault-import` require the
+  passphrase.** They read the index. For `gc` this is load-bearing rather than
+  cosmetic: it deletes blobs the index does not reference, so an unreadable
+  index would make every blob look orphaned.
+
+- **Four public functions take the vault key**: `gc::gc`, `tui::browse`,
+  `vault_bundle::export_vault` and `vault_bundle::import_vault`. The key is a
+  required argument rather than an `Option` so the compiler finds every caller
+  — an omitted key would have meant silently reading an empty index.
+
+- **`VersionControl::new` no longer loads the index.** Call
+  `VersionControl::unlock(&key)` first. A locked instance answers from an empty
+  map and refuses writes rather than dropping data or writing it in the clear.
+
+### Added
+
+- `Vault::gc`, `Vault::browse`, `Vault::export_bundle`, `Vault::import_bundle`
+  and `Vault::import_bundle_into` — wrappers that hold the key for one call
+  instead of handing it out. The key stays private to `Vault`.
+
+### Migration
+
+Automatic and in place. A 7.x plaintext index is read on **first unlock** and
+immediately re-sealed, so a vault that is only ever read is migrated too rather
+than waiting for a write. No command to run.
+
+### Notes
+
+- Opening the index is now a second, independent key check: a wrong key fails
+  its authentication tag, so `unlock` returns `AuthenticationFailed` rather than
+  plausible garbage.
+- **The SQLite backend is not sealed.** `--sqlite` keeps the same metadata in a
+  plain database file. Sealing it needs SQLCipher or per-column encryption, a
+  separate change; the tradeoff is documented on `VersionBackend::Sqlite`.
+- Still unencrypted on both backends: the names and sizes of files in `data/`.
+  An observer can count blobs and see their sizes.
+
 ## [7.2.1] - 2026-08-18
 
 A security patch for a dependency, and nothing else.
