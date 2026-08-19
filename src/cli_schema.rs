@@ -1058,6 +1058,7 @@ fn cmd(
     examples: Option<Vec<String>>,
 ) -> Value {
     let mut c = json!({"name": name, "category": category, "args": args});
+    c["effects"] = effects_for(name);
     if !compact {
         c["description"] = json!(description);
     }
@@ -1065,6 +1066,74 @@ fn cmd(
         c["examples"] = json!(ex);
     }
     c
+}
+
+/// What a command does to the vault, for an agent deciding what it may run.
+///
+/// Three fields, because two would hide the one that matters. `mutates` says
+/// the vault's contents or configuration change. `network` says the command
+/// listens or reaches out. `decrypts` says the command produces plaintext
+/// model bytes outside the vault -- and that is the field a mutation flag
+/// cannot express, because `get` and `export` change nothing and are exactly
+/// the operations that disclose. An agent told only "read-only" about `get`
+/// has been told the least useful true thing about it.
+///
+/// Where the answer depends on internals, `decrypts` is set the conservative
+/// way. `analyze` and `deduplicate` compare model content; if a future
+/// implementation compares ciphertext instead, this should be relaxed
+/// deliberately rather than left optimistic by default. Under-declaring here
+/// is the failure that matters.
+fn effects_for(name: &str) -> Value {
+    // (mutates, decrypts, network)
+    let (mutates, decrypts, network) = match name {
+        "init" => (true, false, false),
+        "store" => (true, false, false),
+        "delete" => (true, false, false),
+        "change-passphrase" => (true, false, false),
+        "extract" => (true, false, false),
+        "get" => (false, true, false),
+        "export" => (false, true, false),
+        "archive" => (false, true, false),
+        "convert" => (false, true, false),
+        "analyze" => (false, true, false),
+        "deduplicate" => (false, true, false),
+        "serve" => (false, true, true),
+        "list" | "versions" | "lineage" | "stats" | "cache" | "compliance" | "list-conversions"
+        | "introspect" => (false, false, false),
+
+        // Command groups, classified by the most permissive thing any of
+        // their subcommands does -- a group is only as safe as its widest
+        // member, and an agent reads the group before it reads the list.
+        //
+        // `cloud` pushes and pulls models, so it both discloses and leaves
+        // the machine. `card` writes model cards. `database` initialises and
+        // resets storage. `telemetry` toggles reporting and sends it.
+        "cloud" => (true, true, true),
+        "card" => (true, false, false),
+        "database" => (true, false, false),
+        "telemetry" => (true, false, true),
+        // Unreachable in a correct build: `every_command_declares_effects`
+        // fails if a command reaches this arm. Declared as the most
+        // restrictive combination so that an unclassified command is never
+        // mistaken for a safe one, and flagged with `declared: false` so the
+        // test can tell it apart from a command that genuinely does all
+        // three -- `cloud` does, which is why sniffing the values alone was
+        // the wrong check.
+        _ => {
+            return json!({
+                "mutates": true,
+                "decrypts": true,
+                "network": true,
+                "declared": false,
+            })
+        }
+    };
+    json!({
+        "mutates": mutates,
+        "decrypts": decrypts,
+        "network": network,
+        "declared": true,
+    })
 }
 
 fn cmd_sub(
@@ -1075,6 +1144,7 @@ fn cmd_sub(
     subcommands: Vec<Value>,
 ) -> Value {
     let mut c = json!({"name": name, "category": category, "subcommands": subcommands});
+    c["effects"] = effects_for(name);
     if !compact {
         c["description"] = json!(description);
     }
@@ -1148,5 +1218,61 @@ mod tests {
         assert_eq!(schema["binary"], "iv");
         assert_eq!(schema["version"], env!("CARGO_PKG_VERSION"));
         assert_eq!(schema["install"], "cargo install ironvault");
+    }
+
+    /// Every command declares its effects, and none falls through to the
+    /// catch-all.
+    ///
+    /// The catch-all in `effects_for` returns the most restrictive
+    /// combination, so a command added without a classification is refused
+    /// rather than waved through -- but that is a safety net, not the
+    /// intended path. This test is what makes adding a command force the
+    /// question "does this decrypt anything?" to be answered.
+    #[test]
+    fn every_command_declares_effects() {
+        let schema = build(false);
+        let commands = schema["commands"].as_array().expect("commands is an array");
+        assert!(!commands.is_empty(), "schema declares no commands");
+
+        let mut unclassified = Vec::new();
+        for c in commands {
+            let name = c["name"].as_str().unwrap_or("<unnamed>");
+            let effects = &c["effects"];
+            assert!(
+                effects.is_object(),
+                "command `{name}` has no effects object"
+            );
+            if effects["declared"] != json!(true) {
+                unclassified.push(name.to_string());
+            }
+        }
+        assert!(
+            unclassified.is_empty(),
+            "these commands hit the unclassified catch-all in effects_for: {unclassified:?}"
+        );
+    }
+
+    /// The commands that take plaintext out of the vault are declared as
+    /// doing so.
+    ///
+    /// Pinned by name because this is the security-relevant claim in the
+    /// whole schema: an agent gating only on `mutates` would treat `get` and
+    /// `export` as harmless reads. If a future change makes one of these stop
+    /// decrypting, this test should be edited deliberately.
+    #[test]
+    fn disclosing_commands_declare_decryption() {
+        let schema = build(false);
+        let commands = schema["commands"].as_array().unwrap();
+        for name in ["get", "export", "convert"] {
+            let c = commands
+                .iter()
+                .find(|c| c["name"] == json!(name))
+                .unwrap_or_else(|| panic!("`{name}` is missing from the schema"));
+            assert_eq!(
+                c["effects"]["decrypts"],
+                json!(true),
+                "`{name}` produces plaintext but does not declare it"
+            );
+        }
     }
 }

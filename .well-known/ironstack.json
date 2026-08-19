@@ -18,98 +18,8 @@
   },
   "capabilities": [
     {
-      "name": "vault.list",
-      "description": "List all models in the vault. Metadata only; nothing is decrypted.",
-      "requires_grant": false,
-      "budgeted": false,
-      "surfaces": [
-        "cli"
-      ]
-    },
-    {
-      "name": "vault.versions",
-      "description": "Show versions of a model.",
-      "requires_grant": false,
-      "budgeted": false,
-      "surfaces": [
-        "cli"
-      ]
-    },
-    {
-      "name": "vault.lineage",
-      "description": "Show version ancestry tree.",
-      "requires_grant": false,
-      "budgeted": false,
-      "surfaces": [
-        "cli"
-      ]
-    },
-    {
-      "name": "vault.stats",
-      "description": "Show vault storage statistics.",
-      "requires_grant": false,
-      "budgeted": false,
-      "surfaces": [
-        "cli"
-      ]
-    },
-    {
-      "name": "utility.cache",
-      "description": "Show cache statistics.",
-      "requires_grant": false,
-      "budgeted": false,
-      "surfaces": [
-        "cli"
-      ]
-    },
-    {
-      "name": "conversion.list-conversions",
-      "description": "List supported format conversion paths.",
-      "requires_grant": false,
-      "budgeted": false,
-      "surfaces": [
-        "cli"
-      ]
-    },
-    {
-      "name": "agent.introspect",
-      "description": "Output the CLI schema for agent discovery.",
-      "requires_grant": false,
-      "budgeted": false,
-      "surfaces": [
-        "cli"
-      ]
-    },
-    {
-      "name": "security.compliance",
-      "description": "Run FIPS/CMMC/MITRE compliance checks. Reports; does not change the vault.",
-      "requires_grant": false,
-      "budgeted": true,
-      "surfaces": [
-        "cli"
-      ]
-    },
-    {
-      "name": "utility.analyze",
-      "description": "Analyze model compression efficiency. Reads model content to measure it.",
-      "requires_grant": false,
-      "budgeted": true,
-      "surfaces": [
-        "cli"
-      ]
-    },
-    {
-      "name": "utility.deduplicate",
-      "description": "Find duplicate models in the vault. Scans the whole vault.",
-      "requires_grant": false,
-      "budgeted": true,
-      "surfaces": [
-        "cli"
-      ]
-    },
-    {
       "name": "vault.init",
-      "description": "Initialize a new encrypted vault.",
+      "description": "Initialize a new encrypted vault. Declares: mutates.",
       "requires_grant": true,
       "budgeted": false,
       "surfaces": [
@@ -118,7 +28,7 @@
     },
     {
       "name": "vault.store",
-      "description": "Store a model in the vault with encryption.",
+      "description": "Store a model in the vault with encryption. Declares: mutates.",
       "requires_grant": true,
       "budgeted": true,
       "surfaces": [
@@ -127,7 +37,7 @@
     },
     {
       "name": "vault.get",
-      "description": "Retrieve and DECRYPT a model out of the vault to a path the caller names.",
+      "description": "Retrieve and decrypt a model from the vault. Declares: decrypts.",
       "requires_grant": true,
       "budgeted": true,
       "surfaces": [
@@ -135,17 +45,71 @@
       ]
     },
     {
-      "name": "utility.export",
-      "description": "Export a model with its metadata.",
+      "name": "vault.list",
+      "description": "List all models in the vault. Declares: no effects.",
+      "requires_grant": false,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "vault.versions",
+      "description": "Show versions of a model. Declares: no effects.",
+      "requires_grant": false,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "vault.lineage",
+      "description": "Show version ancestry tree. Declares: no effects.",
+      "requires_grant": false,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "vault.delete",
+      "description": "Delete a model version. Declares: mutates.",
       "requires_grant": true,
-      "budgeted": true,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "vault.stats",
+      "description": "Show vault storage statistics. Declares: no effects.",
+      "requires_grant": false,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "security.compliance",
+      "description": "Run FIPS/CMMC/MITRE compliance checks. Declares: no effects.",
+      "requires_grant": false,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "security.change-passphrase",
+      "description": "Change vault encryption passphrase. Declares: mutates.",
+      "requires_grant": true,
+      "budgeted": false,
       "surfaces": [
         "cli"
       ]
     },
     {
       "name": "utility.archive",
-      "description": "Archive models to TAR or ZIP.",
+      "description": "Archive models to TAR or ZIP. Declares: decrypts.",
       "requires_grant": true,
       "budgeted": true,
       "surfaces": [
@@ -154,16 +118,52 @@
     },
     {
       "name": "utility.extract",
-      "description": "Extract models from an archive.",
+      "description": "Extract models from archive. Declares: mutates.",
       "requires_grant": true,
       "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "utility.analyze",
+      "description": "Analyze model compression efficiency. Declares: decrypts.",
+      "requires_grant": true,
+      "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "utility.deduplicate",
+      "description": "Find duplicate models in vault. Declares: decrypts.",
+      "requires_grant": true,
+      "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "utility.export",
+      "description": "Export model with metadata. Declares: decrypts.",
+      "requires_grant": true,
+      "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "utility.cache",
+      "description": "Show cache statistics. Declares: no effects.",
+      "requires_grant": false,
+      "budgeted": false,
       "surfaces": [
         "cli"
       ]
     },
     {
       "name": "conversion.convert",
-      "description": "Convert a model between formats.",
+      "description": "Convert model between formats. Declares: decrypts.",
       "requires_grant": true,
       "budgeted": true,
       "surfaces": [
@@ -171,32 +171,59 @@
       ]
     },
     {
-      "name": "vault.delete",
-      "description": "Delete a model version.",
-      "requires_grant": true,
+      "name": "conversion.list-conversions",
+      "description": "List supported format conversion paths. Declares: no effects.",
+      "requires_grant": false,
       "budgeted": false,
       "surfaces": [
         "cli"
       ]
     },
     {
-      "name": "security.change-passphrase",
-      "description": "Change the vault encryption passphrase.",
-      "requires_grant": true,
-      "budgeted": false,
-      "surfaces": [
-        "cli"
-      ]
-    },
-    {
-      "name": "api.serve",
-      "description": "Start the REST/GraphQL API server, exposing the vault over the network.",
+      "name": "cloud.cloud",
+      "description": "Cloud storage operations. Declares: mutates, decrypts, network.",
       "requires_grant": true,
       "budgeted": true,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "model-card.card",
+      "description": "Model card operations. Declares: mutates.",
+      "requires_grant": true,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "rag.database",
+      "description": "RAG knowledge base operations. Declares: mutates.",
+      "requires_grant": true,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "config.telemetry",
+      "description": "Telemetry settings. Declares: mutates, network.",
+      "requires_grant": true,
+      "budgeted": false,
+      "surfaces": [
+        "cli"
+      ]
+    },
+    {
+      "name": "agent.introspect",
+      "description": "Output CLI schema for agent discovery. Declares: no effects.",
+      "requires_grant": false,
+      "budgeted": false,
       "surfaces": [
         "cli"
       ]
     }
   ],
-  "note": "UNLIKE the other manifests in this stack, neither field here is derived: IronVault's CLI schema enumerates its commands but declares no effect, safety or authority data, so both requires_grant and budgeted are judgements made from the command semantics and are stated as such rather than presented as the tool's own position. The commands and their descriptions are IronVault's; the classification is not. The rule applied: a grant is required to decrypt, write, delete, change credentials, or expose the vault over the network. That makes `get` and `export` granted alongside the obvious mutators, because in an encrypted vault the operation that matters most is the one that takes plaintext out -- a manifest that granted `delete` but not `get` would guard the wrong door. `list`, `versions`, `lineage` and `stats` read metadata without decrypting anything and need no grant. Budgets follow size and duration: store, get, export, archive, extract and convert all move or transform whole models; analyze, deduplicate and compliance read across the vault to produce a report; serve runs until stopped. delete and change-passphrase are granted but unbudgeted -- single decisions, where the danger is that one was unauthorised rather than that many were made. This file should be replaced by a derived one if IronVault ever declares effects in its own schema, the way abt, Rodeo, Botnet, MAGE and HyperMachine do. Until then it is the weakest-grounded manifest in the stack and should be read that way."
+  "note": "requires_grant is now DERIVED. An earlier version of this file said the opposite -- that IronVault declared no effect data and both fields were judgement -- and that was true when it was written. The tool now declares mutates, decrypts and network per command, so requires_grant is true where any of the three holds, and this manifest reads them rather than guessing. The field that carries the weight is `decrypts`, and it exists because a mutation flag alone would have been actively misleading here: get, export, archive, convert, analyze and deduplicate change nothing in the vault and are precisely the commands that produce plaintext. An agent gated on mutation would have treated all six as harmless reads. Budgets remain judged, and mark the commands that move or transform whole models. Two things the schema is honest about. cloud is the only command declaring all three effects, since it pushes and pulls models off the machine. And `serve` does not appear here because it is not in this build -- the schema reflects what was compiled, not what the source can offer, which is the correct behaviour for a discovery document but means a caller must read the ontology from the binary it is actually talking to."
 }
