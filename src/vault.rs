@@ -40,13 +40,14 @@ impl VersionBackend {
     /// Hand the vault key to the backend so it can open its index.
     ///
     /// The JSON backend seals `versions.json` and needs the key to read it.
-    /// The SQLite backend does not seal its database yet -- see the note on
-    /// `Sqlite` -- so it has nothing to open and ignores the key.
+    /// The SQLite backend does not seal its own database yet -- see the note
+    /// on `Sqlite` -- but it still needs the key to migrate a sealed
+    /// `versions.json` left behind by the JSON backend.
     fn unlock(&mut self, key: &crate::crypto::SecureKey) -> Result<()> {
         match self {
             Self::Json(vc) => vc.unlock(key),
             #[cfg(feature = "sqlite")]
-            Self::Sqlite(_) => Ok(()),
+            Self::Sqlite(repo) => repo.unlock(key),
         }
     }
 

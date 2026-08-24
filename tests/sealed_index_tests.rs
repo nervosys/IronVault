@@ -298,3 +298,63 @@ fn changing_the_passphrase_re_seals_the_index() {
         "the old key must stop working once the index is re-sealed"
     );
 }
+
+/// Switching to the SQLite backend must work on a sealed vault.
+///
+/// `SqliteVersionRepo::new` used to migrate `versions.json` in its
+/// constructor, with `read_to_string` and `serde_json::from_str`. Against a
+/// sealed index that failed with "stream did not contain valid UTF-8", and
+/// because the constructor runs while the vault is being built, it took the
+/// whole vault down: `iv --sqlite-versions list` on any 8.0 vault errored out.
+/// Shipped in 8.0.0 and found afterwards.
+#[cfg(feature = "sqlite")]
+#[test]
+fn the_sqlite_backend_migrates_a_sealed_json_index() {
+    use ironvault::{SqliteVersionRepo, VersionRepo};
+
+    let tmp = tempfile::tempdir().unwrap();
+    let key = key_from("correct horse battery staple");
+    seed(tmp.path(), &key, "acme-fraud-detection-v3");
+
+    // Sanity: the JSON index really is sealed before we start.
+    let raw = fs::read(tmp.path().join("versions.json")).unwrap();
+    assert!(raw.starts_with(b"IRONVAULT-VERSIONS-v1\n"));
+
+    // Constructing must not touch the sealed file.
+    let mut repo = SqliteVersionRepo::new(tmp.path()).expect("constructing must not need the key");
+
+    // Unlocking migrates it.
+    repo.unlock(&key).unwrap();
+
+    assert_eq!(repo.list_versions("acme-fraud-detection-v3").len(), 1);
+    assert!(
+        tmp.path().join("versions.json.migrated").exists(),
+        "the migrated index should be renamed aside"
+    );
+    assert!(
+        !tmp.path().join("versions.json").exists(),
+        "the original should not be left behind"
+    );
+}
+
+/// A wrong key must not silently produce an empty SQLite index.
+#[cfg(feature = "sqlite")]
+#[test]
+fn the_sqlite_backend_refuses_a_wrong_key_when_migrating() {
+    use ironvault::SqliteVersionRepo;
+
+    let tmp = tempfile::tempdir().unwrap();
+    seed(tmp.path(), &key_from("correct horse battery staple"), "m1");
+
+    let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+    let err = repo.unlock(&key_from("hunter2")).unwrap_err();
+
+    assert!(
+        matches!(err, ironvault::VaultError::AuthenticationFailed),
+        "a wrong key must fail the index's AEAD tag, got: {err}"
+    );
+    assert!(
+        tmp.path().join("versions.json").exists(),
+        "a failed migration must not consume the index"
+    );
+}

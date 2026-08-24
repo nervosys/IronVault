@@ -84,10 +84,13 @@ impl SqliteVersionRepo {
             cache: HashMap::new(),
         };
 
-        // Auto-migrate from versions.json if it exists
-        repo.migrate_from_json()?;
-
-        // Load cache from database
+        // Migration from `versions.json` happens in `unlock`, not here.
+        //
+        // From 8.0 that file is sealed, and reading it needs the vault key,
+        // which does not exist at construction. Migrating here used to work
+        // because the file was plaintext; against a sealed index it failed
+        // with "stream did not contain valid UTF-8" and took the whole vault
+        // down with it, because this runs while the vault is being built.
         repo.reload_cache()?;
 
         Ok(repo)
@@ -132,14 +135,23 @@ impl SqliteVersionRepo {
     }
 
     /// Migrate legacy `versions.json` into the database.
-    fn migrate_from_json(&self) -> Result<()> {
+    fn migrate_from_json(&self, key: &crate::crypto::SecureKey) -> Result<()> {
         let json_path = self.vault_path.join("versions.json");
         if !json_path.exists() {
             return Ok(());
         }
 
-        let contents = std::fs::read_to_string(&json_path)?;
-        let versions: HashMap<String, Vec<ModelVersion>> = serde_json::from_str(&contents)?;
+        // Two shapes: sealed from 8.0, plaintext JSON before it. Told apart by
+        // the marker rather than by trying to parse and seeing what happens.
+        let raw = std::fs::read(&json_path)?;
+        let plain = if let Some(ciphertext) = raw.strip_prefix(crate::version::SEALED_INDEX_MAGIC) {
+            crate::crypto::VaultCrypto::new()?
+                .decrypt(ciphertext, key)
+                .map_err(|_| VaultError::AuthenticationFailed)?
+        } else {
+            raw
+        };
+        let versions: HashMap<String, Vec<ModelVersion>> = serde_json::from_slice(&plain)?;
 
         let conn = self
             .conn
@@ -294,6 +306,22 @@ impl SqliteVersionRepo {
     }
 
     /// Return the vault directory path.
+    /// Hand the vault key to the backend.
+    ///
+    /// Migrates a `versions.json` left by the JSON backend, sealed or not, and
+    /// renames it aside. This is where migration belongs rather than in the
+    /// constructor: an 8.0 index is sealed, so reading it needs the key, and
+    /// the constructor runs before the vault is unlocked.
+    ///
+    /// # Errors
+    ///
+    /// [`VaultError::AuthenticationFailed`] if `key` does not open a sealed
+    /// index.
+    pub fn unlock(&mut self, key: &crate::crypto::SecureKey) -> Result<()> {
+        self.migrate_from_json(key)?;
+        self.reload_cache()
+    }
+
     pub fn vault_path(&self) -> &Path {
         &self.vault_path
     }
@@ -565,6 +593,16 @@ impl crate::traits::VersionRepo for SqliteVersionRepo {
 
 #[cfg(all(test, feature = "sqlite"))]
 mod tests {
+    /// Migration moved out of the constructor into `unlock`, because from 8.0
+    /// the JSON index is sealed and reading it needs the vault key.
+    fn migration_key() -> crate::crypto::SecureKey {
+        crate::crypto::VaultCrypto::new()
+            .unwrap()
+            .derive_key(b"sqlite-migration-tests".to_vec(), Some(vec![13u8; 16]))
+            .unwrap()
+            .0
+    }
+
     use super::*;
     use crate::traits::VersionRepo;
 
@@ -759,7 +797,8 @@ mod tests {
         std::fs::write(vault_path.join("versions.json"), json_content).unwrap();
 
         // Open SQLite repo — should auto-migrate
-        let repo = SqliteVersionRepo::new(vault_path).unwrap();
+        let mut repo = SqliteVersionRepo::new(vault_path).unwrap();
+        repo.unlock(&migration_key()).unwrap();
 
         // Verify migration
         let models = repo.list_models();
@@ -1106,7 +1145,8 @@ mod tests {
         )
         .unwrap();
 
-        let repo = SqliteVersionRepo::new(vault_path).unwrap();
+        let mut repo = SqliteVersionRepo::new(vault_path).unwrap();
+        repo.unlock(&migration_key()).unwrap();
         let v = repo.get_version("migrated_model", Some(1)).unwrap();
         assert_eq!(v.format, "safetensors");
         assert_eq!(v.metadata.get("author"), Some(&"migrator".to_string()));

@@ -14,6 +14,20 @@
 /// an empty map and refuses writes. Every test below wants a working index,
 /// which means a key; the passphrase and salt are fixed because these tests
 /// are about version bookkeeping, not key derivation.
+/// Key for the SQLite backend's JSON migration.
+///
+/// Migration moved from `SqliteVersionRepo::new` into `unlock`: from 8.0 the
+/// JSON index is sealed, so reading it needs the vault key, and the
+/// constructor runs before the vault is unlocked.
+#[cfg(feature = "sqlite")]
+fn sqlite_migration_key() -> ironvault::crypto::SecureKey {
+    ironvault::crypto::VaultCrypto::new()
+        .unwrap()
+        .derive_key(b"coverage-sqlite-migration".to_vec(), Some(vec![17u8; 16]))
+        .unwrap()
+        .0
+}
+
 fn open_vc(path: &std::path::Path) -> ironvault::version::VersionControl {
     let key = ironvault::crypto::VaultCrypto::new()
         .unwrap()
@@ -2677,8 +2691,9 @@ mod coverage_final_push_tests {
             )
             .unwrap();
 
-            // Opening should trigger migration
-            let repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            // Migration happens on unlock, not construction.
+            let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
 
             // The model should be available
             let models = repo.list_models();
@@ -4940,8 +4955,9 @@ mod coverage_maximizer_tests {
             )
             .unwrap();
 
-            let repo = SqliteVersionRepo::new(tmp.path()).unwrap();
-            // After migration, the model should be accessible
+            // Migration happens on unlock, not construction.
+            let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
             let models = repo.list_models();
             // Migration should have imported the model
             assert!(models.contains(&"migrated-model".to_string()));

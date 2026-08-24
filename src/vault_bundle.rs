@@ -97,10 +97,6 @@ pub struct BundleManifest {
 
 // ── Export ────────────────────────────────────────────────────────────────────
 
-/// Marks a sealed `versions.json` inside a bundle. Bundles written before
-/// the index was sealed have plaintext JSON there instead.
-const SEALED_VERSIONS_MAGIC: &[u8] = b"IRONVAULT-VERSIONS-v1\n";
-
 /// Export selected models from a vault into a portable archive.
 ///
 /// The output is a tar file containing:
@@ -189,8 +185,8 @@ pub fn export_vault(
     // The payload digest still verifies the bundle it was written for.
     let versions_plain = serde_json::to_vec(&version_data)?;
     let sealed_versions = crate::crypto::VaultCrypto::new()?.encrypt(&versions_plain, key)?;
-    let mut versions_blob = Vec::with_capacity(SEALED_VERSIONS_MAGIC.len() + sealed_versions.len());
-    versions_blob.extend_from_slice(SEALED_VERSIONS_MAGIC);
+    let mut versions_blob = Vec::with_capacity(crate::version::SEALED_INDEX_MAGIC.len() + sealed_versions.len());
+    versions_blob.extend_from_slice(crate::version::SEALED_INDEX_MAGIC);
     versions_blob.extend_from_slice(&sealed_versions);
     let versions_bytes: &[u8] = &versions_blob;
     let mut header = tar::Header::new_gnu();
@@ -313,7 +309,7 @@ pub fn import_vault(
     let versions_path = temp_dir.path().join("versions.json");
     let versions_raw = fs::read(&versions_path)?;
     let imported_versions: HashMap<String, Vec<crate::version::ModelVersion>> =
-        if let Some(ciphertext) = versions_raw.strip_prefix(SEALED_VERSIONS_MAGIC) {
+        if let Some(ciphertext) = versions_raw.strip_prefix(crate::version::SEALED_INDEX_MAGIC) {
             let plain = crate::crypto::VaultCrypto::new()?
                 .decrypt(ciphertext, key)
                 .map_err(|_| VaultError::AuthenticationFailed)?;

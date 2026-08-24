@@ -12,6 +12,15 @@ use uuid::Uuid;
 use crate::crypto::{SecureKey, VaultCrypto};
 use crate::error::{Result, VaultError};
 
+/// Marks a sealed version index. Written ahead of the ciphertext so a
+/// reader can tell a sealed file from a pre-8.0 plaintext one without
+/// guessing, and so a human running `file` or `head` on it gets an answer.
+///
+/// Public because three places need to agree on it: the index itself, the
+/// copy inside an exported bundle, and the SQLite backend's migration from
+/// a JSON index. Three private copies of the same bytes is how they drift.
+pub const SEALED_INDEX_MAGIC: &[u8] = b"IRONVAULT-VERSIONS-v1\n";
+
 /// Represents a single model version/checkpoint
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ModelVersion {
@@ -75,10 +84,6 @@ pub struct VersionControl {
 impl VersionControl {
     const VERSION_FILE: &'static str = "versions.json";
 
-    /// Marks a sealed index. Written ahead of the ciphertext so a reader can
-    /// tell a sealed file from a pre-8.0 plaintext one without guessing, and
-    /// so a human running `file` or `head` on it gets an answer.
-    const SEALED_MAGIC: &'static [u8] = b"IRONVAULT-VERSIONS-v1\n";
 
     /// Create a version control instance. The index is **not** read yet --
     /// call [`VersionControl::unlock`] with the vault key first.
@@ -118,7 +123,7 @@ impl VersionControl {
 
         let bytes = fs::read(&self.version_file)?;
 
-        if let Some(ciphertext) = bytes.strip_prefix(Self::SEALED_MAGIC) {
+        if let Some(ciphertext) = bytes.strip_prefix(SEALED_INDEX_MAGIC) {
             let plaintext = self
                 .crypto
                 .decrypt(ciphertext, key)
@@ -169,8 +174,8 @@ impl VersionControl {
         let plaintext = serde_json::to_vec(&self.versions)?;
         let sealed = self.crypto.encrypt(&plaintext, key)?;
 
-        let mut out = Vec::with_capacity(Self::SEALED_MAGIC.len() + sealed.len());
-        out.extend_from_slice(Self::SEALED_MAGIC);
+        let mut out = Vec::with_capacity(SEALED_INDEX_MAGIC.len() + sealed.len());
+        out.extend_from_slice(SEALED_INDEX_MAGIC);
         out.extend_from_slice(&sealed);
 
         fs::write(&self.version_file, out)?;
