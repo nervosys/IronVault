@@ -84,7 +84,6 @@ pub struct VersionControl {
 impl VersionControl {
     const VERSION_FILE: &'static str = "versions.json";
 
-
     /// Create a version control instance. The index is **not** read yet --
     /// call [`VersionControl::unlock`] with the vault key first.
     pub fn new(vault_path: &Path) -> Result<Self> {

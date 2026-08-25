@@ -185,7 +185,8 @@ pub fn export_vault(
     // The payload digest still verifies the bundle it was written for.
     let versions_plain = serde_json::to_vec(&version_data)?;
     let sealed_versions = crate::crypto::VaultCrypto::new()?.encrypt(&versions_plain, key)?;
-    let mut versions_blob = Vec::with_capacity(crate::version::SEALED_INDEX_MAGIC.len() + sealed_versions.len());
+    let mut versions_blob =
+        Vec::with_capacity(crate::version::SEALED_INDEX_MAGIC.len() + sealed_versions.len());
     versions_blob.extend_from_slice(crate::version::SEALED_INDEX_MAGIC);
     versions_blob.extend_from_slice(&sealed_versions);
     let versions_bytes: &[u8] = &versions_blob;
