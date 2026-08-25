@@ -5,6 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.0.1] - 2026-08-25
+
+One regression that shipped in 8.0.0, and nothing else.
+
+### Fixed
+
+- **Switching an existing vault to `--sqlite-versions` failed outright.**
+  `SqliteVersionRepo::new` migrated a legacy `versions.json` from its
+  constructor, reading it as UTF-8 text. From 8.0 that file is sealed, so the
+  read failed on invalid UTF-8 — and because the constructor runs while the
+  vault is being built, the failure took the whole vault with it:
+
+  ```
+  $ iv --sqlite-versions list
+  Error: I/O error: stream did not contain valid UTF-8
+  ```
+
+  Any vault the JSON backend had sealed could no longer be opened with
+  `--sqlite-versions` at all, and the error said nothing about why. Migration
+  now happens in `SqliteVersionRepo::unlock`, where a key exists, and reads
+  either shape — sealed, or pre-8.0 plaintext — told apart by the
+  `IRONVAULT-VERSIONS-v1` marker rather than by parsing and seeing what breaks.
+  A migration that fails to decrypt leaves `versions.json` where it is.
+
+### Who needed this
+
+- **Anyone who upgraded to 8.0.0 and then passed `--sqlite-versions` did.**
+  The vault had to be sealed by the JSON backend first, which is what 8.0.0
+  does on first unlock, so every 8.0.0 vault was affected the moment the
+  backend was switched.
+- **Vaults that stayed on one backend did not.** Neither backend was broken on
+  its own; only the crossing was.
+
+### Changed
+
+- **One copy of the sealed-index marker, not three.** `version.rs`,
+  `vault_bundle.rs` and `version_sqlite.rs` each held a private copy of
+  `IRONVAULT-VERSIONS-v1`. It is `version::SEALED_INDEX_MAGIC` once.
+
+### Still not sealed
+
+The SQLite database itself continues to store model names, sizes, timestamps
+and checksums in the clear, so under `--sqlite` the confidentiality the 8.0
+index seal provides depends on which backend was chosen. This release fixes
+the switch, not that. Sealing it needs SQLCipher or per-column encryption and
+a decision about how a queryable index looks up names it cannot read —
+separate work, documented on `VersionBackend::Sqlite` and in SECURITY.md.
+
 ## [8.0.0] - 2026-08-19
 
 **The version index is encrypted.** This is breaking, and the next release
