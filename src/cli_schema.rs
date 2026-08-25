@@ -965,6 +965,452 @@ fn build_commands(compact: bool) -> Value {
                 ]
             )
         ),
+        // -- Model acquisition and inspection ------------------------------
+        cmd(
+            "pull",
+            "vault",
+            compact,
+            "Download a model from HuggingFace, Ollama, or an HTTPS URL",
+            vec![
+                arg("source", "", "string", true, None, desc(compact, "Model source URI (hf://org/model, ollama://model:tag, or https://...)")),
+                arg("--output", "-o", "path", false, None, desc(compact, "Output file path")),
+                arg("--sha256", "", "string", false, None, desc(compact, "Expected SHA-256 hash for verification")),
+                arg("--token", "", "string", false, None, desc(compact, "HuggingFace auth token (for private repos)")),
+                arg("--store", "", "bool", false, None, desc(compact, "Store directly into the vault after download")),
+                arg("--name", "", "string", false, None, desc(compact, "Model name when using --store")),
+            ],
+            ex(compact, &["iv pull hf://meta-llama/Llama-3-8B", "iv pull ollama://llama3:8b --store --name llama3"])
+        ),
+        cmd(
+            "browse",
+            "vault",
+            compact,
+            "Browse vault models in a formatted table",
+            vec![],
+            ex(compact, &["iv browse"])
+        ),
+        cmd(
+            "search",
+            "vault",
+            compact,
+            "Search models by name or tags",
+            vec![
+                arg("query", "", "string", false, Some(json!("")), desc(compact, "Search query text")),
+                arg("--tag", "-t", "string[]", false, None, desc(compact, "Filter by tags")),
+                arg("--format", "-f", "string", false, None, desc(compact, "Output format (text, json)")),
+            ],
+            ex(compact, &["iv search llama", "iv search --tag production"])
+        ),
+        cmd(
+            "diff",
+            "utility",
+            compact,
+            "Compare two model versions or files",
+            vec![
+                arg("left", "", "string", true, None, desc(compact, "Left model (name@version or file path)")),
+                arg("right", "", "string", true, None, desc(compact, "Right model (name@version or file path)")),
+                arg("--format", "-f", "string", false, Some(json!("text")), desc(compact, "Output format (text, json)")),
+            ],
+            ex(compact, &["iv diff mymodel@1 mymodel@2"])
+        ),
+
+        // -- Vault maintenance ---------------------------------------------
+        cmd(
+            "gc",
+            "vault",
+            compact,
+            "Garbage-collect orphaned blobs and temp files",
+            vec![arg("--dry-run", "", "bool", false, None, desc(compact, "Show what would be cleaned without deleting"))],
+            ex(compact, &["iv gc --dry-run", "iv gc"])
+        ),
+        cmd(
+            "vault-export",
+            "vault",
+            compact,
+            "Export the whole vault as a portable archive",
+            vec![arg("output", "", "path", true, None, desc(compact, "Output archive path (.tar.gz)"))],
+            ex(compact, &["iv vault-export backup.tar.gz"])
+        ),
+        cmd(
+            "vault-import",
+            "vault",
+            compact,
+            "Import a vault from a portable archive",
+            vec![
+                arg("archive", "", "path", true, None, desc(compact, "Archive path")),
+                arg("--target", "-t", "path", false, None, desc(compact, "Target directory (defaults to current vault)")),
+            ],
+            ex(compact, &["iv vault-import backup.tar.gz"])
+        ),
+
+        // -- Provenance and safety -----------------------------------------
+        cmd(
+            "sign",
+            "security",
+            compact,
+            "Sign a model for provenance verification",
+            vec![
+                arg("name", "", "string", true, None, desc(compact, "Model name in vault (or path to file with --file)")),
+                arg("--version", "-v", "u32", false, None, desc(compact, "Version number (latest if not specified)")),
+                arg("--key", "-k", "string", false, None, desc(compact, "Signing key pair: a file path, or a KMS URI such as azure-kv://my-vault/hmac-key")),
+                arg("--identity", "-i", "string", false, None, desc(compact, "Signer identity (e.g. email or name)")),
+                arg("--file", "", "path", false, None, desc(compact, "Sign a file on disk instead of a vault model")),
+            ],
+            ex(compact, &["iv sign mymodel --identity alice@example.com"])
+        ),
+        cmd(
+            "verify",
+            "security",
+            compact,
+            "Verify a model's signature",
+            vec![
+                arg("name", "", "string", true, None, desc(compact, "Model name in vault (or path to file with --file)")),
+                arg("--version", "-v", "u32", false, None, desc(compact, "Version number (latest if not specified)")),
+                arg("--signature", "-s", "path", true, None, desc(compact, "Path to signature file")),
+                arg("--key", "-k", "string", false, None, desc(compact, "Verification key: a file path or a KMS URI. Omit to check the file hash only")),
+                arg("--file", "", "path", false, None, desc(compact, "Verify a file on disk instead of a vault model")),
+            ],
+            ex(compact, &["iv verify mymodel --signature mymodel.sig"])
+        ),
+        cmd(
+            "scan",
+            "security",
+            compact,
+            "Scan a model for pickle deserialization vulnerabilities",
+            vec![
+                arg("name", "", "string", false, None, desc(compact, "Model name in vault")),
+                arg("--file", "", "path", false, None, desc(compact, "Scan a file on disk instead of a vault model")),
+                arg("--version", "-v", "u32", false, None, desc(compact, "Version number (latest if not specified)")),
+                arg("--format", "-f", "string", false, Some(json!("text")), desc(compact, "Output format (text, json)")),
+            ],
+            ex(compact, &["iv scan mymodel", "iv scan --file suspect.pt"])
+        ),
+        cmd(
+            "validate",
+            "security",
+            compact,
+            "Validate a stored model's integrity",
+            vec![
+                arg("name", "", "string", true, None, desc(compact, "Model name")),
+                arg("--version", "-v", "u32", false, None, desc(compact, "Version (latest if not specified)")),
+            ],
+            ex(compact, &["iv validate mymodel"])
+        ),
+        cmd(
+            "license-scan",
+            "security",
+            compact,
+            "Scan model files or directories for license information",
+            vec![
+                arg("path", "", "path", true, None, desc(compact, "Path to scan (file or directory)")),
+                arg("--format", "-f", "string", false, Some(json!("text")), desc(compact, "Output format (text, json)")),
+            ],
+            ex(compact, &["iv license-scan ./models"])
+        ),
+        cmd(
+            "register",
+            "utility",
+            compact,
+            "Register a vault model with an inference engine (Ollama, LM Studio)",
+            vec![
+                arg("name", "", "string", true, None, desc(compact, "Model name in vault")),
+                arg("--engine", "-e", "string", true, None, desc(compact, "Inference engine (ollama, lm-studio)")),
+                arg("--version", "-v", "u32", false, None, desc(compact, "Version number (latest if not specified)")),
+                arg("--alias", "", "string", false, None, desc(compact, "Name to register the model as (defaults to vault model name)")),
+                arg("--system-prompt", "", "string", false, None, desc(compact, "System prompt (Ollama only)")),
+            ],
+            ex(compact, &["iv register mymodel --engine ollama"])
+        ),
+
+        // -- Command groups -------------------------------------------------
+        cmd_sub(
+            "chain",
+            "security",
+            compact,
+            "Blockchain audit trail (requires security.blockchain_audit = true)",
+            vec![
+                subcmd("status", compact, "Show chain height, latest block hash, and pending entry count", vec![]),
+                subcmd("verify", compact, "Verify the whole chain: hash links, Merkle roots, and block hashes", vec![]),
+                subcmd("proof", compact, "Emit a Merkle inclusion proof for one entry", vec![
+                    arg("--block", "-b", "u64", true, None, desc(compact, "Block index")),
+                    arg("--entry", "-e", "usize", true, None, desc(compact, "Entry index within that block")),
+                    arg("--output", "-o", "path", false, None, desc(compact, "Write the proof JSON here instead of stdout")),
+                ]),
+                subcmd("verify-proof", compact, "Verify a proof produced by `iv chain proof`", vec![
+                    arg("proof", "", "path", true, None, desc(compact, "Path to the proof JSON")),
+                ]),
+                subcmd("search", compact, "Search recorded entries", vec![
+                    arg("--model", "-m", "string", false, None, desc(compact, "Filter by model name")),
+                    arg("--event", "-e", "string", false, None, desc(compact, "Filter by event type")),
+                    arg("--limit", "-l", "usize", false, Some(json!(50)), desc(compact, "Maximum results")),
+                ]),
+            ]
+        ),
+        cmd_sub(
+            "federation",
+            "cloud",
+            compact,
+            "Sync models with peer nodes",
+            vec![
+                subcmd("status", compact, "Show this node's identity, peers, and sync history", vec![]),
+                subcmd("plan", compact, "Show what a sync with a peer would transfer, without transferring it", vec![
+                    arg("peer", "", "string", true, None, desc(compact, "Peer node ID")),
+                ]),
+                subcmd("sync", compact, "Sync with a peer: download what is missing here, upload what is missing there", vec![
+                    arg("peer", "", "string", true, None, desc(compact, "Peer node ID")),
+                    arg("--dry-run", "", "bool", false, None, desc(compact, "Report what would transfer, then stop")),
+                ]),
+                subcmd("manifest", compact, "Print this node's sync manifest (what peers would see)", vec![]),
+            ]
+        ),
+        cmd_sub(
+            "tag",
+            "vault",
+            compact,
+            "Manage model tags",
+            vec![
+                subcmd("add", compact, "Add tags to a model", vec![
+                    arg("model", "", "string", true, None, desc(compact, "Model name")),
+                    arg("tags", "", "string[]", true, None, desc(compact, "Tags to add")),
+                ]),
+                subcmd("remove", compact, "Remove tags from a model", vec![
+                    arg("model", "", "string", true, None, desc(compact, "Model name")),
+                    arg("tags", "", "string[]", true, None, desc(compact, "Tags to remove")),
+                ]),
+                subcmd("list", compact, "List tags for a model", vec![
+                    arg("model", "", "string", true, None, desc(compact, "Model name")),
+                ]),
+            ]
+        ),
+        cmd_sub(
+            "acl",
+            "security",
+            compact,
+            "Manage access control lists",
+            vec![
+                subcmd("grant", compact, "Grant a role to an identity", vec![
+                    arg("identity", "", "string", true, None, desc(compact, "Identity (e.g. username or email)")),
+                    arg("role", "", "string", true, None, desc(compact, "Role (reader, writer, admin)")),
+                ]),
+                subcmd("revoke", compact, "Revoke access for an identity", vec![
+                    arg("identity", "", "string", true, None, desc(compact, "Identity")),
+                ]),
+                subcmd("list", compact, "List all ACL entries", vec![]),
+            ]
+        ),
+        cmd_sub(
+            "policy",
+            "config",
+            compact,
+            "Manage retention policies",
+            vec![
+                subcmd("set", compact, "Set a retention policy for a model", vec![
+                    arg("model", "", "string", true, None, desc(compact, "Model name")),
+                    arg("--max-versions", "", "usize", false, None, desc(compact, "Maximum number of versions to keep")),
+                    arg("--max-age-days", "", "u64", false, None, desc(compact, "Maximum age in days")),
+                    arg("--keep-minimum", "", "usize", false, None, desc(compact, "Minimum versions to always keep")),
+                ]),
+                subcmd("remove", compact, "Remove a retention policy", vec![
+                    arg("model", "", "string", true, None, desc(compact, "Model name")),
+                ]),
+                subcmd("show", compact, "Show the policy for a model", vec![
+                    arg("model", "", "string", true, None, desc(compact, "Model name")),
+                ]),
+                subcmd("apply", compact, "Apply retention policies (delete old versions)", vec![
+                    arg("--model", "-m", "string", false, None, desc(compact, "Apply only for a specific model")),
+                    arg("--dry-run", "", "bool", false, None, desc(compact, "Show what would be deleted without deleting")),
+                ]),
+            ]
+        ),
+        cmd_sub(
+            "webhook",
+            "config",
+            compact,
+            "Manage webhook targets",
+            vec![
+                subcmd("add", compact, "Register a webhook target", vec![
+                    arg("id", "", "string", true, None, desc(compact, "Webhook ID")),
+                    arg("url", "", "string", true, None, desc(compact, "Target URL")),
+                    arg("--secret", "-s", "string", false, None, desc(compact, "Shared secret for HMAC signing")),
+                    arg("--events", "-e", "string[]", false, None, desc(compact, "Events to subscribe to (empty = all)")),
+                ]),
+                subcmd("remove", compact, "Remove a webhook", vec![
+                    arg("id", "", "string", true, None, desc(compact, "Webhook ID")),
+                ]),
+                subcmd("list", compact, "List all webhooks", vec![]),
+            ]
+        ),
+        cmd_sub(
+            "lineage-graph",
+            "vault",
+            compact,
+            "Cross-model lineage graph",
+            vec![
+                subcmd("add", compact, "Add a derivation edge", vec![
+                    arg("parent", "", "string", true, None, desc(compact, "Parent model (name or name@version)")),
+                    arg("child", "", "string", true, None, desc(compact, "Child model (name or name@version)")),
+                    arg("--kind", "-k", "string", false, Some(json!("finetune")), desc(compact, "Derivation kind (finetune, quantize, merge, distill, convert)")),
+                ]),
+                subcmd("show", compact, "Show lineage for a model", vec![
+                    arg("model", "", "string", true, None, desc(compact, "Model name")),
+                    arg("--format", "-f", "string", false, Some(json!("text")), desc(compact, "Output format (text, json)")),
+                ]),
+            ]
+        ),
+        cmd_sub(
+            "plugin",
+            "config",
+            compact,
+            "Manage plugins",
+            vec![
+                subcmd("list", compact, "List installed plugins", vec![]),
+                subcmd("install", compact, "Install a plugin from a directory", vec![
+                    arg("path", "", "path", true, None, desc(compact, "Plugin directory path")),
+                ]),
+                subcmd("uninstall", compact, "Uninstall a plugin by ID", vec![
+                    arg("id", "", "string", true, None, desc(compact, "Plugin ID")),
+                ]),
+                subcmd("discover", compact, "Discover plugins in the plugin directory", vec![]),
+            ]
+        ),
+        cmd_sub(
+            "profile",
+            "config",
+            compact,
+            "Manage configuration profiles",
+            vec![
+                subcmd("create", compact, "Create a new profile", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Profile name")),
+                    arg("--set", "-s", "string[]", false, None, desc(compact, "Key=value overrides")),
+                ]),
+                subcmd("activate", compact, "Activate a profile", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Profile name")),
+                ]),
+                subcmd("deactivate", compact, "Deactivate the current profile", vec![]),
+                subcmd("list", compact, "List all profiles", vec![]),
+                subcmd("show", compact, "Show a profile's details", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Profile name")),
+                ]),
+                subcmd("delete", compact, "Delete a profile", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Profile name")),
+                ]),
+            ]
+        ),
+        cmd_sub(
+            "vaults",
+            "config",
+            compact,
+            "Manage multiple vault registrations",
+            vec![
+                subcmd("register", compact, "Register a vault", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Vault name/alias")),
+                    arg("path", "", "path", true, None, desc(compact, "Path to vault directory")),
+                    arg("--description", "-d", "string", false, None, desc(compact, "Description")),
+                ]),
+                subcmd("unregister", compact, "Unregister a vault", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Vault name")),
+                ]),
+                subcmd("activate", compact, "Set the active vault", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Vault name")),
+                ]),
+                subcmd("deactivate", compact, "Clear the active vault", vec![]),
+                subcmd("list", compact, "List registered vaults", vec![]),
+            ]
+        ),
+        cmd_sub(
+            "backup",
+            "vault",
+            compact,
+            "Manage vault backup schedules",
+            vec![
+                subcmd("set", compact, "Create or update a backup schedule", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Schedule name")),
+                    arg("--frequency", "-f", "string", true, None, desc(compact, "Frequency (hourly, daily, weekly, monthly)")),
+                    arg("--max-backups", "-m", "usize", false, Some(json!(7)), desc(compact, "Maximum backups to retain")),
+                    arg("--output-dir", "-o", "path", true, None, desc(compact, "Output directory for backup archives")),
+                ]),
+                subcmd("remove", compact, "Remove a backup schedule", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Schedule name")),
+                ]),
+                subcmd("list", compact, "List backup schedules", vec![]),
+                subcmd("history", compact, "Show backup history", vec![
+                    arg("--schedule", "-s", "string", false, None, desc(compact, "Filter by schedule name")),
+                ]),
+            ]
+        ),
+        cmd_sub(
+            "benchmark",
+            "utility",
+            compact,
+            "Record or view benchmark results for a model",
+            vec![
+                subcmd("add", compact, "Record a benchmark result for a model version", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Model name")),
+                    arg("--version", "-v", "u32", true, None, desc(compact, "Version number")),
+                    arg("--benchmark", "-b", "string", true, None, desc(compact, "Benchmark name (e.g. MMLU, HumanEval, perplexity)")),
+                    arg("--score", "-s", "f64", true, None, desc(compact, "Score value")),
+                    arg("--unit", "-u", "string", false, Some(json!("score")), desc(compact, "Unit (e.g. accuracy, ppl, pass@1, ms, tokens/s)")),
+                    arg("--higher-is-better", "", "bool", false, None, desc(compact, "Higher is better")),
+                    arg("--hardware", "", "string", false, None, desc(compact, "Hardware description")),
+                    arg("--dataset", "", "string", false, None, desc(compact, "Dataset or split")),
+                ]),
+                subcmd("show", compact, "Show benchmark results for a model", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Model name")),
+                    arg("--version", "-v", "u32", false, None, desc(compact, "Version number (shows all versions if not specified)")),
+                    arg("--format", "-f", "string", false, Some(json!("text")), desc(compact, "Output format (text, json)")),
+                ]),
+            ]
+        ),
+        cmd_sub(
+            "eval",
+            "utility",
+            compact,
+            "Record and compare model evaluations",
+            vec![
+                subcmd("record", compact, "Record an evaluation run", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Model name")),
+                    arg("--version", "-v", "u64", true, None, desc(compact, "Model version")),
+                    arg("--suite", "-s", "string", true, None, desc(compact, "Evaluation suite name (e.g. mmlu, hellaswag)")),
+                    arg("--metric", "-m", "string[]", true, None, desc(compact, "Metric in name=value format (repeatable)")),
+                    arg("--unit", "-u", "string", false, Some(json!("score")), desc(compact, "Unit for all metrics")),
+                    arg("--higher-is-better", "", "bool", false, Some(json!(true)), desc(compact, "Higher is better")),
+                ]),
+                subcmd("list", compact, "List evaluation runs for a model", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Model name")),
+                    arg("--version", "-v", "u64", false, None, desc(compact, "Filter by version")),
+                    arg("--format", "-f", "string", false, Some(json!("text")), desc(compact, "Output format (text, json)")),
+                ]),
+                subcmd("compare", compact, "Compare two model versions on a suite", vec![
+                    arg("a", "", "string", true, None, desc(compact, "First model (name@version)")),
+                    arg("b", "", "string", true, None, desc(compact, "Second model (name@version)")),
+                    arg("--suite", "-s", "string", true, None, desc(compact, "Evaluation suite")),
+                    arg("--format", "-f", "string", false, Some(json!("text")), desc(compact, "Output format (text, json)")),
+                ]),
+                subcmd("suites", compact, "List all known evaluation suites", vec![]),
+            ]
+        ),
+        cmd_sub(
+            "quantize",
+            "conversion",
+            compact,
+            "Manage quantization profiles and estimate sizes",
+            vec![
+                subcmd("set", compact, "Create or update a quantization profile", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Profile name")),
+                    arg("--method", "-m", "string", true, None, desc(compact, "Quantization method (q4_0, q4_k_m, q5_k_m, q8_0, f16, f32)")),
+                    arg("--description", "-d", "string", false, None, desc(compact, "Description")),
+                ]),
+                subcmd("remove", compact, "Remove a quantization profile", vec![
+                    arg("name", "", "string", true, None, desc(compact, "Profile name")),
+                ]),
+                subcmd("list", compact, "List quantization profiles", vec![]),
+                subcmd("estimate", compact, "Estimate output size for a quantization method", vec![
+                    arg("--size", "-s", "u64", true, None, desc(compact, "Original file size in bytes")),
+                    arg("--from", "", "string", false, Some(json!("f32")), desc(compact, "Source precision")),
+                    arg("--to", "-t", "string", true, None, desc(compact, "Target quantization method")),
+                ]),
+            ]
+        ),
     ]);
 
     // `serve` exists only in an `api` build -- `Commands::Serve` in
@@ -1112,6 +1558,32 @@ fn effects_for(name: &str) -> Value {
         "card" => (true, false, false),
         "database" => (true, false, false),
         "telemetry" => (true, false, true),
+        // The 27 commands the schema had never declared. Each is classified
+        // from what its handler actually reaches, not from its name:
+        // `decrypts` is true wherever a command reads model content, because
+        // the field exists to stop an agent treating a disclosing read as a
+        // harmless one.
+        "gc" => (true, false, false),
+        "vault-import" => (true, true, false),
+        "pull" => (true, false, true),
+        "sign" => (true, true, true),
+        "browse" | "search" | "license-scan" => (false, false, false),
+        "diff" | "scan" | "validate" => (false, true, false),
+        "verify" | "register" => (false, true, true),
+        // `vault-export` copies blobs that are already sealed and re-seals the
+        // index, so it writes no plaintext model bytes. It is still declared
+        // as decrypting: it needs the key, and it puts the entire vault --
+        // every model, and the inventory naming them -- into one portable
+        // file. An agent gating on `decrypts` should stop before doing that,
+        // and this is the same conservative call the file already makes for
+        // `analyze` and `deduplicate`.
+        "vault-export" => (false, true, false),
+        // Groups, classified by their widest subcommand as above.
+        // `federation` moves models between nodes, so it matches `cloud`.
+        "federation" => (true, true, true),
+        "acl" | "backup" | "benchmark" | "chain" | "eval" | "lineage-graph" | "plugin"
+        | "policy" | "profile" | "quantize" | "tag" | "vaults" | "webhook" => (true, false, false),
+
         // Unreachable in a correct build: `every_command_declares_effects`
         // fails if a command reaches this arm. Declared as the most
         // restrictive combination so that an unclassified command is never

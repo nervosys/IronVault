@@ -434,4 +434,53 @@ mod tests {
             ("change-passphrase".to_string(), None)
         );
     }
+    /// The schema must declare every subcommand the binary actually has.
+    ///
+    /// This test lives in the binary because nothing else can see both sides:
+    /// `cli_schema` is in the library, `cli::args` is in the binary, and the
+    /// library cannot reach the clap definitions. That gap is how the schema
+    /// came to describe 24 of the CLI's 51 commands while every test it had
+    /// still passed -- `every_command_declares_effects` validates the
+    /// commands that are *in* the schema, so a command never added was never
+    /// checked, and `iv introspect` under-reported for as long as nobody
+    /// counted by hand.
+    ///
+    /// Checked in both directions. A command missing from the schema makes
+    /// discovery incomplete; a command in the schema that the binary does not
+    /// have makes discovery wrong, which is the `serve` failure that
+    /// `serve_is_advertised_only_when_it_exists` was written for.
+    #[test]
+    fn schema_declares_every_cli_command() {
+        use std::collections::BTreeSet;
+
+        let declared: BTreeSet<String> = ironvault::cli_schema::build(false)["commands"]
+            .as_array()
+            .expect("commands is an array")
+            .iter()
+            .filter_map(|c| c.get("name").and_then(|n| n.as_str()))
+            .map(str::to_string)
+            .collect();
+
+        // `help` is clap's own, generated rather than declared, and is not
+        // part of the vault's command surface.
+        let actual: BTreeSet<String> = Cli::command()
+            .get_subcommands()
+            .map(|s| s.get_name().to_string())
+            .filter(|n| n != "help")
+            .collect();
+
+        let missing: Vec<&String> = actual.difference(&declared).collect();
+        let phantom: Vec<&String> = declared.difference(&actual).collect();
+
+        assert!(
+            missing.is_empty(),
+            "these commands exist in the CLI but are not declared in \
+             `cli_schema.rs`, so `iv introspect` under-reports them: {missing:?}"
+        );
+        assert!(
+            phantom.is_empty(),
+            "`cli_schema.rs` declares commands this binary does not have, so \
+             discovery advertises what a caller cannot run: {phantom:?}"
+        );
+    }
 }

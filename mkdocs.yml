@@ -139,6 +139,7 @@ nav:
       - External KMS: KMS.md
       - Model Validation: VALIDATION.md
       - Blockchain Audit: BLOCKCHAIN_AUDIT.md
+      - Sealing the SQLite Index: SQLITE_INDEX_SEALING.md
   - AI & RAG:
       - RAG System: RAG.md
       - RAG Quick Ref: RAG_QUICKREF.md
