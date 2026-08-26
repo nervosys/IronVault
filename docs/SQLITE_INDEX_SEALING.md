@@ -110,16 +110,108 @@ partial in ways worth stating rather than discovering:
   temp store can retain fragments. Deleting a row does not scrub the page.
   Option A covers these and Option B does not.
 
+## Resolving the threat-model question
+
+The question left open above — whether WAL and freelist residue matters more
+than build cost — is answerable from the code rather than from taste, and the
+answer is that it matters for exactly one window.
+
+**Names exist only in the index.** Blobs under `data/` are named
+`{uuid}.vault` (`Uuid::new_v4()`, `vault.rs`), so the filesystem leaks the
+number of stored versions and their approximate sizes, but never a model name.
+The name in `acme-fraud-detection-v3` — the whole reason for sealing — lives in
+the index and nowhere else. That raises the value of sealing the index and
+raises the cost of leaving plaintext names recoverable inside the database file.
+
+**After migration, Option B never writes a plaintext name to the database
+again.** Every column that reaches disk is either an HMAC tag, an AEAD payload,
+or an integer version. So WAL frames, freelist pages and temp spill created
+from that point forward contain no plaintext names to recover. The residue
+objection does not apply to steady-state operation at all.
+
+**It applies only to the migration itself** — and to that it applies
+completely. A row-by-row `UPDATE` in `unlock`, as sketched above, writes every
+old plaintext row into the freelist and the WAL, where it stays recoverable for
+the life of the file. That would leave the pre-migration inventory readable in
+a vault the user believes is sealed, which is worse than the honest plaintext
+of today.
+
+The fix is not SQLCipher. It is to migrate by **building a new database file
+and replacing the old one**:
+
+1. Create `versions.db.new`, write only sealed rows into it, `fsync`.
+2. Atomically rename over `versions.db`; remove `versions.db-wal` and
+   `versions.db-shm` from the old file.
+3. Remove the old file. The plaintext pages go with it.
+
+Two pragmas close the remaining ongoing exposure, both one-line additions to
+the `execute_batch` at `version_sqlite.rs:50`, which today sets only
+`journal_mode=WAL` and `foreign_keys=ON`:
+
+- `PRAGMA secure_delete = ON` — zero deleted rows' pages instead of leaving
+  them on the freelist. Post-migration those pages hold only ciphertext, so
+  this is defence in depth rather than a requirement.
+- `PRAGMA temp_store = MEMORY` — keep any spill off disk.
+
 ## Recommendation
 
-**Option B**, on the strength of the cache finding: the ACID guarantees that
-justify `--sqlite` are unaffected by sealing the payload, and the option that
-does not add a C dependency to a security tool's build matrix is the cheaper
-one to get right and to keep right.
+**Option B**, and the decision above is what makes it decisive rather than a
+balance of costs. SQLCipher's one real advantage over a sealed row payload is
+coverage of SQLite's own artifacts; that advantage is worth paying a C
+dependency for only if those artifacts would otherwise hold recoverable
+plaintext. With a fresh-file migration they do not — after the rewrite, nothing
+plaintext ever enters the file. The build-matrix cost of SQLCipher buys
+protection for a window that a correct migration already closes.
 
-Option A remains the better answer if the WAL and freelist residue matter more
-than build cost — that is a threat-model decision, not a technical one, and it
-is the one question here worth deciding before any code is written.
+What Option B still does not hide, unchanged from the analysis above and worth
+stating in `SECURITY.md` when this lands: the **row count**, and **equality
+between rows** — that two versions belong to the same model. Neither is a name,
+and `data/` already bounds the count.
+
+Implementation order, once approved:
+
+1. **Done.** `PRAGMA secure_delete=ON` and `PRAGMA temp_store=MEMORY` at
+   `version_sqlite.rs:59`, with `test_sqlite_residue_pragmas_are_set`. No
+   format change. The fresh-file migration helper is deliberately *not* here —
+   until rows are sealed it has no caller, and scrubbing freelist residue is
+   pointless while the rows above it are plaintext names.
+2. The sealed schema and blind index, behind the migration. Scoped below.
+3. Update `SECURITY.md`, the `VersionBackend::Sqlite` doc comment and
+   `CHANGELOG.md` together — the three places that currently promise this.
+
+### What step 2 actually costs
+
+Larger than "change the schema", because it changes the backend's contract.
+
+**The repo must retain the vault key.** `unlock` (`version_sqlite.rs:334`)
+currently takes the key, runs the JSON migration and drops it. None of
+`add_version`, `delete_version`, `cleanup_old_versions` or `update_metadata`
+takes a key. Sealing requires one at every write, so `unlock` must store it —
+and `new()` can no longer populate the cache, because decrypting payloads
+needs a key that does not exist at construction.
+
+**Writes and reads before `unlock` must start failing.** They succeed today.
+This is inherent to sealing rather than a design choice, but it is a
+behavioural change: all 35 tests in `version_sqlite.rs` build a repo and write
+to it without unlocking. `Vault::store_model` is safe — it only reaches
+`add_version` with a key in scope (`vault.rs:637`) — but the trait permits
+what the sealed backend must refuse.
+
+**Blind index primitive: `hmac` (RustCrypto), a new dependency.** Only `sha2`
+is present today. This does not contradict the argument against SQLCipher
+above: that argument is about a *C* dependency and its cost across the
+three-platform CI matrix, which a pure-Rust crate does not carry. The
+alternative — hand-rolling `SHA256(subkey ‖ name)` — is length-extension-
+weak and not worth owning in a security tool. Derivation:
+`tag_subkey = HMAC(vault_key, "IRONVAULT-INDEX-TAG-v1")`, then
+`model_tag = HMAC(tag_subkey, model_name)`.
+
+**Migration covers two shapes, not one:** a legacy plaintext `versions.db`,
+and the `versions.json` path that already exists. Both must land in the new
+file via the fresh-file rewrite, never an in-place `UPDATE`.
+
+Estimated at ~350 lines plus the test rework. Worth staging as its own branch
+with the contract change reviewed separately from the crypto.
 
 ## Not in scope
 

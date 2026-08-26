@@ -26,12 +26,14 @@ pub enum VersionBackend {
     Json(VersionControl),
     /// SQLite database with WAL mode and ACID guarantees.
     ///
-    /// **This backend stores the version index unencrypted.** The JSON backend
-    /// seals `versions.json` from 8.0; the SQLite one holds the same model
-    /// names, sizes, timestamps and checksums in a plain database file, and
-    /// sealing it means either SQLCipher or per-column encryption, neither of
-    /// which is a lockfile change. `--sqlite` therefore trades the index
-    /// confidentiality the default backend now has for its ACID guarantees.
+    /// The index is sealed, as the JSON backend's is: each row carries an
+    /// AEAD-sealed payload under the vault key, matched by an HMAC blind index
+    /// over the model name. Names, sizes, timestamps, checksums, blob paths
+    /// and metadata are inside the payload; the row count and which rows share
+    /// a model remain visible, which is inherent to a blind index. Writes are
+    /// refused until [`SqliteVersionRepo::unlock`] supplies the key.
+    ///
+    /// [`SqliteVersionRepo::unlock`]: crate::version_sqlite::SqliteVersionRepo::unlock
     #[cfg(feature = "sqlite")]
     Sqlite(crate::version_sqlite::SqliteVersionRepo),
 }

@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+**The SQLite version index is sealed.** This is breaking for `--sqlite` vaults
+and the migration is one-way; the release carrying it needs a version bump that
+says so.
+
+### Added
+
+- **Sealed rows and a blind index.** Each row of the SQLite index is now an
+  AEAD-sealed payload under the vault key, keyed by
+  `model_tag = HMAC(HMAC(vault_key, "IRONVAULT-INDEX-TAG-v1"), model_name)` — a
+  tag that can be matched but not read. Model names, sizes, timestamps,
+  checksums, blob paths and metadata moved inside the payload; the
+  `version_metadata` table is gone. `version` stays plaintext so ordering and
+  `UNIQUE(model_tag, version)` still work.
+
+  Under `--sqlite`, index confidentiality no longer depends on which backend
+  was chosen.
+
+- **`PRAGMA secure_delete=ON` and `PRAGMA temp_store=MEMORY`** on the index
+  connection, so a deleted row is not left readable on the freelist and
+  nothing spills to a temp file.
+
+### Changed
+
+- **Reads and writes before `unlock` now fail** on this backend, where they
+  previously succeeded. Sealing needs the key, and the trait's write methods do
+  not carry one. `Vault::store_model` is unaffected — it only reaches the
+  backend with a key in scope.
+
+- **Migration rewrites the file rather than the rows.** A legacy plaintext
+  `versions` table, a `versions.json`, or both, are read at first unlock and
+  written into a *new* database file which is then renamed over the old one.
+  An in-place `UPDATE` would have left every plaintext row recoverable on the
+  freelist and in the WAL — a vault that reports itself sealed while still
+  carrying its old inventory.
+
+### Note on the previous release
+
+The 8.0.1 entry below states that sealing needs "SQLCipher or per-column
+encryption and a decision about how a queryable index looks up names it cannot
+read". The premise was wrong: the backend never filtered on plaintext names.
+It already loaded the whole table into memory with an unfiltered scan and
+answered reads from that cache, and only three statements matched on
+`model_name` — each satisfiable by a blind index. That is what made this
+change smaller than it looked. See `docs/SQLITE_INDEX_SEALING.md`.
+
 ## [8.0.1] - 2026-08-25
 
 One regression that shipped in 8.0.0, and nothing else.

@@ -100,12 +100,28 @@ Three consequences worth stating plainly:
   the index does not reference, so running it against an unreadable index
   would treat every blob as an orphan.
 
-**The SQLite backend is not sealed.** `--sqlite` stores the same model names,
-sizes, timestamps and checksums in a plain database file. Sealing it requires
-SQLCipher or per-column encryption, which is a separate change; until then
-`--sqlite` trades index confidentiality for its ACID guarantees. Treat such a
-vault directory as sensitive and rely on filesystem permissions (0600/0700,
-applied on creation).
+**The SQLite backend is sealed too.** `--sqlite` stores each version as an
+AEAD-sealed payload under the vault key, keyed by an HMAC *blind index* over
+the model name: a tag that can be matched but not read. Model names, sizes,
+timestamps, checksums, blob paths and user metadata are all inside the sealed
+payload. The index is opened at unlock and held in memory, as it always was.
+
+Two things a sealed row still reveals, and they are inherent to a blind index
+rather than an oversight:
+
+- **How many versions exist** — the row count is visible.
+- **Which rows belong together** — two rows sharing a tag are the same model.
+  An observer learns the shape of a vault (five models, one with forty
+  versions) without learning a name.
+
+The `version` column also stays plaintext, so ordering and the uniqueness
+constraint keep working. A vault created before this change is migrated on its
+first unlock by rewriting the database into a new file and deleting the old
+one, so the previous plaintext rows do not survive on the freelist. That
+migration is one-way. See `docs/SQLITE_INDEX_SEALING.md`.
+
+Treat a vault directory as sensitive regardless, and rely on filesystem
+permissions (0600/0700, applied on creation).
 
 What is still *not* encrypted, on either backend: file names and sizes in the
 `data/` directory. An observer can count blobs and see how large each is,

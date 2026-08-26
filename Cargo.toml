@@ -39,6 +39,7 @@ exclude = [
 # Cryptography - FIPS-approved algorithms (implementations are not CMVP-validated)
 aes-gcm = "0.11"                                     # AES-GCM encryption
 sha2 = "0.10"                                        # SHA-256 hashing
+hmac = "0.12"                                        # Blind index for the sealed SQLite version index
 argon2 = "0.5"                                       # Alternative KDF (more secure than PBKDF2)
 # The CSPRNG behind salts, nonces and key seeds. Named directly rather than
 # taken from whichever crypto crate happens to re-export one: 0.10 got it from
