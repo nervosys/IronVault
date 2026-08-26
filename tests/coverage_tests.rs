@@ -808,7 +808,11 @@ mod coverage_boost_tests {
         use std::collections::HashMap;
 
         fn make_repo() -> SqliteVersionRepo {
-            SqliteVersionRepo::in_memory().unwrap()
+            // Sealing needs the vault key, so a test repo has to be unlocked
+            // the same way a real one is.
+            let mut repo = SqliteVersionRepo::in_memory().unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
+            repo
         }
 
         fn sha256_hex(data: &[u8]) -> String {
@@ -2616,7 +2620,8 @@ mod coverage_final_push_tests {
         #[test]
         fn new_creates_db_file() {
             let tmp = tempfile::tempdir().unwrap();
-            let repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
 
             // The DB file should exist
             assert!(tmp.path().join("versions.db").exists());
@@ -2633,6 +2638,7 @@ mod coverage_final_push_tests {
             // First open: add a version
             {
                 let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+                repo.unlock(&crate::sqlite_migration_key()).unwrap();
                 let mut meta = HashMap::new();
                 meta.insert("tag".to_string(), "v1".to_string());
                 repo.add_version(
@@ -2650,7 +2656,8 @@ mod coverage_final_push_tests {
 
             // Second open: re-opening should load from DB
             {
-                let repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+                let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+                repo.unlock(&crate::sqlite_migration_key()).unwrap();
                 let models = repo.list_models();
                 assert_eq!(models.len(), 1);
                 assert!(models.contains(&"model-a".to_string()));
@@ -2712,6 +2719,7 @@ mod coverage_final_push_tests {
         fn filesystem_add_multiple_then_cleanup() {
             let tmp = tempfile::tempdir().unwrap();
             let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
 
             for i in 0..5u32 {
                 repo.add_version(
@@ -2745,6 +2753,7 @@ mod coverage_final_push_tests {
         fn filesystem_delete_and_verify_checksum() {
             let tmp = tempfile::tempdir().unwrap();
             let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
 
             let data = b"model data bytes";
             let checksum = hex::encode(ironvault::crypto::VaultCrypto::hash_sha256(data));
@@ -2775,6 +2784,7 @@ mod coverage_final_push_tests {
         fn filesystem_update_metadata() {
             let tmp = tempfile::tempdir().unwrap();
             let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
 
             repo.add_version("m", "/p", "pt", 100, 50, "c", None, None)
                 .unwrap();
@@ -2794,6 +2804,7 @@ mod coverage_final_push_tests {
         fn filesystem_lineage() {
             let tmp = tempfile::tempdir().unwrap();
             let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
 
             repo.add_version("m", "/p1", "pt", 100, 50, "c1", None, None)
                 .unwrap();
@@ -2811,7 +2822,8 @@ mod coverage_final_push_tests {
         #[test]
         fn vault_path_returns_correct_path() {
             let tmp = tempfile::tempdir().unwrap();
-            let repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
             assert_eq!(repo.vault_path(), tmp.path());
         }
     }
@@ -4773,7 +4785,8 @@ mod coverage_maximizer_tests {
 
         fn make_repo() -> (SqliteVersionRepo, TempDir) {
             let tmp = TempDir::new().unwrap();
-            let repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
             (repo, tmp)
         }
 
@@ -8507,6 +8520,7 @@ mod deep_coverage_tests {
         fn sqlite_version_multiple_models() {
             let tmp = tempfile::tempdir().unwrap();
             let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
 
             repo.add_version("m1", "f1.vault", "PyTorch", 100, 80, "h1", None, None)
                 .unwrap();
@@ -8529,6 +8543,7 @@ mod deep_coverage_tests {
         fn sqlite_version_get_latest() {
             let tmp = tempfile::tempdir().unwrap();
             let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
 
             repo.add_version("m1", "f1.vault", "PyTorch", 100, 80, "h1", None, None)
                 .unwrap();
@@ -8544,6 +8559,7 @@ mod deep_coverage_tests {
         fn sqlite_version_delete_nonexistent() {
             let tmp = tempfile::tempdir().unwrap();
             let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
             let deleted = repo.delete_version("nope", 1).unwrap();
             assert!(!deleted);
         }
@@ -8552,6 +8568,7 @@ mod deep_coverage_tests {
         fn sqlite_version_lineage() {
             let tmp = tempfile::tempdir().unwrap();
             let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
 
             repo.add_version("m1", "f1.vault", "PyTorch", 100, 80, "h1", None, None)
                 .unwrap();
@@ -8568,6 +8585,7 @@ mod deep_coverage_tests {
         fn sqlite_version_with_metadata() {
             let tmp = tempfile::tempdir().unwrap();
             let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
 
             let mut meta = std::collections::HashMap::new();
             meta.insert("tag".to_string(), "production".to_string());
@@ -14977,6 +14995,7 @@ mod remaining_coverage_tests {
         fn sqlite_version_repo_basic() {
             let tmp = tempfile::tempdir().unwrap();
             let mut repo = SqliteVersionRepo::new(tmp.path()).unwrap();
+            repo.unlock(&crate::sqlite_migration_key()).unwrap();
 
             let ver = repo
                 .add_version(
