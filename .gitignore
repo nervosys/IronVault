@@ -119,3 +119,6 @@ fuzz/coverage/
 *.bak
 *.orig
 *.rej
+
+# Session handoff pages (published as Artifacts, not repo content)
+HANDOFF.html

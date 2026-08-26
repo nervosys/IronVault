@@ -2847,6 +2847,7 @@ dependencies = [
  "futures-util",
  "gguf-quant",
  "hex",
+ "hmac 0.12.1",
  "hostname",
  "hyper",
  "jsonwebtoken",
