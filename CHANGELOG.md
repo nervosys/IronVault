@@ -5,11 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [9.0.0] - unreleased
 
 **The SQLite version index is sealed.** This is breaking for `--sqlite` vaults
-and the migration is one-way; the release carrying it needs a version bump that
-says so.
+and the migration is one-way, which is why this is a major bump — the same call
+8.0.0 made when it sealed the JSON index.
+
+The ten version declarations still read 8.0.1. They are bumped by the release
+commit, as `00ec31d` did for 8.0.1, not by the branch that earns the bump; the
+date above lands with it.
 
 ### Added
 
