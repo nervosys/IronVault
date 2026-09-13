@@ -63,7 +63,7 @@ lzma-rs = "0.3" # LZMA compression
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml_ng = "0.10"
-toml = "0.8"
+toml = "1.1"
 
 # File I/O and paths
 tokio = { version = "1.35", features = ["full"] } # Async runtime
